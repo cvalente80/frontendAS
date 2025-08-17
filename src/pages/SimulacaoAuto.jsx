@@ -49,6 +49,11 @@ export default function SimulacaoAuto() {
     );
   }
 
+  function formatDate(dateStr) {
+    const [year, month, day] = dateStr.split('-');
+    return `${day}-${month}-${year}`;
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center relative">
       <img src="https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=1200&q=80" alt="Estrada" className="absolute inset-0 w-full h-full object-cover opacity-30" />
@@ -77,25 +82,68 @@ export default function SimulacaoAuto() {
           {step === 1 && (
             <>
               <h3 className="text-xl font-semibold text-blue-700 mb-2 text-center">Passo 1 - Identificação do condutor</h3>
-              <input name="nome" value={form.nome} onChange={handleChange} placeholder="Nome" className="w-full p-3 border border-blue-300 rounded-lg" required onInvalid={e => e.target.setCustomValidity('Por favor, preencha o nome.')} onInput={e => e.target.setCustomValidity('')} />
+              <input name="nome" value={form.nome} onChange={handleChange} placeholder="Nome completo" className="w-full p-3 border border-blue-300 rounded-lg" required onInvalid={e => e.target.setCustomValidity('Por favor, preencha o nome completo.')} onInput={e => e.target.setCustomValidity('')} />
               <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Email" className="w-full p-3 border border-blue-300 rounded-lg" required onInvalid={e => e.target.setCustomValidity(e.target.validity.valueMissing ? 'Por favor, preencha o email.' : 'Por favor, insira um email válido.')} onInput={e => e.target.setCustomValidity('')} />
               <div className="w-full">
                 <DatePicker
                   selected={form.dataNascimento ? new Date(form.dataNascimento) : null}
                   onChange={date => handleChange({ target: { name: "dataNascimento", value: date ? date.toISOString().slice(0, 10) : "" } })}
                   locale="pt"
-                  dateFormat="dd/MM/yyyy"
-                  placeholderText="Data de nascimento"
+                  dateFormat="dd-MM-yyyy"
+                  placeholderText="Data de nascimento (dd-mm-aaaa)"
                   className="w-full p-3 border border-blue-300 rounded-lg"
                   required
                   todayButton="Hoje"
                   isClearable
                   clearButtonText="Limpar"
+                  showMonthDropdown
                   showYearDropdown
                   yearDropdownItemNumber={100}
                   scrollableYearDropdown
+                  value={form.dataNascimento ? `${formatDate(form.dataNascimento)} (data de nascimento)` : ""}
                 />
               </div>
+              <div className="w-full mt-2">
+                <DatePicker
+                  selected={form.dataCartaConducao ? new Date(form.dataCartaConducao) : null}
+                  onChange={date => handleChange({ target: { name: "dataCartaConducao", value: date ? date.toISOString().slice(0, 10) : "" } })}
+                  locale="pt"
+                  dateFormat="dd-MM-yyyy"
+                  placeholderText="Data da Carta de condução (dd-mm-aaaa)"
+                  className="w-full p-3 border border-blue-300 rounded-lg"
+                  required
+                  todayButton="Hoje"
+                  isClearable
+                  clearButtonText="Limpar"
+                  showMonthDropdown
+                  showYearDropdown
+                  yearDropdownItemNumber={100}
+                  scrollableYearDropdown
+                  value={form.dataCartaConducao ? `${formatDate(form.dataCartaConducao)} (data da carta de condução)` : ""}
+                />
+              </div>
+              <input
+                name="codigoPostal"
+                value={form.codigoPostal || ""}
+                onChange={e => {
+                  let v = e.target.value.replace(/[^\d]/g, "");
+                  if (v.length > 4) v = v.slice(0, 4) + '-' + v.slice(4, 7);
+                  if (v.length > 8) v = v.slice(0, 8);
+                  setForm({ ...form, codigoPostal: v });
+                }}
+                placeholder="Código Postal (____-___)"
+                className="w-full p-3 border border-blue-300 rounded-lg mt-2"
+                pattern="\d{4}-\d{3}"
+                maxLength={8}
+                required
+                onFocus={e => {
+                  if (!form.codigoPostal) {
+                    setForm({ ...form, codigoPostal: "" });
+                  }
+                }}
+                onInvalid={e => e.target.setCustomValidity('Por favor, insira o código postal no formato XXXX-XXX.')}
+                onInput={e => e.target.setCustomValidity('')}
+              />
               <div className="flex justify-end gap-2">
                 <button type="button" className="px-6 py-2 bg-gray-200 rounded" disabled>Anterior</button>
                 <button type="submit" className="px-6 py-2 bg-blue-700 text-white rounded font-bold hover:bg-blue-900 transition">Próximo</button>
