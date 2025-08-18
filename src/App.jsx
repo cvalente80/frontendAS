@@ -10,11 +10,20 @@ import './App.css';
 function App() {
   return (
     <Router>
+      {/* Marca de água da vila de Ansião no body */}
+      <div style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 0,
+        pointerEvents: 'none',
+        opacity: 0.12,
+        background: `url('/imagens/image.png') center center / cover no-repeat`
+      }} />
       {/* Navbar sempre visível em todas as páginas */}
-      <nav className="bg-white shadow-md py-4 px-8 flex justify-between items-center sticky top-0 z-50">
+      <nav className="bg-white py-4 px-8 flex justify-between items-center sticky top-0 z-50">
         <NavLink to="/" className="flex items-center gap-2">
-          <img src="/logo-empresarial.svg" alt="Logo Ansião Seguros" className="h-8 w-8" />
-          <span className="text-2xl font-bold text-blue-900 hover:text-blue-700">Ansião Seguros</span>
+          <img src="/logo-empresarial.svg" alt="Logo Ansião Seguros" className="h-12 w-12" />
+          <span className="text-3xl font-bold text-blue-900 hover:text-blue-700">Ansião Seguros</span>
         </NavLink>
         <div className="flex gap-6 text-blue-700 font-medium">
           <NavLink to="/" end className={({ isActive }) => isActive ? "border-b-2 border-blue-900 text-blue-900 font-bold" : "hover:text-blue-900"}>Home</NavLink>
