@@ -13,16 +13,19 @@ const produtos: Array<{
 		nome: "Seguro Auto",
 		descricao: "Proteção completa para seu veículo.",
 		imagem: "/imagens/nosso-produtos-car.jpg", // imagem profissional correta
+
 	},
 	{
 		nome: "Seguro Vida",
 		descricao: "Segurança para você e sua família.",
 		imagem: "/family-happy2.png",
+
 	},
 	{
 		nome: "Seguro Saúde",
 		descricao: "Cuide do seu bem-estar.",
 		imagem: "/health-insurance.svg",
+
 	},
 	{
 		nome: "Seguro Residencial",
@@ -42,6 +45,7 @@ const slides: Array<{
 		texto: "Proteção completa para o seu veículo com atendimento personalizado.",
 	},
 	{
+
 		imagem: "https://images.unsplash.com/photo-1506784365847-bbad939e9335?auto=format&fit=crop&w=1200&q=80", // Família feliz em parque com árvores
 		titulo: "Seguro Vida e Saúde",
 		texto: "Segurança para você e sua família, com planos flexíveis.",
