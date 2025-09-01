@@ -4,49 +4,54 @@ import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 
-const produtos = [
+const produtos: Array<{
+	nome: string;
+	descricao: string;
+	imagem: string;
+}> = [
 	{
 		nome: "Seguro Auto",
 		descricao: "Proteção completa para seu veículo.",
-		imagem:
-			"https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=400&q=80",
+		imagem: "/imagens/nosso-produtos-car.jpg", // imagem profissional correta
+
 	},
 	{
 		nome: "Seguro Vida",
 		descricao: "Segurança para você e sua família.",
-		imagem:
-			"/family-happy2.png",
+		imagem: "/family-happy2.png",
+
 	},
 	{
 		nome: "Seguro Saúde",
 		descricao: "Cuide do seu bem-estar.",
-		imagem:
-			"/health-insurance.svg",
+		imagem: "/health-insurance.svg",
+
 	},
 	{
 		nome: "Seguro Residencial",
 		descricao: "Proteja seu lar contra imprevistos.",
-		imagem:
-			"https://images.unsplash.com/photo-1507089947368-19c1da9775ae?auto=format&fit=crop&w=400&q=80",
+		imagem: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?auto=format&fit=crop&w=400&q=80",
 	},
 ];
 
-const slides = [
+const slides: Array<{
+	imagem: string;
+	titulo: string;
+	texto: string;
+}> = [
 	{
-		imagem:
-			"https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=1200&q=80",
+		imagem: "https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=1200&q=80",
 		titulo: "Simule o seu seguro auto em segundos",
 		texto: "Proteção completa para o seu veículo com atendimento personalizado.",
 	},
 	{
-		imagem:
-			"https://images.unsplash.com/photo-1506784365847-bbad939e9335?auto=format&fit=crop&w=1200&q=80", // Família feliz em parque com árvores
+
+		imagem: "https://images.unsplash.com/photo-1506784365847-bbad939e9335?auto=format&fit=crop&w=1200&q=80", // Família feliz em parque com árvores
 		titulo: "Seguro Vida e Saúde",
 		texto: "Segurança para você e sua família, com planos flexíveis.",
 	},
 	{
-		imagem:
-			"https://images.unsplash.com/photo-1507089947368-19c1da9775ae?auto=format&fit=crop&w=1200&q=80",
+		imagem: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?auto=format&fit=crop&w=1200&q=80",
 		titulo: "Seguro Residencial",
 		texto: "Proteja seu lar contra imprevistos e garanta tranquilidade.",
 	},

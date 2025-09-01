@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, ChangeEvent, FormEvent } from "react";
 import DatePicker, { registerLocale } from "react-datepicker";
-import { pt } from "date-fns/locale";
+import { pt } from "date-fns/locale/pt";
 import "react-datepicker/dist/react-datepicker.css";
 registerLocale("pt", pt);
 
-// Tipos do formulário
+
 interface FormState {
   nome: string;
   email: string;
@@ -34,23 +34,23 @@ export default function SimulacaoAuto() {
     tipoSeguro: "",
     coberturas: [],
     codigoPostal: "",
-    dataCartaConducao: "",
-    dataNascimentoManual: "",
-    dataCartaConducaoManual: ""
+
   });
   const [resultado, setResultado] = useState<string | null>(null);
-  const [openNascimento, setOpenNascimento] = useState(false);
-  const [openCarta, setOpenCarta] = useState(false);
+  const [openNascimento, setOpenNascimento] = useState<boolean>(false);
+  const [openCarta, setOpenCarta] = useState<boolean>(false);
   const [erroNascimento, setErroNascimento] = useState<string>("");
   const [erroCarta, setErroCarta] = useState<string>("");
   const [mensagem, setMensagem] = useState<string | null>(null);
   const [mensagemTipo, setMensagemTipo] = useState<string | null>(null);
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement> | { target: { name: string; value: any; type?: string; checked?: boolean } }) {
-    const { name, value } = e.target;
-    const type = (e.target as HTMLInputElement).type;
-    const checked = (e.target as HTMLInputElement).checked;
+
+  function handleChange(e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
+    const target = e.target as HTMLInputElement | HTMLSelectElement;
+    const { name, value, type } = target;
     if (type === "checkbox") {
+      const checked = (target as HTMLInputElement).checked;
+
       setForm((prev) => {
         const coberturas = checked
           ? [...prev.coberturas, value]
@@ -60,6 +60,12 @@ export default function SimulacaoAuto() {
     } else {
       setForm({ ...form, [name]: value });
     }
+  }
+
+
+  // Função utilitária para setCustomValidity e validity
+  function setCustomValidity(e: React.FormEvent<HTMLInputElement | HTMLSelectElement>, message: string) {
+    (e.target as HTMLInputElement | HTMLSelectElement).setCustomValidity(message);
   }
 
   function validarDatas() {
@@ -79,7 +85,8 @@ export default function SimulacaoAuto() {
     return ok;
   }
 
-  function handleNext(e: React.FormEvent) {
+
+  function handleNext(e: FormEvent) {
     e.preventDefault();
     if (step === 1) {
       if (!validarDatas()) return;
@@ -87,16 +94,19 @@ export default function SimulacaoAuto() {
     setStep((s) => s + 1);
   }
 
-  function handlePrev(e: React.FormEvent) {
+
+  function handlePrev(e: FormEvent) {
     e.preventDefault();
     setStep((s) => s - 1);
   }
 
-  function handleSubmit(e: React.FormEvent) {
+
+  function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!form.tipoSeguro) {
-      setMensagem("Por favor, selecione o tipo de seguro.");
-      setMensagemTipo("erro");
+      setMensagem('Por favor, selecione o tipo de seguro.');
+      setMensagemTipo('erro');
+
       setTimeout(() => {
         setMensagem(null);
         setMensagemTipo(null);
@@ -106,8 +116,10 @@ export default function SimulacaoAuto() {
     setResultado(
       `Simulação para ${form.modelo} (${form.ano}) - ${form.tipoSeguro}: R$ 1.200,00/ano\nCoberturas: ${form.coberturas.join(", ")}`
     );
-    setMensagem("Simulação submetida com sucesso!");
-    setMensagemTipo("sucesso");
+
+    setMensagem('Simulação submetida com sucesso!');
+    setMensagemTipo('sucesso');
+
     setTimeout(() => {
       setMensagem(null);
       setMensagemTipo(null);
@@ -115,7 +127,7 @@ export default function SimulacaoAuto() {
   }
 
   function formatDate(dateStr: string) {
-    const [year, month, day] = dateStr.split("-");
+    const [year, month, day] = dateStr.split('-');
     return `${day}-${month}-${year}`;
   }
 
@@ -171,10 +183,7 @@ export default function SimulacaoAuto() {
               <div className="w-full relative">
                 <DatePicker
                   selected={form.dataNascimento ? new Date(form.dataNascimento) : null}
-                  onChange={date => {
-                    handleChange({ target: { name: "dataNascimento", value: date ? date.toISOString().slice(0, 10) : "" } });
-                    setOpenNascimento(false);
-                  }}
+                  onChange={date => setForm(f => ({ ...f, dataNascimento: date ? date.toISOString().slice(0, 10) : "" }))}
                   locale="pt"
                   dateFormat="dd-MM-yyyy"
                   placeholderText="Data de nascimento (dd-mm-aaaa)"
@@ -201,8 +210,10 @@ export default function SimulacaoAuto() {
                       className="w-full p-3 border border-blue-300 rounded-lg pr-10"
                       value={form.dataNascimentoManual !== undefined ? form.dataNascimentoManual : (form.dataNascimento ? formatDate(form.dataNascimento) : "")}
                       required
-                      onInvalid={e => (e.target as HTMLInputElement).setCustomValidity('Por favor, insira a data de nascimento no formato dd-mm-aaaa.')}
-                      onInput={e => (e.target as HTMLInputElement).setCustomValidity('')}
+
+                      onInvalid={e => setCustomValidity(e, 'Por favor, insira a data de nascimento no formato dd-mm-aaaa.')}
+                      onInput={e => setCustomValidity(e, '')}
+
                       onBlur={e => {
                         if (!e.target.value || e.target.value.length !== 10) {
                           setErroNascimento('Por favor, insira a data de nascimento no formato dd-mm-aaaa.');
@@ -211,18 +222,21 @@ export default function SimulacaoAuto() {
                         }
                       }}
                       onChange={e => {
-                        const v = e.target.value.replace(/[^ -]/g, "").replace(/[^\d]/g, "");
+
+                        const v = e.target.value.replace(/[^\d]/g, "");
+
                         let formatted = v;
                         if (v.length > 2) formatted = v.slice(0, 2) + '-' + v.slice(2);
                         if (v.length > 4) formatted = formatted.slice(0, 5) + '-' + v.slice(4, 8);
                         if (formatted.length > 10) formatted = formatted.slice(0, 10);
                         setForm(f => ({ ...f, dataNascimentoManual: formatted }));
                         if (formatted.length === 10) {
-                          handleChange({ target: { name: "dataNascimento", value: `${formatted.slice(6,10)}-${formatted.slice(3,5)}-${formatted.slice(0,2)}` } });
+                          setForm(f => ({ ...f, dataNascimento: `${formatted.slice(6,10)}-${formatted.slice(3,5)}-${formatted.slice(0,2)}` }));
                         } else {
-                          handleChange({ target: { name: "dataNascimento", value: "" } });
+                          setForm(f => ({ ...f, dataNascimento: "" }));
                         }
-                        e.target.setCustomValidity('');
+                        (e.target as HTMLInputElement).setCustomValidity("");
+
                       }}
                       placeholder="Data de nascimento (dd-mm-aaaa)"
                     />
@@ -241,7 +255,8 @@ export default function SimulacaoAuto() {
                           onChange={e => props.changeMonth(Number(e.target.value))}
                           className="border rounded px-2 py-1"
                         >
-                          {Array.from({ length: 12 }, (_, i) => new Intl.DateTimeFormat('pt-PT', { month: 'long' }).format(new Date(0, i))).map((month, idx) => (
+
+                          {["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"].map((month, idx) => (
                             <option key={month} value={idx}>{month}</option>
                           ))}
                         </select>
@@ -271,10 +286,7 @@ export default function SimulacaoAuto() {
               <div className="w-full mt-2 relative">
                 <DatePicker
                   selected={form.dataCartaConducao ? new Date(form.dataCartaConducao) : null}
-                  onChange={date => {
-                    handleChange({ target: { name: "dataCartaConducao", value: date ? date.toISOString().slice(0, 10) : "" } });
-                    setOpenCarta(false);
-                  }}
+                  onChange={date => setForm(f => ({ ...f, dataCartaConducao: date ? date.toISOString().slice(0, 10) : "" }))}
                   locale="pt"
                   dateFormat="dd-MM-yyyy"
                   placeholderText="Data da Carta de condução (dd-mm-aaaa)"
@@ -301,8 +313,8 @@ export default function SimulacaoAuto() {
                       className="w-full p-3 border border-blue-300 rounded-lg pr-10"
                       value={form.dataCartaConducaoManual !== undefined ? form.dataCartaConducaoManual : (form.dataCartaConducao ? formatDate(form.dataCartaConducao) : "")}
                       required
-                      onInvalid={e => (e.target as HTMLInputElement).setCustomValidity('Por favor, insira a data da carta de condução no formato dd-mm-aaaa.')}
-                      onInput={e => (e.target as HTMLInputElement).setCustomValidity('')}
+                      onInvalid={e => setCustomValidity(e, 'Por favor, insira a data da carta de condução no formato dd-mm-aaaa.')}
+                      onInput={e => setCustomValidity(e, '')}
                       onBlur={e => {
                         if (!e.target.value || e.target.value.length !== 10) {
                           setErroCarta('Por favor, insira a data da carta de condução no formato dd-mm-aaaa.');
@@ -318,10 +330,12 @@ export default function SimulacaoAuto() {
                         if (formatted.length > 10) formatted = formatted.slice(0, 10);
                         setForm(f => ({ ...f, dataCartaConducaoManual: formatted }));
                         if (formatted.length === 10) {
-                          handleChange({ target: { name: "dataCartaConducao", value: `${formatted.slice(6,10)}-${formatted.slice(3,5)}-${formatted.slice(0,2)}` } });
+                          setForm(f => ({ ...f, dataCartaConducao: `${formatted.slice(6,10)}-${formatted.slice(3,5)}-${formatted.slice(0,2)}` }));
                         } else {
-                          handleChange({ target: { name: "dataCartaConducao", value: "" } });
+                          setForm(f => ({ ...f, dataCartaConducao: "" }));
                         }
+                        (e.target as HTMLInputElement).setCustomValidity("");
+
                       }}
                       placeholder="Data da Carta de condução (dd-mm-aaaa)"
                     />
@@ -340,7 +354,8 @@ export default function SimulacaoAuto() {
                           onChange={e => props.changeMonth(Number(e.target.value))}
                           className="border rounded px-2 py-1"
                         >
-                          {Array.from({ length: 12 }, (_, i) => new Intl.DateTimeFormat('pt-PT', { month: 'long' }).format(new Date(0, i))).map((month, idx) => (
+                          {["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"].map((month, idx) => (
+
                             <option key={month} value={idx}>{month}</option>
                           ))}
                         </select>
@@ -385,8 +400,9 @@ export default function SimulacaoAuto() {
                     setForm({ ...form, codigoPostal: "" });
                   }
                 }}
-                onInvalid={e => (e.target as HTMLInputElement).setCustomValidity('Por favor, insira o código postal no formato XXXX-XXX.')}
-                onInput={e => (e.target as HTMLInputElement).setCustomValidity('')}
+                onInvalid={e => setCustomValidity(e, 'Por favor, insira o código postal no formato XXXX-XXX.')}
+                onInput={e => setCustomValidity(e, '')}
+
               />
               <div className="flex justify-end gap-2">
                 <button type="button" className="px-6 py-2 bg-gray-200 rounded" disabled>Anterior</button>
@@ -397,17 +413,14 @@ export default function SimulacaoAuto() {
           {step === 2 && (
             <>
               <h3 className="text-xl font-semibold text-blue-700 mb-2 text-center">Passo 2 - Identificação da viatura</h3>
-              <input name="marca" value={form.marca || ""} onChange={handleChange} placeholder="Marca do carro" className="w-full p-3 border border-blue-300 rounded-lg" required onInvalid={e => (e.target as HTMLInputElement).setCustomValidity('Por favor, preencha a marca do carro.')} onInput={e => (e.target as HTMLInputElement).setCustomValidity('')} />
-              <input name="modelo" value={form.modelo} onChange={handleChange} placeholder="Modelo do carro" className="w-full p-3 border border-blue-300 rounded-lg" required onInvalid={e => (e.target as HTMLInputElement).setCustomValidity('Por favor, preencha o modelo do carro.')} onInput={e => (e.target as HTMLInputElement).setCustomValidity('')} />
-              <input
-  name="ano"
-  value={form.ano}
-  onChange={e => {
-    let v = e.target.value.replace(/[^\d]/g, "");
-    if (v.length > 4) v = v.slice(0, 4);
-    setForm({ ...form, ano: v });
-  }}
-  placeholder="Ano" className="w-full p-3 border border-blue-300 rounded-lg" required maxLength={4} onInvalid={e => (e.target as HTMLInputElement).setCustomValidity('Por favor, preencha o ano do carro.')} onInput={e => (e.target as HTMLInputElement).setCustomValidity('')} />
+              <input name="marca" value={form.marca || ""} onChange={handleChange} placeholder="Marca do carro" className="w-full p-3 border border-blue-300 rounded-lg" required onInvalid={e => setCustomValidity(e, 'Por favor, preencha a marca do carro.')} onInput={e => setCustomValidity(e, '')} />
+              <input name="modelo" value={form.modelo} onChange={handleChange} placeholder="Modelo do carro" className="w-full p-3 border border-blue-300 rounded-lg" required onInvalid={e => setCustomValidity(e, 'Por favor, preencha o modelo do carro.')} onInput={e => setCustomValidity(e, '')} />
+              <input name="ano" value={form.ano} onChange={e => {
+  let v = e.target.value.replace(/[^\d]/g, "");
+  if (v.length > 4) v = v.slice(0, 4);
+  setForm({ ...form, ano: v });
+}} placeholder="Ano" className="w-full p-3 border border-blue-300 rounded-lg" required maxLength={4} onInvalid={e => setCustomValidity(e, 'Por favor, preencha o ano do carro.')} onInput={e => setCustomValidity(e, '')} />
+
               <div className="flex justify-center my-2">
   <div className="border-4 border-gray-700 rounded-lg flex items-center px-4 py-2 shadow-md" style={{ minWidth: '180px', maxWidth: '220px', background: 'white' }}>
     <input
@@ -424,8 +437,8 @@ export default function SimulacaoAuto() {
       className="text-center font-mono text-lg bg-transparent outline-none w-full"
       maxLength={8}
       required
-      onInvalid={e => (e.target as HTMLInputElement).setCustomValidity('Por favor, preencha a matrícula no formato XX-XX-XX.')}
-      onInput={e => (e.target as HTMLInputElement).setCustomValidity('')}
+      onInvalid={e => setCustomValidity(e, 'Por favor, preencha a matrícula no formato XX-XX-XX.')}
+      onInput={e => setCustomValidity(e, '')}
       style={{ letterSpacing: '2px' }}
     />
     <svg width="32" height="20" viewBox="0 0 32 20" className="ml-2" fill="none"><rect x="0.5" y="0.5" width="31" height="19" rx="3" fill="#2563eb" stroke="#1e293b"/><text x="16" y="14" textAnchor="middle" fontSize="10" fill="#fff">PT</text></svg>
@@ -441,7 +454,8 @@ export default function SimulacaoAuto() {
             <>
               <h3 className="text-xl font-semibold text-blue-700 mb-2 text-center">Passo 3 - Produto e coberturas adicionais</h3>
               <label className="block font-semibold mb-2 text-left" htmlFor="tipoSeguro">Tipo de seguro:</label>
-<select id="tipoSeguro" name="tipoSeguro" value={form.tipoSeguro || ""} onChange={handleChange} className="w-full p-3 border border-blue-300 rounded-lg text-left" required onInvalid={e => (e.target as HTMLInputElement).setCustomValidity('Por favor, selecione o tipo de seguro.')} onInput={e => (e.target as HTMLInputElement).setCustomValidity('')}>
+<select id="tipoSeguro" name="tipoSeguro" value={form.tipoSeguro || ""} onChange={handleChange} className="w-full p-3 border border-blue-300 rounded-lg text-left" required onInvalid={e => setCustomValidity(e, 'Por favor, selecione o tipo de seguro.')} onInput={e => setCustomValidity(e, '')}>
+
   <option value="">Selecione o tipo de seguro</option>
   <option value="Terceiros">Terceiros</option>
   <option value="Danos Próprios">Danos Próprios</option>

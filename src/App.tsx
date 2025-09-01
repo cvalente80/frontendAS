@@ -7,7 +7,9 @@ import Produtos from "./pages/Produtos";
 import Contato from "./pages/Contato";
 import './App.css';
 
-function App() {
+
+function App(): React.ReactElement {
+
   return (
     <Router>
       {/* Marca de água da vila de Ansião no body */}
