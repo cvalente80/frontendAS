@@ -177,20 +177,41 @@ export default function SimulacaoAuto() {
                 placeholder="Email"
                 className="w-full p-3 border border-blue-300 rounded-lg"
                 required
-                onInvalid={e => (e.target as HTMLInputElement).setCustomValidity((e.target as HTMLInputElement).validity.valueMissing ? 'Por favor, preencha o email.' : 'Por favor, insira um email válido.')}
+                pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+                onInvalid={e => {
+                  const input = e.target as HTMLInputElement;
+                  if (input.validity.valueMissing) {
+                    input.setCustomValidity('Por favor, preencha o email.');
+                  } else if (input.validity.typeMismatch || input.validity.patternMismatch) {
+                    input.setCustomValidity('Por favor, insira um email válido.');
+                  } else {
+                    input.setCustomValidity('');
+                  }
+                }}
                 onInput={e => (e.target as HTMLInputElement).setCustomValidity('')}
               />
               <div className="w-full relative">
                 <DatePicker
                   selected={form.dataNascimento ? new Date(form.dataNascimento) : null}
-                  onChange={date => setForm(f => ({ ...f, dataNascimento: date ? date.toISOString().slice(0, 10) : "" }))}
+                  onChange={date => {
+                    if (date) {
+                      // Salva em ISO, mas também atualiza o manual para dd-mm-aaaa
+                      const iso = date.toISOString().slice(0, 10);
+                      const [year, month, day] = iso.split('-');
+                      const manual = `${day}-${month}-${year}`;
+                      setForm(f => ({ ...f, dataNascimento: iso, dataNascimentoManual: manual }));
+                    } else {
+                      setForm(f => ({ ...f, dataNascimento: "", dataNascimentoManual: "" }));
+                    }
+                  }}
                   locale="pt"
                   dateFormat="dd-MM-yyyy"
                   placeholderText="Data de nascimento (dd-mm-aaaa)"
                   className="w-full p-3 border border-blue-300 rounded-lg pr-10"
                   required
                   onBlur={e => {
-                    if (!form.dataNascimento || form.dataNascimento.length !== 10) {
+                    // Valida pelo campo manual
+                    if (!form.dataNascimentoManual || !/^\d{2}-\d{2}-\d{4}$/.test(form.dataNascimentoManual)) {
                       setErroNascimento("Por favor, insira a data de nascimento no formato dd-mm-aaaa.");
                     } else {
                       setErroNascimento("");
@@ -203,40 +224,35 @@ export default function SimulacaoAuto() {
                   showYearDropdown
                   yearDropdownItemNumber={100}
                   scrollableYearDropdown
-                  value={form.dataNascimento ? `${formatDate(form.dataNascimento)} (data de nascimento)` : ""}
+                  value={form.dataNascimentoManual || ""}
                   customInput={
                     <input
                       type="text"
                       className="w-full p-3 border border-blue-300 rounded-lg pr-10"
-                      value={form.dataNascimentoManual !== undefined ? form.dataNascimentoManual : (form.dataNascimento ? formatDate(form.dataNascimento) : "")}
+                      value={form.dataNascimentoManual || ""}
                       required
-
                       onInvalid={e => setCustomValidity(e, 'Por favor, insira a data de nascimento no formato dd-mm-aaaa.')}
                       onInput={e => setCustomValidity(e, '')}
-
                       onBlur={e => {
-                        if (!e.target.value || e.target.value.length !== 10) {
+                        if (!e.target.value || !/^\d{2}-\d{2}-\d{4}$/.test(e.target.value)) {
                           setErroNascimento('Por favor, insira a data de nascimento no formato dd-mm-aaaa.');
                         } else {
                           setErroNascimento('');
                         }
                       }}
                       onChange={e => {
-
-                        const v = e.target.value.replace(/[^\d]/g, "");
-
+                        const v = e.target.value.replace(/[^\d-]/g, "");
                         let formatted = v;
-                        if (v.length > 2) formatted = v.slice(0, 2) + '-' + v.slice(2);
-                        if (v.length > 4) formatted = formatted.slice(0, 5) + '-' + v.slice(4, 8);
+                        if (v.length > 2 && v[2] !== '-') formatted = v.slice(0, 2) + '-' + v.slice(2);
+                        if (v.length > 5 && v[5] !== '-') formatted = formatted.slice(0, 5) + '-' + v.slice(5, 9);
                         if (formatted.length > 10) formatted = formatted.slice(0, 10);
                         setForm(f => ({ ...f, dataNascimentoManual: formatted }));
-                        if (formatted.length === 10) {
+                        if (/^\d{2}-\d{2}-\d{4}$/.test(formatted)) {
                           setForm(f => ({ ...f, dataNascimento: `${formatted.slice(6,10)}-${formatted.slice(3,5)}-${formatted.slice(0,2)}` }));
                         } else {
                           setForm(f => ({ ...f, dataNascimento: "" }));
                         }
                         (e.target as HTMLInputElement).setCustomValidity("");
-
                       }}
                       placeholder="Data de nascimento (dd-mm-aaaa)"
                     />

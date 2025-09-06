@@ -18,8 +18,7 @@ const produtos: Array<{
 	{
 		nome: "Seguro Vida",
 		descricao: "Segurança para você e sua família.",
-		imagem: "/family-happy2.png",
-
+		imagem: "https://images.pexels.com/photos/1683975/pexels-photo-1683975.jpeg?auto=compress&w=400&q=60", // Família feliz com pessoas (Pexels)
 	},
 	{
 		nome: "Seguro Saúde",
@@ -28,7 +27,7 @@ const produtos: Array<{
 
 	},
 	{
-		nome: "Seguro Residencial",
+		nome: "Seguro Multi-Riscos Habitação", // Corrigido para 'Multi-Riscos' com R maiúsculo
 		descricao: "Proteja seu lar contra imprevistos.",
 		imagem: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?auto=format&fit=crop&w=400&q=80",
 	},
@@ -46,13 +45,13 @@ const slides: Array<{
 	},
 	{
 
-		imagem: "https://images.unsplash.com/photo-1506784365847-bbad939e9335?auto=format&fit=crop&w=1200&q=80", // Família feliz em parque com árvores
+		imagem: "https://images.unsplash.com/photo-1506784365847-bbad939e9335?auto=format&fit=crop&w=1200&q=80", // Família feliz: pai, mãe e filho
 		titulo: "Seguro Vida e Saúde",
 		texto: "Segurança para você e sua família, com planos flexíveis.",
 	},
 	{
 		imagem: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?auto=format&fit=crop&w=1200&q=80",
-		titulo: "Seguro Residencial",
+		titulo: "Seguro  Multi-Riscos Habitação",
 		texto: "Proteja seu lar contra imprevistos e garanta tranquilidade.",
 	},
 ];
@@ -118,13 +117,14 @@ export default function Home() {
 			{/* Produtos em destaque */}
 			<section className="py-16 px-6 bg-gray-50">
 				<h2 className="text-3xl font-bold text-blue-900 mb-10 text-center">
-					Nossos Produtos
+					Produtos para pessoas particulares
 				</h2>
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
 					{produtos.map((p) => (
-						<div
+						<a
+							href={p.nome === "Seguro Auto" ? "/produto-auto" : p.nome === "Seguro Vida" ? "/produto-vida" : p.nome === "Seguro Saúde" ? "/produto-saude" : p.nome === "Seguro Multi-Riscos Habitação" ? "/produto-habitacao" : "/produtos"}
 							key={p.nome}
-							className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center hover:scale-105 transition"
+							className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center hover:scale-105 transition cursor-pointer block"
 						>
 							<img
 								src={p.imagem}
@@ -138,12 +138,66 @@ export default function Home() {
 								{p.descricao}
 							</p>
 							<a
-								href="/produtos"
+								href={p.nome === "Seguro Auto" ? "/produto-auto" : p.nome === "Seguro Vida" ? "/produto-vida" : p.nome === "Seguro Saúde" ? "/produto-saude" : p.nome === "Seguro Multi-Riscos Habitação" ? "/produto-habitacao" : "/produtos"}
 								className="text-blue-600 underline hover:text-blue-900"
 							>
 								Saiba mais
 							</a>
-						</div>
+						</a>
+					))}
+				</div>
+			</section>
+			{/* Produtos para empresas */}
+			<section className="py-16 px-6 bg-gray-50">
+				<h2 className="text-3xl font-bold text-blue-900 mb-10 text-center">
+					Produtos para empresas
+				</h2>
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+					{[
+						{
+							nome: "Seguro Frota",
+							descricao: "Proteção para todos os veículos da empresa.",
+							imagem: "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80",
+						},
+						{
+							nome: "Seguro Acidentes de Trabalho",
+							descricao: "Cobertura para colaboradores em caso de acidente.",
+							imagem: "https://images.pexels.com/photos/3183197/pexels-photo-3183197.jpeg?auto=compress&w=400&q=60",
+						},
+						{
+							nome: "Seguro Responsabilidade Civil Profissional",
+							descricao: "Proteja sua empresa contra danos a terceiros.",
+							imagem: "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg?auto=compress&w=400&q=60",
+						},
+						{
+							nome: "Seguro Multi-Riscos Empresarial",
+							descricao: "Cobertura para as suas instalações e bens empresariais.",
+							imagem: "https://images.pexels.com/photos/323705/pexels-photo-323705.jpeg?auto=compress&w=400&q=60", // Instalações empresariais (Pexels)
+						},
+					].map((p) => (
+						<a
+							href={p.nome === "Seguro Frota" ? "/produto-frota" : p.nome === "Seguro Acidentes de Trabalho" ? "/produto-acidentes-trabalho" : "/produtos"}
+							key={p.nome}
+							className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center hover:scale-105 transition cursor-pointer block"
+						>
+							<img
+								src={p.imagem}
+								alt={p.nome}
+								className="w-24 h-24 object-cover rounded-full mb-4 border-4 border-blue-200"
+							/>
+							<h3 className="text-xl font-semibold text-blue-700 mb-2">
+								{p.nome}
+							</h3>
+							<p className="text-gray-700 text-center mb-2">
+								{p.descricao}
+							</p>
+							<a
+								href={p.nome === "Seguro Frota" ? "/produto-frota" : p.nome === "Seguro Acidentes de Trabalho" ? "/produto-acidentes-trabalho" : "/produtos"}
+								className="text-blue-600 underline hover:text-blue-900"
+							>
+								Saiba mais
+							</a>
+						</a>
 					))}
 				</div>
 			</section>

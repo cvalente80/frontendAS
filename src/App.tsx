@@ -5,6 +5,12 @@ import SimulacaoVidaSaude from "./pages/SimulacaoVidaSaude";
 import SimulacaoHabitacao from "./pages/SimulacaoHabitacao";
 import Produtos from "./pages/Produtos";
 import Contato from "./pages/Contato";
+import ProdutoAuto from "./pages/ProdutoAuto";
+import ProdutoVida from "./pages/ProdutoVida";
+import ProdutoSaude from "./pages/ProdutoSaude";
+import ProdutoHabitacao from "./pages/ProdutoHabitacao";
+import ProdutoFrota from "./pages/ProdutoFrota";
+import ProdutoAcidentesTrabalho from "./pages/ProdutoAcidentesTrabalho";
 import './App.css';
 
 
@@ -43,6 +49,12 @@ function App(): React.ReactElement {
         <Route path="/simulacao-habitacao" element={<SimulacaoHabitacao />} />
         <Route path="/produtos" element={<Produtos />} />
         <Route path="/contato" element={<Contato />} />
+        <Route path="/produto-auto" element={<ProdutoAuto />} />
+        <Route path="/produto-vida" element={<ProdutoVida />} />
+        <Route path="/produto-saude" element={<ProdutoSaude />} />
+        <Route path="/produto-habitacao" element={<ProdutoHabitacao />} />
+        <Route path="/produto-frota" element={<ProdutoFrota />} />
+        <Route path="/produto-acidentes-trabalho" element={<ProdutoAcidentesTrabalho />} />
       </Routes>
     </Router>
   );
