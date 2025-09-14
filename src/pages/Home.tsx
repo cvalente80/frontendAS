@@ -27,7 +27,7 @@ const produtos: Array<{
 
 	},
 	{
-		nome: "Seguro Multi-Riscos Habitação", // Corrigido para 'Multi-Riscos' com R maiúsculo
+		nome: "Seguro Multirriscos Habitação", // Corrigido para 'Multirriscos' com rr
 		descricao: "Proteja seu lar contra imprevistos.",
 		imagem: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?auto=format&fit=crop&w=400&q=80",
 	},
@@ -51,7 +51,7 @@ const slides: Array<{
 	},
 	{
 		imagem: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?auto=format&fit=crop&w=1200&q=80",
-		titulo: "Seguro  Multi-Riscos Habitação",
+		titulo: "Seguro  Multirriscos Habitação",
 		texto: "Proteja seu lar contra imprevistos e garanta tranquilidade.",
 	},
 ];
@@ -122,7 +122,7 @@ export default function Home() {
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
 					{produtos.map((p) => (
 						<a
-							href={p.nome === "Seguro Auto" ? "/produto-auto" : p.nome === "Seguro Vida" ? "/produto-vida" : p.nome === "Seguro Saúde" ? "/produto-saude" : p.nome === "Seguro Multi-Riscos Habitação" ? "/produto-habitacao" : "/produtos"}
+							href={p.nome === "Seguro Auto" ? "/produto-auto" : p.nome === "Seguro Vida" ? "/produto-vida" : p.nome === "Seguro Saúde" ? "/produto-saude" : p.nome === "Seguro Multirriscos Habitação" ? "/produto-habitacao" : "/produtos"}
 							key={p.nome}
 							className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center hover:scale-105 transition cursor-pointer block"
 						>
@@ -138,7 +138,7 @@ export default function Home() {
 								{p.descricao}
 							</p>
 							<a
-								href={p.nome === "Seguro Auto" ? "/produto-auto" : p.nome === "Seguro Vida" ? "/produto-vida" : p.nome === "Seguro Saúde" ? "/produto-saude" : p.nome === "Seguro Multi-Riscos Habitação" ? "/produto-habitacao" : "/produtos"}
+								href={p.nome === "Seguro Auto" ? "/produto-auto" : p.nome === "Seguro Vida" ? "/produto-vida" : p.nome === "Seguro Saúde" ? "/produto-saude" : p.nome === "Seguro Multirriscos Habitação" ? "/produto-habitacao" : "/produtos"}
 								className="text-blue-600 underline hover:text-blue-900"
 							>
 								Saiba mais
@@ -170,13 +170,13 @@ export default function Home() {
 							imagem: "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg?auto=compress&w=400&q=60",
 						},
 						{
-							nome: "Seguro Multi-Riscos Empresarial",
+							nome: "Seguro Multirriscos Empresarial",
 							descricao: "Cobertura para as suas instalações e bens empresariais.",
 							imagem: "https://images.pexels.com/photos/323705/pexels-photo-323705.jpeg?auto=compress&w=400&q=60", // Instalações empresariais (Pexels)
 						},
 					].map((p) => (
 						<a
-							href={p.nome === "Seguro Frota" ? "/produto-frota" : p.nome === "Seguro Acidentes de Trabalho" ? "/produto-acidentes-trabalho" : "/produtos"}
+							href={p.nome === "Seguro Frota" ? "/produto-frota" : p.nome === "Seguro Acidentes de Trabalho" ? "/produto-acidentes-trabalho" : p.nome === "Seguro Responsabilidade Civil Profissional" ? "/produto-responsabilidade-civil-profissional" : p.nome === "Seguro Multirriscos Empresarial" ? "/produto-multirriscos-empresarial" : "/produtos"}
 							key={p.nome}
 							className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center hover:scale-105 transition cursor-pointer block"
 						>
@@ -192,7 +192,7 @@ export default function Home() {
 								{p.descricao}
 							</p>
 							<a
-								href={p.nome === "Seguro Frota" ? "/produto-frota" : p.nome === "Seguro Acidentes de Trabalho" ? "/produto-acidentes-trabalho" : "/produtos"}
+								href={p.nome === "Seguro Frota" ? "/produto-frota" : p.nome === "Seguro Acidentes de Trabalho" ? "/produto-acidentes-trabalho" : p.nome === "Seguro Responsabilidade Civil Profissional" ? "/produto-responsabilidade-civil-profissional" : p.nome === "Seguro Multirriscos Empresarial" ? "/produto-multirriscos-empresarial" : "/produtos"}
 								className="text-blue-600 underline hover:text-blue-900"
 							>
 								Saiba mais
@@ -207,25 +207,14 @@ export default function Home() {
 					<h2 className="text-2xl font-bold text-blue-900 mb-4 text-center">
 						Por que escolher a Ansião Seguros?
 					</h2>
-					<ul className="space-y-3 text-blue-800 text-lg list-disc pl-6">
-						<li>Atendimento personalizado e consultoria especializada</li>
-						<li>Simulação rápida e transparente de seguros auto</li>
-						<li>Soluções para empresas e famílias</li>
-						<li>Diversos produtos: auto, vida, saúde, residencial e mais</li>
+					<ul className="space-y-3 text-blue-800 text-lg pl-0">
+						<li className="flex items-center gap-3"><span className="text-2xl">🤝</span>Atendimento personalizado e consultoria especializada</li>
+						<li className="flex items-center gap-3"><span className="text-2xl">⚡</span>Simulação rápida e automática realizada pelos nossos sistemas inteligentes.</li>
+						<li className="flex items-center gap-3"><span className="text-2xl">🏢</span>Soluções para empresas e famílias</li>
+						<li className="flex items-center gap-3"><span className="text-2xl">📦</span>Diversos produtos: auto, vida, saúde, residencial e mais</li>
 					</ul>
 				</div>
 			</section>
-			{/* Rodapé */}
-			<footer className="bg-blue-950 text-blue-100 py-6 px-6 text-center text-sm mt-auto">
-				&copy; {new Date().getFullYear()} Ansião Seguros. Todos os direitos
-				reservados. |{" "}
-				<a
-					href="/contato"
-					className="underline text-blue-300 hover:text-yellow-400"
-				>
-					Fale conosco
-				</a>
-			</footer>
 		</div>
 	);
 }

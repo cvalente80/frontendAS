@@ -11,6 +11,9 @@ import ProdutoSaude from "./pages/ProdutoSaude";
 import ProdutoHabitacao from "./pages/ProdutoHabitacao";
 import ProdutoFrota from "./pages/ProdutoFrota";
 import ProdutoAcidentesTrabalho from "./pages/ProdutoAcidentesTrabalho";
+import ProdutoResponsabilidadeCivilProfissional from "./pages/ProdutoResponsabilidadeCivilProfissional";
+import ProdutoMultirriscosEmpresarial from "./pages/ProdutoMultirriscosEmpresarial";
+import PoliticaRGPD from "./pages/PoliticaRGPD";
 import './App.css';
 
 
@@ -34,7 +37,7 @@ function App(): React.ReactElement {
           <span className="text-3xl font-bold text-blue-900 hover:text-blue-700">Ansião Seguros</span>
         </NavLink>
         <div className="flex gap-6 text-blue-700 font-medium">
-          <NavLink to="/" end className={({ isActive }) => isActive ? "border-b-2 border-blue-900 text-blue-900 font-bold" : "hover:text-blue-900"}>Home</NavLink>
+          <NavLink to="/" end className={({ isActive }) => isActive ? "border-b-2 border-blue-900 text-blue-900 font-bold" : "hover:text-blue-900"}>Início</NavLink>
           <NavLink to="/simulacao-auto" className={({ isActive }) => isActive ? "border-b-2 border-blue-900 text-blue-900 font-bold" : "hover:text-blue-900"}>Simulação Auto</NavLink>
           <NavLink to="/simulacao-vida-saude" className={({ isActive }) => isActive ? "border-b-2 border-blue-900 text-blue-900 font-bold" : "hover:text-blue-900"}>Simulação Vida/Saúde</NavLink>
           <NavLink to="/simulacao-habitacao" className={({ isActive }) => isActive ? "border-b-2 border-blue-900 text-blue-900 font-bold" : "hover:text-blue-900"}>Simulação Habitação</NavLink>
@@ -55,7 +58,21 @@ function App(): React.ReactElement {
         <Route path="/produto-habitacao" element={<ProdutoHabitacao />} />
         <Route path="/produto-frota" element={<ProdutoFrota />} />
         <Route path="/produto-acidentes-trabalho" element={<ProdutoAcidentesTrabalho />} />
+        <Route path="/produto-responsabilidade-civil-profissional" element={<ProdutoResponsabilidadeCivilProfissional />} />
+        <Route path="/produto-multirriscos-empresarial" element={<ProdutoMultirriscosEmpresarial />} />
+        <Route path="/politica-rgpd" element={<PoliticaRGPD />} />
       </Routes>
+      {/* Footer com link para RGPD */}
+      <footer className="bg-blue-900 text-blue-100 py-6 mt-12 text-center w-full">
+        <div className="container mx-auto flex flex-col md:flex-row justify-between items-center px-4 gap-2">
+          <span className="text-sm">© {new Date().getFullYear()} Ansião Seguros. Todos os direitos reservados.</span>
+          <div className="flex gap-4 items-center">
+            <NavLink to="/contato" className="text-blue-200 underline hover:text-white text-sm">Contato</NavLink>
+            <span className="hidden md:inline-block">|</span>
+            <NavLink to="/politica-rgpd" className="text-blue-200 underline hover:text-white text-sm">Política de Privacidade &amp; RGPD</NavLink>
+          </div>
+        </div>
+      </footer>
     </Router>
   );
 }
