@@ -8,6 +8,7 @@ registerLocale("pt", pt);
 interface FormState {
   nome: string;
   email: string;
+  contribuinte: string;
   dataNascimento: string;
   dataNascimentoManual?: string;
   dataCartaConducao?: string;
@@ -26,6 +27,7 @@ export default function SimulacaoAuto() {
   const [form, setForm] = useState<FormState>({
     nome: "",
     email: "",
+    contribuinte: "",
     dataNascimento: "",
     modelo: "",
     marca: "",
@@ -85,11 +87,29 @@ export default function SimulacaoAuto() {
     return ok;
   }
 
+  function validarNIF(nif: string): boolean {
+    if (!/^[0-9]{9}$/.test(nif)) return false;
+    const n = nif.split('').map(Number);
+    const start = n[0];
+    if (![1,2,3,5,6,8,9].includes(start)) return false;
+    let soma = 0;
+    for (let i = 0; i < 8; i++) {
+      soma += n[i] * (9 - i);
+    }
+    let controlo = 11 - (soma % 11);
+    if (controlo >= 10) controlo = 0;
+    return controlo === n[8];
+  }
+
 
   function handleNext(e: FormEvent) {
     e.preventDefault();
     if (step === 1) {
       if (!validarDatas()) return;
+      if (idadeMenorQue18(form.dataNascimento)) {
+        setErroNascimento("Apenas condutores com 18 anos ou mais podem prosseguir.");
+        return;
+      }
     }
     setStep((s) => s + 1);
   }
@@ -131,6 +151,25 @@ export default function SimulacaoAuto() {
     return `${day}-${month}-${year}`;
   }
 
+  function idadeMenorQue18(data: string): boolean {
+    if (!data) return true;
+    const [ano, mes, dia] = data.split('-').map(Number);
+    const hoje = new Date();
+    let idade = hoje.getFullYear() - ano;
+    if (
+      hoje.getMonth() + 1 < mes ||
+      (hoje.getMonth() + 1 === mes && hoje.getDate() < dia)
+    ) {
+      idade--;
+    }
+    return idade < 18;
+  }
+
+  function nomeCompletoValido(nome: string): boolean {
+    if (!nome) return false;
+    return nome.trim().split(/\s+/).length > 1;
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center relative">
       <img src="https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=1200&q=80" alt="Estrada" className="absolute inset-0 w-full h-full object-cover opacity-30" />
@@ -164,11 +203,21 @@ export default function SimulacaoAuto() {
                 value={form.nome}
                 onChange={handleChange}
                 placeholder="Nome completo"
-                className="w-full p-3 border border-blue-300 rounded-lg"
+                className={`w-full p-3 border rounded-lg ${form.nome && !nomeCompletoValido(form.nome) ? 'border-red-500' : 'border-blue-300'}`}
                 required
-                onInvalid={e => (e.target as HTMLInputElement).setCustomValidity('Por favor, preencha o nome completo.')}
+                onBlur={e => {
+                  if (!nomeCompletoValido(e.target.value)) {
+                    e.target.setCustomValidity('Por favor, indique o nome completo.');
+                  } else {
+                    e.target.setCustomValidity('');
+                  }
+                }}
+                onInvalid={e => (e.target as HTMLInputElement).setCustomValidity('Por favor, indique o nome completo (pelo menos dois nomes).')}
                 onInput={e => (e.target as HTMLInputElement).setCustomValidity('')}
               />
+              {form.nome && !nomeCompletoValido(form.nome) && (
+                <div className="text-red-600 text-sm mt-1">Por favor, indique o nome completo.</div>
+              )}
               <input
                 name="email"
                 type="email"
@@ -420,6 +469,30 @@ export default function SimulacaoAuto() {
                 onInput={e => setCustomValidity(e, '')}
 
               />
+              <input
+                name="contribuinte"
+                type="text"
+                value={form.contribuinte || ""}
+                onChange={handleChange}
+                placeholder="NIF (Contribuinte)"
+                className={`w-full p-3 border rounded-lg ${form.contribuinte && !validarNIF(form.contribuinte) ? 'border-red-500' : 'border-blue-300'}`}
+                required
+                pattern="[0-9]{9}"
+                maxLength={9}
+                minLength={9}
+                onBlur={e => {
+                  if (e.target.value && !validarNIF(e.target.value)) {
+                    e.target.setCustomValidity('NIF inválido.');
+                  } else {
+                    e.target.setCustomValidity('');
+                  }
+                }}
+                onInvalid={e => (e.target as HTMLInputElement).setCustomValidity('Por favor, preencha o NIF válido com 9 dígitos.')}
+                onInput={e => (e.target as HTMLInputElement).setCustomValidity('')}
+              />
+              {form.contribuinte && !validarNIF(form.contribuinte) && (
+                <div className="text-red-600 text-sm mt-1">NIF inválido.</div>
+              )}
               <div className="flex justify-end gap-2">
                 <button type="button" className="px-6 py-2 bg-gray-200 rounded" disabled>Anterior</button>
                 <button type="submit" className="px-6 py-2 bg-blue-700 text-white rounded font-bold hover:bg-blue-900 transition">Próximo</button>
@@ -469,6 +542,19 @@ export default function SimulacaoAuto() {
           {step === 3 && (
             <>
               <h3 className="text-xl font-semibold text-blue-700 mb-2 text-center">Passo 3 - Produto e coberturas adicionais</h3>
+              {/* RGPD Checkbox */}
+              <div className="mb-4 flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="aceitaRgpd"
+                  required
+                  className="accent-blue-700 w-5 h-5"
+                  style={{ minWidth: 20, minHeight: 20 }}
+                />
+                <label htmlFor="aceitaRgpd" className="text-blue-900 text-sm select-none">
+                  Li e aceito a <a href="/politica-rgpd" target="_blank" rel="noopener noreferrer" className="underline text-blue-700 hover:text-blue-900">Política de Privacidade &amp; RGPD</a> da Ansião Seguros.
+                </label>
+              </div>
               <label className="block font-semibold mb-2 text-left" htmlFor="tipoSeguro">Tipo de seguro:</label>
 <select id="tipoSeguro" name="tipoSeguro" value={form.tipoSeguro || ""} onChange={handleChange} className="w-full p-3 border border-blue-300 rounded-lg text-left" required onInvalid={e => setCustomValidity(e, 'Por favor, selecione o tipo de seguro.')} onInput={e => setCustomValidity(e, '')}>
 

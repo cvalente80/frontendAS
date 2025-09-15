@@ -8,7 +8,7 @@ export default function ProdutoHabitacao() {
         <div className="relative h-64 w-full flex items-center justify-center bg-blue-900">
           <img src="https://images.unsplash.com/photo-1507089947368-19c1da9775ae?auto=format&fit=crop&w=800&q=60" alt="Seguro Habitação" className="absolute inset-0 w-full h-full object-cover opacity-30" />
           <div className="relative z-10 text-center w-full">
-            <h1 className="text-5xl font-extrabold text-white drop-shadow mb-2">Seguro Multi-Riscos Habitação</h1>
+            <h1 className="text-5xl font-extrabold text-white drop-shadow mb-2">Seguro Multirriscos Habitação</h1>
             <p className="text-lg text-blue-100 font-medium mb-4">Proteja seu lar contra imprevistos e garanta tranquilidade para sua família</p>
             <a href="/simulacao-habitacao" className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition">Simular Seguro Habitação</a>
           </div>
@@ -19,7 +19,7 @@ export default function ProdutoHabitacao() {
           <section>
             <h2 className="text-2xl font-bold text-blue-800 mb-4 flex items-center gap-2">
               <svg width="28" height="28" fill="none" stroke="#2563eb" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#2563eb" strokeWidth="2"/><path d="M8 12l2 2 4-4" stroke="#2563eb" strokeWidth="2" strokeLinecap="round"/></svg>
-              Por que escolher o Multi-Riscos Habitação?
+              Por que escolher o Multirriscos Habitação?
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-blue-50 rounded-xl p-5 shadow flex gap-3 items-start">
