@@ -2,6 +2,8 @@ import React, { useState, ChangeEvent, FormEvent } from "react";
 import DatePicker, { registerLocale } from "react-datepicker";
 import { pt } from "date-fns/locale/pt";
 import "react-datepicker/dist/react-datepicker.css";
+import { EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, EMAILJS_USER_ID } from "../emailjs.config";
+import emailjs from "@emailjs/browser";
 registerLocale("pt", pt);
 
 
@@ -126,7 +128,6 @@ export default function SimulacaoAuto() {
     if (!form.tipoSeguro) {
       setMensagem('Por favor, selecione o tipo de seguro.');
       setMensagemTipo('erro');
-
       setTimeout(() => {
         setMensagem(null);
         setMensagemTipo(null);
@@ -134,11 +135,47 @@ export default function SimulacaoAuto() {
       return;
     }
     setResultado(
-      `Simulação para ${form.modelo} (${form.ano}) - ${form.tipoSeguro}: R$ 1.200,00/ano\nCoberturas: ${form.coberturas.join(", ")}`
+      `Simulação para ${form.marca} ${form.modelo} (${form.ano}) - ${form.tipoSeguro}\nCoberturas: ${form.coberturas.join(", ")}`
     );
 
-    setMensagem('Simulação submetida com sucesso!');
-    setMensagemTipo('sucesso');
+    // Enviar email via EmailJS
+    const templateParams = {
+      email: form.email,
+      nome: form.nome,
+      modelo: form.modelo,
+      marca: form.marca,
+      ano: form.ano,
+      matricula: form.matricula,
+      tipoSeguro: form.tipoSeguro,
+      coberturas: form.coberturas.join(", "),
+      resultado: `Simulação para ${form.marca} ${form.modelo} (${form.ano}) - ${form.tipoSeguro}\nCoberturas: ${form.coberturas.join(", ")}`,
+    };
+    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams, EMAILJS_USER_ID)
+      .then(() => {
+        setMensagem('Simulação submetida com sucesso!\nEmail enviado.');
+        setMensagemTipo('sucesso');
+      })
+      .catch((error) => {
+        setMensagem('Simulação submetida, mas houve erro ao enviar o email.');
+        setMensagemTipo('erro');
+        // Exibe o erro no canto inferior esquerdo, incluindo o user_id
+        const errorDiv = document.createElement('div');
+        errorDiv.textContent = `Erro ao enviar email: ${error?.text || error?.message || error} | user_id: ${EMAILJS_USER_ID}`;
+        errorDiv.style.position = 'fixed';
+        errorDiv.style.left = '24px';
+        errorDiv.style.bottom = '24px';
+        errorDiv.style.background = '#fee2e2';
+        errorDiv.style.color = '#991b1b';
+        errorDiv.style.padding = '12px 20px';
+        errorDiv.style.borderRadius = '8px';
+        errorDiv.style.fontWeight = 'bold';
+        errorDiv.style.zIndex = '9999';
+        errorDiv.style.boxShadow = '0 2px 8px rgba(0,0,0,0.12)';
+        document.body.appendChild(errorDiv);
+        setTimeout(() => {
+          if (errorDiv.parentNode) errorDiv.parentNode.removeChild(errorDiv);
+        }, 8000);
+      });
 
     setTimeout(() => {
       setMensagem(null);
@@ -608,9 +645,11 @@ export default function SimulacaoAuto() {
         {resultado && <div className="mt-6 p-4 bg-blue-50 text-blue-900 rounded-lg text-center font-semibold shadow whitespace-pre-line">{resultado}</div>}
         {mensagem && (
           <div className={`fixed bottom-8 right-8 z-50 p-4 rounded-lg font-semibold shadow transition-opacity duration-500 ${mensagemTipo === 'sucesso' ? 'bg-green-100 text-green-900' : 'bg-red-100 text-red-900'}`}
-    style={{ minWidth: '260px', maxWidth: '350px', textAlign: 'right' }}>
-    {mensagem}
-  </div>
+            style={{ minWidth: '260px', maxWidth: '350px', textAlign: 'left' }}>
+            {mensagem.split('\n').map((line, idx) => (
+              <div key={idx} style={{ textAlign: 'left' }}>{line}</div>
+            ))}
+          </div>
         )}
       </div>
     </div>
