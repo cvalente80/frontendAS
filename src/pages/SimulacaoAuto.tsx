@@ -497,15 +497,18 @@ export default function SimulacaoAuto() {
                 className="w-full p-3 border border-blue-300 rounded-lg mt-2"
                 maxLength={8}
                 required
+                pattern="^\d{4}-\d{3}$"
                 onFocus={e => {
                   if (!form.codigoPostal) {
                     setForm({ ...form, codigoPostal: "" });
                   }
                 }}
-                onInvalid={e => setCustomValidity(e, 'Por favor, insira o código postal no formato XXXX-XXX.')}
+                onInvalid={e => setCustomValidity(e, 'Por favor, insira o código postal no formato XXXX-XXX com 7 dígitos numéricos.')}
                 onInput={e => setCustomValidity(e, '')}
-
               />
+              {form.codigoPostal && !/^\d{4}-\d{3}$/.test(form.codigoPostal) && (
+                <div className="text-red-600 text-sm mt-1">O código postal deve ter 7 dígitos numéricos (formato XXXX-XXX).</div>
+              )}
               <input
                 name="contribuinte"
                 type="text"
