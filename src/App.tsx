@@ -1,7 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, NavLink } from "react-router-dom";
 import Home from "./pages/Home";
 import SimulacaoAuto from "./pages/SimulacaoAuto";
-import SimulacaoVidaSaude from "./pages/SimulacaoVidaSaude";
+import SimulacaoVida from "./pages/SimulacaoVida";
+import SimulacaoSaude from "./pages/SimulacaoSaude";
 import SimulacaoHabitacao from "./pages/SimulacaoHabitacao";
 import Produtos from "./pages/Produtos";
 import Contato from "./pages/Contato";
@@ -39,7 +40,8 @@ function App(): React.ReactElement {
         <div className="flex gap-6 text-blue-700 font-medium">
           <NavLink to="/" end className={({ isActive }) => isActive ? "border-b-2 border-blue-900 text-blue-900 font-bold" : "hover:text-blue-900"}>Início</NavLink>
           <NavLink to="/simulacao-auto" className={({ isActive }) => isActive ? "border-b-2 border-blue-900 text-blue-900 font-bold" : "hover:text-blue-900"}>Simulação Auto</NavLink>
-          <NavLink to="/simulacao-vida-saude" className={({ isActive }) => isActive ? "border-b-2 border-blue-900 text-blue-900 font-bold" : "hover:text-blue-900"}>Simulação Vida/Saúde</NavLink>
+          <NavLink to="/simulacao-vida" className={({ isActive }) => isActive ? "border-b-2 border-blue-900 text-blue-900 font-bold" : "hover:text-blue-900"}>Simulação Vida</NavLink>
+          <NavLink to="/simulacao-saude" className={({ isActive }) => isActive ? "border-b-2 border-blue-900 text-blue-900 font-bold" : "hover:text-blue-900"}>Simulação Saúde</NavLink>
           <NavLink to="/simulacao-habitacao" className={({ isActive }) => isActive ? "border-b-2 border-blue-900 text-blue-900 font-bold" : "hover:text-blue-900"}>Simulação Habitação</NavLink>
           <NavLink to="/produtos" className={({ isActive }) => isActive ? "border-b-2 border-blue-900 text-blue-900 font-bold" : "hover:text-blue-900"}>Produtos</NavLink>
           <NavLink to="/contato" className={({ isActive }) => isActive ? "border-b-2 border-blue-900 text-blue-900 font-bold" : "hover:text-blue-900"}>Contato</NavLink>
@@ -48,7 +50,8 @@ function App(): React.ReactElement {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/simulacao-auto" element={<SimulacaoAuto />} />
-        <Route path="/simulacao-vida-saude" element={<SimulacaoVidaSaude />} />
+        <Route path="/simulacao-vida" element={<SimulacaoVida />} />
+        <Route path="/simulacao-saude" element={<SimulacaoSaude />} />
         <Route path="/simulacao-habitacao" element={<SimulacaoHabitacao />} />
         <Route path="/produtos" element={<Produtos />} />
         <Route path="/contato" element={<Contato />} />
