@@ -73,20 +73,10 @@ export default function SimulacaoAuto() {
   }
 
   function validarDatas() {
-    let ok = true;
-    if (!form.dataNascimento || form.dataNascimento.length !== 10) {
-      setErroNascimento("Por favor, insira a data de nascimento no formato dd-mm-aaaa.");
-      ok = false;
-    } else {
-      setErroNascimento("");
-    }
-    if (!form.dataCartaConducao || form.dataCartaConducao.length !== 10) {
-      setErroCarta("Por favor, insira a data da carta de condução no formato dd-mm-aaaa.");
-      ok = false;
-    } else {
-      setErroCarta("");
-    }
-    return ok;
+    // Sem validação manual de formato, apenas obrigatório
+    setErroNascimento("");
+    setErroCarta("");
+    return true;
   }
 
   function validarNIF(nif: string): boolean {
@@ -295,14 +285,6 @@ export default function SimulacaoAuto() {
                   placeholderText="Data de nascimento (dd-mm-aaaa)"
                   className="w-full p-3 border border-blue-300 rounded-lg pr-10"
                   required
-                  onBlur={e => {
-                    // Valida pelo campo manual
-                    if (!form.dataNascimentoManual || !/^\d{2}-\d{2}-\d{4}$/.test(form.dataNascimentoManual)) {
-                      setErroNascimento("Por favor, insira a data de nascimento no formato dd-mm-aaaa.");
-                    } else {
-                      setErroNascimento("");
-                    }
-                  }}
                   todayButton="Hoje"
                   isClearable
                   clearButtonTitle="Limpar"
@@ -312,36 +294,14 @@ export default function SimulacaoAuto() {
                   scrollableYearDropdown
                   value={form.dataNascimentoManual || ""}
                   customInput={
-                    <input
-                      type="text"
-                      className="w-full p-3 border border-blue-300 rounded-lg pr-10"
-                      value={form.dataNascimentoManual || ""}
-                      required
-                      onInvalid={e => setCustomValidity(e, 'Por favor, insira a data de nascimento no formato dd-mm-aaaa.')}
-                      onInput={e => setCustomValidity(e, '')}
-                      onBlur={e => {
-                        if (!e.target.value || !/^\d{2}-\d{2}-\d{4}$/.test(e.target.value)) {
-                          setErroNascimento('Por favor, insira a data de nascimento no formato dd-mm-aaaa.');
-                        } else {
-                          setErroNascimento('');
-                        }
-                      }}
-                      onChange={e => {
-                        const v = e.target.value.replace(/[^\d-]/g, "");
-                        let formatted = v;
-                        if (v.length > 2 && v[2] !== '-') formatted = v.slice(0, 2) + '-' + v.slice(2);
-                        if (v.length > 5 && v[5] !== '-') formatted = formatted.slice(0, 5) + '-' + v.slice(5, 9);
-                        if (formatted.length > 10) formatted = formatted.slice(0, 10);
-                        setForm(f => ({ ...f, dataNascimentoManual: formatted }));
-                        if (/^\d{2}-\d{2}-\d{4}$/.test(formatted)) {
-                          setForm(f => ({ ...f, dataNascimento: `${formatted.slice(6,10)}-${formatted.slice(3,5)}-${formatted.slice(0,2)}` }));
-                        } else {
-                          setForm(f => ({ ...f, dataNascimento: "" }));
-                        }
-                        (e.target as HTMLInputElement).setCustomValidity("");
-                      }}
-                      placeholder="Data de nascimento (dd-mm-aaaa)"
-                    />
+                    React.createElement('input', {
+                      type: 'text',
+                      className: 'w-full p-3 border border-blue-300 rounded-lg pr-10',
+                      value: form.dataNascimentoManual || '',
+                      required: true,
+                      readOnly: true,
+                      placeholder: 'Data de nascimento (dd-mm-aaaa)'
+                    })
                   }
                   open={openNascimento}
                   onClickOutside={() => setOpenNascimento(false)}
@@ -394,13 +354,6 @@ export default function SimulacaoAuto() {
                   placeholderText="Data da Carta de condução (dd-mm-aaaa)"
                   className="w-full p-3 border border-blue-300 rounded-lg pr-10"
                   required
-                  onBlur={e => {
-                    if (!form.dataCartaConducao || form.dataCartaConducao.length !== 10) {
-                      setErroCarta("Por favor, insira a data da carta de condução no formato dd-mm-aaaa.");
-                    } else {
-                      setErroCarta("");
-                    }
-                  }}
                   todayButton="Hoje"
                   isClearable
                   clearButtonTitle="Limpar"
@@ -410,37 +363,14 @@ export default function SimulacaoAuto() {
                   scrollableYearDropdown
                   value={form.dataCartaConducao ? `${formatDate(form.dataCartaConducao)} (data da carta de condução)` : ""}
                   customInput={
-                    <input
-                      type="text"
-                      className="w-full p-3 border border-blue-300 rounded-lg pr-10"
-                      value={form.dataCartaConducaoManual !== undefined ? form.dataCartaConducaoManual : (form.dataCartaConducao ? formatDate(form.dataCartaConducao) : "")}
-                      required
-                      onInvalid={e => setCustomValidity(e, 'Por favor, insira a data da carta de condução no formato dd-mm-aaaa.')}
-                      onInput={e => setCustomValidity(e, '')}
-                      onBlur={e => {
-                        if (!e.target.value || e.target.value.length !== 10) {
-                          setErroCarta('Por favor, insira a data da carta de condução no formato dd-mm-aaaa.');
-                        } else {
-                          setErroCarta('');
-                        }
-                      }}
-                      onChange={e => {
-                        const v = e.target.value.replace(/[^\d]/g, "");
-                        let formatted = v;
-                        if (v.length > 2) formatted = v.slice(0, 2) + '-' + v.slice(2);
-                        if (v.length > 4) formatted = formatted.slice(0, 5) + '-' + v.slice(4, 8);
-                        if (formatted.length > 10) formatted = formatted.slice(0, 10);
-                        setForm(f => ({ ...f, dataCartaConducaoManual: formatted }));
-                        if (formatted.length === 10) {
-                          setForm(f => ({ ...f, dataCartaConducao: `${formatted.slice(6,10)}-${formatted.slice(3,5)}-${formatted.slice(0,2)}` }));
-                        } else {
-                          setForm(f => ({ ...f, dataCartaConducao: "" }));
-                        }
-                        (e.target as HTMLInputElement).setCustomValidity("");
-
-                      }}
-                      placeholder="Data da Carta de condução (dd-mm-aaaa)"
-                    />
+                    React.createElement('input', {
+                      type: 'text',
+                      className: 'w-full p-3 border border-blue-300 rounded-lg pr-10',
+                      value: form.dataCartaConducaoManual !== undefined ? form.dataCartaConducaoManual : (form.dataCartaConducao ? formatDate(form.dataCartaConducao) : ''),
+                      required: true,
+                      readOnly: true,
+                      placeholder: 'Data da Carta de condução (dd-mm-aaaa)'
+                    })
                   }
                   open={openCarta}
                   onClickOutside={() => setOpenCarta(false)}
@@ -636,6 +566,7 @@ export default function SimulacaoAuto() {
   <div className="flex flex-col gap-2">
     <label><input type="checkbox" name="coberturas" value="Riscos catastróficos da natureza" checked={form.coberturas.includes("Riscos catastróficos da natureza")} onChange={handleChange} /> Riscos catastróficos da natureza</label>
     <label><input type="checkbox" name="coberturas" value="Atos de vandalismo" checked={form.coberturas.includes("Atos de vandalismo")} onChange={handleChange} /> Atos de vandalismo</label>
+    <label><input type="checkbox" name="coberturas" value="Veículo de Substituição" checked={form.coberturas.includes("Veículo de Substituição")} onChange={handleChange} /> Veículo de Substituição</label>
   </div>
 )}
               <div className="flex justify-between gap-2 mt-4">

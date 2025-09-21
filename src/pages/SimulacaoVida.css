@@ -1,0 +1,16 @@
+.react-datepicker__input-container {
+  background: #fff !important;
+  border-radius: 0 !important;
+  border: none !important; /* Removed border for a cleaner look */
+  box-shadow: none !important; /* Removed box-shadow for a cleaner look */
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.react-datepicker__input-container button {
+  background: #fff !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
