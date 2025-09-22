@@ -1,4 +1,5 @@
 import React from "react";
+import SimulacaoVida from "./SimulacaoVida";
 
 export default function ProdutoVida() {
   return (
@@ -10,7 +11,6 @@ export default function ProdutoVida() {
           <div className="relative z-10 text-center w-full">
             <h1 className="text-5xl font-extrabold text-white drop-shadow mb-2">Seguro Vida</h1>
             <p className="text-lg text-blue-100 font-medium mb-4">Proteção financeira e tranquilidade para você e sua família</p>
-            <a href="/simulacao-vida-saude" className="inline-block px-8 py-3 bg-green-400 text-blue-900 font-bold rounded-full shadow-lg hover:bg-green-300 transition">Simular Seguro Vida</a>
           </div>
         </div>
         {/* Conteúdo principal */}
@@ -100,6 +100,10 @@ export default function ProdutoVida() {
               <li>Escolha o tipo de seguro e coberturas que melhor se adaptam ao seu perfil.</li>
               <li>Envie os documentos necessários e finalize a contratação.</li>
             </ol>
+          </section>
+          {/* Wizard de simulação para ambos os tipos de seguro */}
+          <section className="mt-12">
+            <SimulacaoVida />
           </section>
         </div>
       </div>

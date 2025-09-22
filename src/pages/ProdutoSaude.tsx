@@ -10,7 +10,7 @@ export default function ProdutoSaude() {
           <div className="relative z-10 text-center w-full">
             <h1 className="text-5xl font-extrabold text-white drop-shadow mb-2">Seguro Saúde</h1>
             <p className="text-lg text-blue-100 font-medium mb-4">Cuide do seu bem-estar com planos flexíveis e ampla cobertura</p>
-            <a href="/simulacao-vida-saude" className="inline-block px-8 py-3 bg-green-400 text-blue-900 font-bold rounded-full shadow-lg hover:bg-green-300 transition">Simular Seguro Saúde</a>
+            <a href="/simulacao-saude" className="inline-block px-8 py-3 bg-green-400 text-blue-900 font-bold rounded-full shadow-lg hover:bg-green-300 transition">Simular Seguro Saúde</a>
           </div>
         </div>
         {/* Conteúdo principal */}
