@@ -11,6 +11,11 @@ const EXPLICACAO_INVALIDEZ = {
 	IAD: "Invalidez Absoluta e Definitiva (IAD): A indemnização é realizada quando o segurado fica totalmente dependente de terceiros para as atividades básicas do dia a dia.",
 	ITP: "Invalidez Total e Permanente (ITP): A indemnização é realizada quando segurado fica impossibilitado de exercer qualquer atividade profissional, mas pode realizar tarefas básicas sozinho."
 };
+// Novo mapeamento para valor enviado no email (sem o texto longo explicativo)
+const LABEL_INVALIDEZ_EMAIL = {
+	IAD: 'Invalidez Absoluta e Definitiva (IAD)',
+	ITP: 'Invalidez Total e Permanente (ITP)'
+} as const;
 
 export default function SimulacaoVida() {
 	const [form, setForm] = useState({
@@ -31,6 +36,14 @@ export default function SimulacaoVida() {
 	const [errosSegurados, setErrosSegurados] = useState<{ nome?: string; nascimento?: string; contribuinte?: string }[]>([]);
 	const [errosPasso2, setErrosPasso2] = useState<{ capital?: string; prazo?: string }>({});
 	const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null);
+
+	// Formata capital em milhares (apenas visual)
+	function formatMilhares(valor: string) {
+		if (!valor) return '';
+		const num = Number(valor.replace(/\D/g, ''));
+		if (isNaN(num)) return valor;
+		return num.toLocaleString('pt-PT');
+	}
 
 	function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
 		const { name, value } = e.target;
@@ -56,7 +69,10 @@ export default function SimulacaoVida() {
 	}
 
 	function addSegurado() {
-		setForm(f => ({ ...f, segurados: [...f.segurados, { nome: "", nascimento: "", nascimentoManual: "", contribuinte: "" }] }));
+		setForm(f => {
+			if (f.segurados.length >= 2) return f; // máximo 2
+			return { ...f, segurados: [...f.segurados, { nome: '', nascimento: '', nascimentoManual: '', contribuinte: '' }] };
+		});
 	}
 	function removeSegurado(idx: number) {
 		setForm(f => ({ ...f, segurados: f.segurados.filter((_, i) => i !== idx) }));
@@ -64,13 +80,19 @@ export default function SimulacaoVida() {
 
 	function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
-		// Monta dados para envio
+		// Validação final extra (proteção caso avance por DevTools)
+		const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+		if (!form.email || !emailRegex.test(form.email)) {
+			alert('Por favor, insira um email válido no formato nome@servidor.pt');
+			return;
+		}
 		const templateParams = {
 			tipoSeguro: form.tipoSeguro,
 			capital: form.capital,
 			prazo: form.prazo,
 			fumador: form.fumador,
-			tipoInvalidez: form.tipoInvalidez,
+			tipoInvalidez: LABEL_INVALIDEZ_EMAIL[form.tipoInvalidez as 'IAD' | 'ITP'],
+			explicacaoInvalidez: EXPLICACAO_INVALIDEZ[form.tipoInvalidez as keyof typeof EXPLICACAO_INVALIDEZ],
 			nome: form.nome,
 			email: form.email,
 			telefone: form.telefone,
@@ -83,6 +105,18 @@ export default function SimulacaoVida() {
 			EMAILJS_USER_ID
 		).then(() => {
 			setMensagemSucesso('Pedido efetuado com sucesso! Irá receber as próximas instruções por email.');
+			// Reset mantendo o tipoSeguro atual
+			setForm(f => ({
+				...f,
+				capital: '',
+				prazo: '',
+				segurados: [{ nome: '', nascimento: '', nascimentoManual: '', contribuinte: '' }],
+				tipoInvalidez: 'IAD',
+				nome: '',
+				email: '',
+				telefone: ''
+			}));
+			setStep(1);
 			setTimeout(() => setMensagemSucesso(null), 7000);
 		}).catch(() => {
 			setMensagemSucesso('Erro ao enviar pedido. Tente novamente ou contacte-nos.');
@@ -92,7 +126,8 @@ export default function SimulacaoVida() {
 
 	function handleNext(e: React.FormEvent) {
 		e.preventDefault();
-		if (isCreditoHabitacao && step === 1) {
+		// Valida agora para ambos os tipos de seguro
+		if (step === 1) {
 			const novosErros = form.segurados.map(seg => ({
 				nome: !seg.nome ? 'Por favor, preencha o nome completo.' : undefined,
 				nascimento: !seg.nascimento ? 'Por favor, preencha a data de nascimento.' : undefined,
@@ -101,39 +136,31 @@ export default function SimulacaoVida() {
 			setErrosSegurados(novosErros);
 			if (novosErros.some(err => err.nome || err.nascimento || err.contribuinte)) return;
 		}
-		if (isCreditoHabitacao && step === 2) {
+		if (step === 2) {
 			const erros: { capital?: string; prazo?: string } = {};
 			if (!form.capital) erros.capital = 'Por favor, preencha o capital seguro.';
 			if (!form.prazo) erros.prazo = 'Por favor, preencha o prazo do seguro.';
 			setErrosPasso2(erros);
 			if (erros.capital || erros.prazo) return;
 		}
-		// Validação extra de email no passo 3
-		if (isCreditoHabitacao && step === 3) {
+		if (step === 3) {
 			const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 			if (!form.email || !emailRegex.test(form.email)) {
 				alert('Por favor, insira um email válido no formato nome@servidor.pt');
 				return;
 			}
 		}
-		setStep((s) => s + 1);
-	}
-
-	const isCreditoHabitacao = form.tipoSeguro === "Vida Crédito Habitação";
-
-	function formatMilhares(valor: string) {
-		if (!valor) return '';
-		const num = Number(valor.replace(/\D/g, ''));
-		if (isNaN(num)) return valor;
-		return num.toLocaleString('pt-PT');
+		if (step < 3) setStep(s => s + 1);
 	}
 
 	return (
 		<div className="min-h-screen flex items-center justify-center bg-blue-50 relative">
+			{/* Background local (adicione o ficheiro em public/imagens/seguro-vida-bg.jpg). Fallback para imagem existente. */}
 			<img
-				src="https://images.unsplash.com/photo-1506784365847-bbad939e9335?auto=format&fit=crop&w=1200&q=80"
-				alt="Família feliz e hospital"
+				src="/imagens/seguro-vida-bg.jpg"
+				alt="Plano de proteção familiar - Seguro de Vida"
 				className="absolute inset-0 w-full h-full object-cover opacity-30"
+				onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/family-happy2.png'; }}
 			/>
 			<div className="relative z-10 max-w-lg w-full bg-white bg-opacity-90 rounded-xl shadow-xl p-8">
 				<h1 className="text-3xl font-bold text-blue-900 mb-6 text-center">
@@ -144,7 +171,8 @@ export default function SimulacaoVida() {
 						<option value="Vida Individual">Vida Individual</option>
 						<option value="Vida Crédito Habitação">Vida Crédito Habitação</option>
 					</select>
-					{isCreditoHabitacao ? (
+					{/* Removido o formulário simples; wizard usado para ambos os tipos */}
+					{(
 						<div>
 							{/* Wizard de 3 passos */}
 							{step === 1 && (
@@ -161,7 +189,7 @@ export default function SimulacaoVida() {
 													type="text"
 													name="nome"
 													value={seg.nome}
-													onChange={e => { handleChangeSegurado(e, idx); setErrosSegurados(errs => { const copy = [...errs]; if (copy[idx]) copy[idx].nome = ''; return copy; }); }}
+													onChange={e => { handleChangeSegurado(e as any, idx); setErrosSegurados(errs => { const copy = [...errs]; if (copy[idx]) copy[idx].nome = ''; return copy; }); }}
 													placeholder="Nome completo"
 													className={`w-full rounded border h-11 pl-10 ${errosSegurados[idx]?.nome ? 'border-red-500' : ''}`}
 													required
@@ -176,12 +204,12 @@ export default function SimulacaoVida() {
 															const iso = date.toISOString().slice(0, 10);
 															const [year, month, day] = iso.split('-');
 															const manual = `${day}-${month}-${year}`;
-															handleChangeSegurado({ target: { name: "nascimento", value: iso } } as any, idx);
-															handleChangeSegurado({ target: { name: "nascimentoManual", value: manual } } as any, idx);
+															handleChangeSegurado({ target: { name: 'nascimento', value: iso } } as any, idx);
+															handleChangeSegurado({ target: { name: 'nascimentoManual', value: manual } } as any, idx);
 															setErrosSegurados(errs => { const copy = [...errs]; if (copy[idx]) copy[idx].nascimento = ''; return copy; });
 														} else {
-															handleChangeSegurado({ target: { name: "nascimento", value: "" } } as any, idx);
-															handleChangeSegurado({ target: { name: "nascimentoManual", value: "" } } as any, idx);
+															handleChangeSegurado({ target: { name: 'nascimento', value: '' } } as any, idx);
+															handleChangeSegurado({ target: { name: 'nascimentoManual', value: '' } } as any, idx);
 														}
 													}}
 													locale="pt"
@@ -193,7 +221,7 @@ export default function SimulacaoVida() {
 													showYearDropdown
 													yearDropdownItemNumber={100}
 													scrollableYearDropdown
-													value={seg.nascimentoManual || ""}
+													value={seg.nascimentoManual || ''}
 													customInput={
 														<div className="relative w-full">
 															<button type="button" onClick={() => setOpenNascimento(idx)} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white rounded-full p-0.5 shadow" tabIndex={-1}>
@@ -226,7 +254,7 @@ export default function SimulacaoVida() {
 													type="text"
 													name="contribuinte"
 													value={seg.contribuinte}
-													onChange={e => { handleChangeSegurado(e, idx); setErrosSegurados(errs => { const copy = [...errs]; if (copy[idx]) copy[idx].contribuinte = ''; return copy; }); }}
+													onChange={e => { handleChangeSegurado(e as any, idx); setErrosSegurados(errs => { const copy = [...errs]; if (copy[idx]) copy[idx].contribuinte = ''; return copy; }); }}
 													placeholder="NIF"
 													className={`w-full rounded border h-11 pl-10 ${errosSegurados[idx]?.contribuinte ? 'border-red-500' : ''}`}
 													required
@@ -242,7 +270,12 @@ export default function SimulacaoVida() {
 											)}
 										</div>
 									))}
-									<button type="button" onClick={addSegurado} className="w-full py-2 bg-blue-200 text-blue-900 font-bold rounded hover:bg-blue-300 transition mb-2">Adicionar pessoa segura</button>
+									{form.segurados.length < 2 && (
+										<button type="button" onClick={addSegurado} className="w-full py-2 bg-blue-200 text-blue-900 font-bold rounded hover:bg-blue-300 transition mb-2">Adicionar pessoa segura</button>
+									)}
+									{form.segurados.length >= 2 && (
+										<p className="text-xs text-blue-700 font-medium -mt-2 mb-2 text-right">Máximo de 2 pessoas atingido</p>
+									)}
 									<div className="flex justify-end">
 										<button type="button" onClick={handleNext} className="px-6 py-2 bg-blue-700 text-white rounded font-bold hover:bg-blue-900 transition">Próximo</button>
 									</div>
@@ -384,22 +417,6 @@ export default function SimulacaoVida() {
 								</div>
 							)}
 						</div>
-					) : (
-						// Formulário simples para Vida Individual
-						<>
-							<div className="relative mb-2">
-								<span className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-700 font-bold">€</span>
-								<input type="number" name="capital" value={form.capital} onChange={handleChange} placeholder="Capital seguro" className="w-full p-3 pl-8 rounded border" min="10000" max="1000000" required />
-							</div>
-							<input type="number" name="idade" value={form.segurados[0].nascimento ? '' : (form as any).idade || ''} onChange={handleChange} placeholder="Idade do segurado" className="w-full p-3 rounded border" min="18" max="70" required />
-							<input type="number" name="prazo" value={form.prazo} onChange={handleChange} placeholder="Prazo do seguro (anos)" className="w-full p-3 rounded border" min="1" max="40" required />
-							<input type="text" name="nome" value={form.nome} onChange={handleChange} placeholder="Nome completo" className="w-full p-3 rounded border" required />
-							<input type="email" name="email" value={form.email} onChange={handleChange} placeholder="Email" className="w-full p-3 rounded border" required />
-							<input type="tel" name="telefone" value={form.telefone} onChange={handleChange} placeholder="Telefone" className="w-full p-3 rounded border" pattern="[0-9]{9}" required />
-							<button type="submit" className="w-full py-3 bg-green-500 text-white font-bold rounded hover:bg-green-600 transition">
-								Simular
-							</button>
-						</>
 					)}
 				</form>
 				{mensagemSucesso && (

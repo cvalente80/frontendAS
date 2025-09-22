@@ -94,10 +94,10 @@ export default function Home() {
 									)}
 									{idx === 1 && (
 										<a
-											href="/simulacao-vida-saude"
+											href="/simulacao-vida"
 											className="px-8 py-4 bg-green-400 text-blue-900 font-bold rounded-full shadow-lg hover:bg-green-300 transition"
 										>
-											Simule seguro vida e saúde
+											Simule seguro vida
 										</a>
 									)}
 									{idx === 2 && (
