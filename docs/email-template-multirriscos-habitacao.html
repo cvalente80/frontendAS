@@ -1,0 +1,47 @@
+<!-- Template EmailJS: Seguro Multirriscos Habitação -->
+<!-- Variáveis esperadas: 
+{{nome}}, {{email}}, {{telefone}}, {{nif}}, {{situacao}}, {{tipo_imovel}}, {{utilizacao}}, {{ano_construcao}}, {{area_m2}}, {{codigo_postal}}, {{construcao}}, {{seguranca}}, {{capital_edificio}}, {{capital_conteudo}}, {{produto}}, {{extras}}, {{detalhes}}, {{resultado}}, {{tipoSeguro}}
+-->
+<div style="font-family:system-ui,Arial,sans-serif; font-size:14px; color:#0f2747; line-height:1.45;">
+  <p>Olá <strong>{{nome}}</strong>,</p>
+  <p>Recebemos o seu pedido de simulação de <strong>Seguro Multirriscos Habitação</strong>. Estamos a analisar o mercado para lhe apresentar a melhor proposta.</p>
+  <p style="margin:0;">Em breve entraremos em contacto.</p>
+  <p style="margin:20px 0 0 0;">Segue o resumo que nos enviou:</p>
+
+  <div style="margin-top:14px; border:1px solid #c9dceb; border-radius:8px; background:#f5f9fc;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+      <tbody>
+        <tr>
+          <td style="padding:14px 18px;">
+            <h3 style="margin:0 0 10px 0; font-size:16px; color:#123d6b;">Dados do Risco</h3>
+            <p style="margin:4px 0;">Tipo de imóvel: <strong>{{tipo_imovel}}</strong></p>
+            <p style="margin:4px 0;">Situação: <strong>{{situacao}}</strong> | Utilização: <strong>{{utilizacao}}</strong></p>
+            <p style="margin:4px 0;">Ano: <strong>{{ano_construcao}}</strong> | Área: <strong>{{area_m2}} m²</strong></p>
+            <p style="margin:4px 0;">Construção: <strong>{{construcao}}</strong></p>
+            <p style="margin:4px 0;">Código Postal: <strong>{{codigo_postal}}</strong></p>
+            <p style="margin:4px 0;">Segurança: <strong>{{seguranca}}</strong></p>
+            <hr style="border:none; border-top:1px dashed #c3d4e2; margin:12px 0;">
+            <h3 style="margin:0 0 10px 0; font-size:16px; color:#123d6b;">Capitais Seguros</h3>
+            <p style="margin:4px 0;">Edifício: <strong>{{capital_edificio}} €</strong></p>
+            <p style="margin:4px 0;">Conteúdo: <strong>{{capital_conteudo}} €</strong></p>
+            <hr style="border:none; border-top:1px dashed #c3d4e2; margin:12px 0;">
+            <h3 style="margin:0 0 10px 0; font-size:16px; color:#123d6b;">Produto & Coberturas</h3>
+            <p style="margin:4px 0;">Produto selecionado: <strong>{{produto}}</strong></p>
+            <p style="margin:4px 0;">Extras: <strong>{{extras}}</strong></p>
+            <p style="margin:4px 0;">Detalhes adicionais:<br><em>{{detalhes}}</em></p>
+            <hr style="border:none; border-top:1px dashed #c3d4e2; margin:12px 0;">
+            <h3 style="margin:0 0 10px 0; font-size:16px; color:#123d6b;">Contacto</h3>
+            <p style="margin:4px 0;">Nome: <strong>{{nome}}</strong></p>
+            <p style="margin:4px 0;">Email: <strong>{{email}}</strong></p>
+            <p style="margin:4px 0;">Telefone: <strong>{{telefone}}</strong></p>
+            <p style="margin:4px 0;">NIF: <strong>{{nif}}</strong></p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p style="margin:22px 0 6px 0;">A nossa equipa entrará em contacto assim que possível.</p>
+  <p style="margin:0;">Obrigado,<br><strong>Ansião Seguros</strong></p>
+  <p style="margin-top:28px; font-size:11px; color:#6b7b8c;">(Mensagem automática – não responder diretamente a este email)</p>
+</div>

@@ -3,6 +3,9 @@ export const EMAILJS_SERVICE_ID = "service_g957e2d";
 export const EMAILJS_TEMPLATE_ID = "template_e1b2bg9";
 export const EMAILJS_USER_ID = "BSaau8RnIf4S9eYV6"; 
 
+// Template específico Multirriscos Habitação
+export const EMAILJS_TEMPLATE_ID_HABITACAO = "template_v453ahc";
+
 // IDs específicos para o formulário de Saúde
 export const EMAILJS_SERVICE_ID_SAUDE = "service_gk9trk7";
 export const EMAILJS_TEMPLATE_ID_SAUDE = "template_cinva8e";
