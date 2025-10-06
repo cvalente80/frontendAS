@@ -22,6 +22,7 @@ interface FormState {
   tipoSeguro: string;
   coberturas: string[];
   codigoPostal?: string;
+  outrosPedidos?: string;
 }
 
 export default function SimulacaoAuto() {
@@ -38,6 +39,7 @@ export default function SimulacaoAuto() {
     tipoSeguro: "",
     coberturas: [],
     codigoPostal: "",
+    outrosPedidos: "",
 
   });
   const [resultado, setResultado] = useState<string | null>(null);
@@ -49,8 +51,8 @@ export default function SimulacaoAuto() {
   const [mensagemTipo, setMensagemTipo] = useState<string | null>(null);
 
 
-  function handleChange(e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
-    const target = e.target as HTMLInputElement | HTMLSelectElement;
+  function handleChange(e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
+    const target = e.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
     const { name, value, type } = target;
     if (type === "checkbox") {
       const checked = (target as HTMLInputElement).checked;
@@ -124,21 +126,25 @@ export default function SimulacaoAuto() {
       }, 6000);
       return;
     }
-    setResultado(
-      `Simulação para ${form.marca} ${form.modelo} (${form.ano}) - ${form.tipoSeguro}\nCoberturas: ${form.coberturas.join(", ")}`
-    );
+  const resumo = `Simulação para ${form.marca} ${form.modelo} (${form.ano}) - ${form.tipoSeguro}\nNIF: ${form.contribuinte}\nData Nascimento: ${form.dataNascimento ? formatDate(form.dataNascimento) : '-'}\nData Carta: ${form.dataCartaConducao ? formatDate(form.dataCartaConducao) : '-'}\nCódigo Postal: ${form.codigoPostal || '-'}\nCoberturas: ${form.coberturas.join(", ")}\nOutros pedidos: ${form.outrosPedidos?.trim() ? form.outrosPedidos.trim() : '-'}`;
+    setResultado(resumo);
 
     // Enviar email via EmailJS
     const templateParams = {
       email: form.email,
       nome: form.nome,
+      contribuinte: form.contribuinte,
+      dataNascimento: form.dataNascimento ? formatDate(form.dataNascimento) : '',
+      dataCartaConducao: form.dataCartaConducao ? formatDate(form.dataCartaConducao) : '',
+      codigoPostal: form.codigoPostal || '',
       modelo: form.modelo,
       marca: form.marca,
       ano: form.ano,
       matricula: form.matricula,
       tipoSeguro: form.tipoSeguro,
       coberturas: form.coberturas.join(", "),
-      resultado: `Simulação para ${form.marca} ${form.modelo} (${form.ano}) - ${form.tipoSeguro}\nCoberturas: ${form.coberturas.join(", ")}`,
+      outrosPedidos: form.outrosPedidos?.trim() ? form.outrosPedidos.trim() : '-',
+      resultado: resumo,
     };
     emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams, EMAILJS_USER_ID)
       .then(() => {
@@ -569,6 +575,16 @@ export default function SimulacaoAuto() {
     <label><input type="checkbox" name="coberturas" value="Veículo de Substituição" checked={form.coberturas.includes("Veículo de Substituição")} onChange={handleChange} /> Veículo de Substituição</label>
   </div>
 )}
+<div className="mt-4">
+  <label className="block text-sm font-semibold mb-1">Outros pedidos / detalhes</label>
+  <textarea
+    name="outrosPedidos"
+    value={form.outrosPedidos || ''}
+    onChange={handleChange}
+    placeholder="Ex.: limites, condutor jovem, franquias desejadas, observações..."
+    className="w-full p-3 border rounded bg-white min-h-[90px]"
+  />
+</div>
               <div className="flex justify-between gap-2 mt-4">
                 <button type="button" onClick={handlePrev} className="px-6 py-2 bg-gray-200 rounded">Anterior</button>
                 <button type="submit" className="px-6 py-2 bg-green-600 text-white rounded font-bold hover:bg-green-700 transition">Simular</button>
