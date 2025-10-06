@@ -1,0 +1,33 @@
+<div>Olá {{nome}}!&nbsp;</div>
+<div>&nbsp;</div>
+<div>Vamos responder à sua solicitação o mais rápido possível.</div>
+<div>&nbsp;</div>
+<div>Os nossos consultores vão procurar no mercado a melhor cotação de acordo com o seu perfil.</div>
+<div>&nbsp;</div>
+<div>Obrigado,</div>
+<div>&nbsp;</div>
+<div>Ansião Seguros</div>
+<div style="margin-top: 20px; padding: 15px 0; border-width: 1px 0; border-style: dashed; border-color: lightgrey;">
+  <table role="presentation">
+    <tbody>
+      <tr>
+        <td style="vertical-align: top;">
+          <div style="padding: 6px 10px; margin: 0 10px; background-color: aliceblue; border-radius: 5px; font-size: 26px;" role="img">&nbsp;</div>
+        </td>
+        <td style="vertical-align: top;">
+          <p style="font-size: 16px;">Tipo de seguro: {{tipoSeguro}}</p>
+          <p style="font-size: 16px;">Resumo: {{resultado}}</p>
+          <p style="font-size: 16px;">Estado da simulação: <span style="background-color: #2dc26b;">Em Processamento</span></p>
+          <div style="font-size: 0; height: 10px;">&nbsp;</div>
+          {{#if detalhes_html}}
+          <div style="margin-top: 10px;">
+            {{{detalhes_html}}}
+          </div>
+          {{/if}}
+          <p style="font-size: 16px;">&nbsp;</p>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<p>&nbsp;</p>

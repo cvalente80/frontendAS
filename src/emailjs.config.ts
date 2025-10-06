@@ -10,3 +10,8 @@ export const EMAILJS_TEMPLATE_ID_HABITACAO = "template_v453ahc";
 export const EMAILJS_SERVICE_ID_SAUDE = "service_gk9trk7";
 export const EMAILJS_TEMPLATE_ID_SAUDE = "template_cinva8e";
 export const EMAILJS_USER_ID_SAUDE = "rhKWX9EC7oQt2nwPK";
+
+// IDs genéricos para propostas (usados por AT e outros produtos globais)
+export const EMAILJS_SERVICE_ID_GENERIC = "service_sginz04";
+export const EMAILJS_TEMPLATE_ID_GENERIC = "template_1hel704";
+export const EMAILJS_USER_ID_GENERIC = "qQ4BV2IFiEIcJ28OA";
