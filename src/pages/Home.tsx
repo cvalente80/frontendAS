@@ -1,6 +1,6 @@
 import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation } from "swiper/modules";
+import { Navigation, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 
@@ -64,10 +64,10 @@ export default function Home() {
 			<section className="relative h-[400px] flex items-center justify-center bg-blue-900">
 				<Swiper
 					className="w-full h-full"
-					autoplay={{ delay: 10000 }}
+					autoplay={{ delay: 10000, disableOnInteraction: false }}
 					loop={true}
 					navigation={true}
-					modules={[Navigation]}
+					modules={[Navigation, Autoplay]}
 				>
 					{slides.map((slide, idx) => (
 						<SwiperSlide key={idx}>
@@ -157,7 +157,7 @@ export default function Home() {
 						{
 							nome: "Seguro Frota",
 							descricao: "Proteção para todos os veículos da empresa.",
-							imagem: "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80",
+							imagem: "https://images.pexels.com/photos/210019/pexels-photo-210019.jpeg?auto=compress&w=400&q=60",
 						},
 						{
 							nome: "Seguro Acidentes de Trabalho",
@@ -174,9 +174,14 @@ export default function Home() {
 							descricao: "Cobertura para as suas instalações e bens empresariais.",
 							imagem: "https://images.pexels.com/photos/323705/pexels-photo-323705.jpeg?auto=compress&w=400&q=60", // Instalações empresariais (Pexels)
 						},
+						{
+							nome: "Seguro Condomínio",
+							descricao: "Proteção completa para edifícios e áreas comuns.",
+							imagem: "https://images.pexels.com/photos/439391/pexels-photo-439391.jpeg?auto=compress&w=400&q=60",
+						},
 					].map((p) => (
 						<a
-							href={p.nome === "Seguro Frota" ? "/produto-frota" : p.nome === "Seguro Acidentes de Trabalho" ? "/produto-acidentes-trabalho" : p.nome === "Seguro Responsabilidade Civil Profissional" ? "/produto-responsabilidade-civil-profissional" : p.nome === "Seguro Multirriscos Empresarial" ? "/produto-multirriscos-empresarial" : "/produtos"}
+							href={p.nome === "Seguro Frota" ? "/produto-frota" : p.nome === "Seguro Acidentes de Trabalho" ? "/produto-acidentes-trabalho" : p.nome === "Seguro Responsabilidade Civil Profissional" ? "/produto-responsabilidade-civil-profissional" : p.nome === "Seguro Multirriscos Empresarial" ? "/produto-multirriscos-empresarial" : p.nome === "Seguro Condomínio" ? "/produto-condominio" : "/produtos"}
 							key={p.nome}
 							className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center hover:scale-105 transition cursor-pointer block"
 						>

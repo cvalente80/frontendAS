@@ -1,5 +1,5 @@
 import React from "react";
-import SimulacaoVida from "./SimulacaoVida";
+import { Link } from "react-router-dom";
 
 export default function ProdutoVida() {
   return (
@@ -11,6 +11,10 @@ export default function ProdutoVida() {
           <div className="relative z-10 text-center w-full">
             <h1 className="text-5xl font-extrabold text-white drop-shadow mb-2">Seguro Vida</h1>
             <p className="text-lg text-blue-100 font-medium mb-4">Proteção financeira e tranquilidade para você e sua família</p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link to="/simulacao-vida" className="inline-block px-8 py-3 bg-yellow-400 text-blue-900 font-bold rounded-full shadow-lg hover:bg-yellow-300 transition">Simular seguro Vida</Link>
+              <Link to="/contato" className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition">Fale com um consultor</Link>
+            </div>
           </div>
         </div>
         {/* Conteúdo principal */}
@@ -101,10 +105,7 @@ export default function ProdutoVida() {
               <li>Envie os documentos necessários e finalize a contratação.</li>
             </ol>
           </section>
-          {/* Wizard de simulação para ambos os tipos de seguro */}
-          <section className="mt-12">
-            <SimulacaoVida />
-          </section>
+          {/* Simulador removido desta página; usar o botão acima para navegar para /simulacao-vida */}
         </div>
       </div>
     </div>
