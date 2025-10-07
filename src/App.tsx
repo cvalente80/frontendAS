@@ -13,7 +13,10 @@ import ProdutoHabitacao from "./pages/ProdutoHabitacao";
 import ProdutoFrota from "./pages/ProdutoFrota";
 import ProdutoAcidentesTrabalho from "./pages/ProdutoAcidentesTrabalho";
 import ProdutoResponsabilidadeCivilProfissional from "./pages/ProdutoResponsabilidadeCivilProfissional";
+import SimulacaoResponsabilidadeCivilProfissional from "./pages/SimulacaoResponsabilidadeCivilProfissional";
 import ProdutoMultirriscosEmpresarial from "./pages/ProdutoMultirriscosEmpresarial";
+import ProdutoCondominio from "./pages/ProdutoCondominio";
+import SimulacaoCondominio from "./pages/SimulacaoCondominio";
 import PoliticaRGPD from "./pages/PoliticaRGPD";
 import './App.css';
 
@@ -62,7 +65,10 @@ function App(): React.ReactElement {
         <Route path="/produto-frota" element={<ProdutoFrota />} />
         <Route path="/produto-acidentes-trabalho" element={<ProdutoAcidentesTrabalho />} />
         <Route path="/produto-responsabilidade-civil-profissional" element={<ProdutoResponsabilidadeCivilProfissional />} />
+  <Route path="/simulacao-rc-profissional" element={<SimulacaoResponsabilidadeCivilProfissional />} />
         <Route path="/produto-multirriscos-empresarial" element={<ProdutoMultirriscosEmpresarial />} />
+  <Route path="/produto-condominio" element={<ProdutoCondominio />} />
+  <Route path="/simulacao-condominio" element={<SimulacaoCondominio />} />
         <Route path="/politica-rgpd" element={<PoliticaRGPD />} />
       </Routes>
       {/* Footer com link para RGPD */}

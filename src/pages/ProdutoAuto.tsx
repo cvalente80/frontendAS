@@ -10,7 +10,10 @@ export default function ProdutoAuto() {
           <div className="relative z-10 text-center w-full">
             <h1 className="text-5xl font-extrabold text-white drop-shadow mb-2">Seguro Automóvel</h1>
             <p className="text-lg text-blue-100 font-medium mb-4">Proteja o seu veículo com as melhores coberturas do mercado</p>
-            <a href="/simulacao-auto" className="inline-block px-8 py-3 bg-yellow-400 text-blue-900 font-bold rounded-full shadow-lg hover:bg-yellow-300 transition">Simular Seguro Auto</a>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <a href="/simulacao-auto" className="inline-block px-8 py-3 bg-yellow-400 text-blue-900 font-bold rounded-full shadow-lg hover:bg-yellow-300 transition">Simular Seguro Auto</a>
+              <a href="/contato" className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition">Fale com um consultor</a>
+            </div>
           </div>
         </div>
         {/* Conteúdo principal */}

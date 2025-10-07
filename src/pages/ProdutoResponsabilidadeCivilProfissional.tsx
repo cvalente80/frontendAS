@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 export default function ProdutoResponsabilidadeCivilProfissional() {
   return (
@@ -18,12 +19,20 @@ export default function ProdutoResponsabilidadeCivilProfissional() {
             <p className="text-lg text-blue-100 font-medium mb-4">
               Proteja a sua atividade profissional contra reclamações e imprevistos.
             </p>
-            <a
-              href="/contato"
-              className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition"
-            >
-              Fale com um consultor
-            </a>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link
+                to="/simulacao-rc-profissional"
+                className="inline-block px-8 py-3 bg-yellow-400 text-blue-900 font-bold rounded-full shadow-lg hover:bg-yellow-300 transition"
+              >
+                Simular seguro responsabilidade civil
+              </Link>
+              <Link
+                to="/contato"
+                className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition"
+              >
+                Fale com um consultor
+              </Link>
+            </div>
           </div>
         </div>
         {/* Conteúdo principal */}

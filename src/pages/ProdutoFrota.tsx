@@ -205,7 +205,10 @@ export default function ProdutoFrota() {
             <h1 className="text-5xl font-extrabold text-white drop-shadow mb-2">Seguro Frota Empresarial</h1>
             <p className="text-lg text-blue-100 font-medium mb-4">Gestão eficiente e proteção completa para todos os veículos da sua empresa</p>
             <span className="inline-block px-6 py-2 bg-red-600 text-white font-bold rounded-full shadow-lg mb-2">Produto Fidelidade</span>
-            <a href="#form-frota" className="inline-block px-8 py-3 bg-yellow-400 text-blue-900 font-bold rounded-full shadow-lg hover:bg-yellow-300 transition">Solicitar proposta</a>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <a href="#form-frota" className="inline-block px-8 py-3 bg-yellow-400 text-blue-900 font-bold rounded-full shadow-lg hover:bg-yellow-300 transition">Solicitar proposta</a>
+              <a href="/contato" className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition">Fale com um consultor</a>
+            </div>
           </div>
         </div>
         {/* Conteúdo principal */}
