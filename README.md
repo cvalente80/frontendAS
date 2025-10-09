@@ -15,6 +15,24 @@ Este projeto pode ser facilmente adaptado para outras empresas e produtos de seg
 1. Instale as dependências: `npm install`
 2. Inicie o servidor: `npm run dev`
 
+## Deploy para GitHub Pages
+
+Este site está configurado para deploy automático no GitHub Pages.
+
+### Configuração inicial
+
+1. Vá às configurações do repositório no GitHub (Settings > Pages)
+2. Em "Build and deployment", selecione "Source: GitHub Actions"
+3. O site será automaticamente publicado em: `https://cvalente80.github.io/frontendAS/`
+
+### Deploy automático
+
+Cada push para a branch `main` irá automaticamente:
+- Construir o projeto
+- Publicar no GitHub Pages
+
+Você também pode fazer deploy manual através da aba "Actions" no GitHub.
+
 ## Personalização
 Adicione ou edite componentes em `src/` para adaptar o site a outros clientes ou produtos.
 
