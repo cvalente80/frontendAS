@@ -526,6 +526,8 @@ export default function SimulacaoAuto() {
                   required
                   className="accent-blue-700 w-5 h-5"
                   style={{ minWidth: 20, minHeight: 20 }}
+                  onInvalid={e => (e.target as HTMLInputElement).setCustomValidity('Por favor, aceite a Política de Privacidade & RGPD para prosseguir.')}
+                  onInput={e => (e.target as HTMLInputElement).setCustomValidity('')}
                 />
                 <label htmlFor="aceitaRgpd" className="text-blue-900 text-sm select-none">
                   Li e aceito a <a href="/politica-rgpd" target="_blank" rel="noopener noreferrer" className="underline text-blue-700 hover:text-blue-900">Política de Privacidade &amp; RGPD</a> da Ansião Seguros.
