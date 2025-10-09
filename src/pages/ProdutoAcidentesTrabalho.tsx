@@ -377,7 +377,7 @@ export default function ProdutoAcidentesTrabalho() {
                 <textarea name="outrosPedidos" value={form.outrosPedidos || ''} onChange={handleChange} placeholder="Ex.: atividade específica, limites, observações…" className="w-full p-3 border rounded bg-white min-h-[90px]" />
               </div>
               <div className="mb-4 mt-4 flex items-center gap-2">
-                <input type="checkbox" id="aceitaRgpd" name="aceitaRgpd" checked={!!form.aceitaRgpd} onChange={handleChange} className="accent-blue-700 w-5 h-5" required />
+                <input type="checkbox" id="aceitaRgpd" name="aceitaRgpd" checked={!!form.aceitaRgpd} onChange={handleChange} className="accent-blue-700 w-5 h-5" required onInvalid={e => (e.target as HTMLInputElement).setCustomValidity('Necessário aceitar a Política de Privacidade & RGPD.')} onInput={e => (e.target as HTMLInputElement).setCustomValidity('')} />
                 <label htmlFor="aceitaRgpd" className="text-blue-900 text-sm select-none">Li e aceito a <a href="/politica-rgpd" target="_blank" rel="noopener noreferrer" className="underline text-blue-700 hover:text-blue-900">Política de Privacidade & RGPD</a>.</label>
               </div>
               <div className="flex justify-between gap-2 mt-2"><button type="button" onClick={handlePrev} className="px-6 py-2 bg-gray-200 rounded">Anterior</button><button type="submit" className="px-6 py-2 bg-green-600 text-white rounded font-bold hover:bg-green-700 transition">Pedir Proposta</button></div>

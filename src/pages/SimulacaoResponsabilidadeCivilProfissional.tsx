@@ -252,7 +252,7 @@ export default function SimulacaoResponsabilidadeCivilProfissional() {
             <>
               <h3 className="text-xl font-semibold text-blue-700 mb-2 text-center">3. Envio</h3>
               <div className="mb-4 flex items-center gap-2">
-                <input type="checkbox" id="aceitaRgpd" name="aceitaRgpd" checked={!!form.aceitaRgpd} onChange={handleChange} className="accent-blue-700 w-5 h-5" required />
+                <input type="checkbox" id="aceitaRgpd" name="aceitaRgpd" checked={!!form.aceitaRgpd} onChange={handleChange} className="accent-blue-700 w-5 h-5" required onInvalid={e => (e.target as HTMLInputElement).setCustomValidity('Necessário aceitar a Política de Privacidade & RGPD.')} onInput={e => (e.target as HTMLInputElement).setCustomValidity('')} />
                 <label htmlFor="aceitaRgpd" className="text-blue-900 text-sm select-none">Li e aceito a <a href="/politica-rgpd" target="_blank" rel="noopener noreferrer" className="underline text-blue-700 hover:text-blue-900">Política de Privacidade & RGPD</a>.</label>
               </div>
               <div>
