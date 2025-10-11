@@ -170,7 +170,7 @@ export default function Contato() {
             <textarea name="mensagem" value={form.mensagem} onChange={handleChange} placeholder="Descreva o seu pedido ou dúvida..." className="w-full p-3 border border-blue-300 rounded-lg min-h-[140px]" required onInvalid={e=>setCustomValidity(e,'Descreva o seu pedido.')} onInput={e=>setCustomValidity(e,'')} />
             <label className="flex items-start gap-2 text-sm text-blue-800">
               <input type="checkbox" name="aceitaRgpd" checked={form.aceitaRgpd} onChange={handleChange} required onInvalid={e=> (e.target as HTMLInputElement).setCustomValidity('Necessário aceitar a Política de Privacidade & RGPD.')} onInput={e=> (e.target as HTMLInputElement).setCustomValidity('')} />
-              <span>Li e aceito a <a href="/politica-rgpd" className="underline" target="_blank" rel="noreferrer">Política de Privacidade & RGPD</a>.</span>
+              <span>Li e aceito a <a href={`${import.meta.env.BASE_URL}politica-rgpd`} className="underline" target="_blank" rel="noreferrer">Política de Privacidade & RGPD</a>.</span>
             </label>
 
             {mensagem && (

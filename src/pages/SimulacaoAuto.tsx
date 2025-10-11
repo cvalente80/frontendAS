@@ -530,7 +530,7 @@ export default function SimulacaoAuto() {
                   onInput={e => (e.target as HTMLInputElement).setCustomValidity('')}
                 />
                 <label htmlFor="aceitaRgpd" className="text-blue-900 text-sm select-none">
-                  Li e aceito a <a href="/politica-rgpd" target="_blank" rel="noopener noreferrer" className="underline text-blue-700 hover:text-blue-900">Política de Privacidade &amp; RGPD</a> da Ansião Seguros.
+                  Li e aceito a <a href={`${import.meta.env.BASE_URL}politica-rgpd`} target="_blank" rel="noopener noreferrer" className="underline text-blue-700 hover:text-blue-900">Política de Privacidade &amp; RGPD</a> da Ansião Seguros.
                 </label>
               </div>
               <label className="block font-semibold mb-2 text-left" htmlFor="tipoSeguro">Tipo de seguro:</label>

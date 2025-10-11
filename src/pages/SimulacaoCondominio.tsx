@@ -306,7 +306,7 @@ export default function SimulacaoCondominio(): React.ReactElement {
               <h3 className="text-xl font-semibold text-blue-700 mb-2 text-center">3. RGPD e envio</h3>
               <label className="flex items-start gap-2 text-sm text-blue-800">
                 <input type="checkbox" name="aceitaRgpd" checked={form.aceitaRgpd} onChange={handleChange} required onInvalid={e=> (e.target as HTMLInputElement).setCustomValidity('Necessário aceitar a Política de Privacidade & RGPD.')} onInput={e=> (e.target as HTMLInputElement).setCustomValidity('')} />
-                <span>Li e aceito a <a href="/politica-rgpd" target="_blank" className="underline">Política de Privacidade & RGPD</a>.</span>
+                <span>Li e aceito a <a href={`${import.meta.env.BASE_URL}politica-rgpd`} target="_blank" className="underline">Política de Privacidade & RGPD</a>.</span>
               </label>
               <div className="flex justify-between gap-2 mt-2">
                 <button type="button" onClick={()=>setStep(2)} className="px-6 py-2 bg-gray-200 rounded">Anterior</button>

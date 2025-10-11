@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 export default function ProdutoHabitacao() {
   return (
@@ -11,8 +12,8 @@ export default function ProdutoHabitacao() {
             <h1 className="text-5xl font-extrabold text-white drop-shadow mb-2">Seguro Multirriscos Habitação</h1>
             <p className="text-lg text-blue-100 font-medium mb-4">Proteja seu lar contra imprevistos e garanta tranquilidade para sua família</p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <a href="/simulacao-habitacao" className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition">Simular Seguro Habitação</a>
-              <a href="/contato" className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition">Fale com um consultor</a>
+              <Link to="/simulacao-habitacao" className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition">Simular Seguro Habitação</Link>
+              <Link to="/contato" className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition">Fale com um consultor</Link>
             </div>
           </div>
         </div>

@@ -141,7 +141,7 @@ export default function SimulacaoSaude() {
 	return (
 		<div className="min-h-screen flex items-start justify-center bg-blue-50 relative pt-8 md:pt-12">
 			<img
-				src="/imagens/insurance-background.jpg"
+				src={`${import.meta.env.BASE_URL}imagens/insurance-background.jpg`}
 				alt="Seguro Saúde"
 				className="absolute inset-0 w-full h-full object-cover opacity-25"
 				onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/family-happy2.png'; }}
