@@ -7,7 +7,7 @@ const particulares: Produto[] = [
   {
     nome: "Seguro Auto",
     descricao: "Proteção completa para o seu veículo.",
-    imagem: "/imagens/nosso-produtos-car.jpg",
+    imagem: `${import.meta.env.BASE_URL}imagens/nosso-produtos-car.jpg`,
     to: "/produto-auto",
   },
   {
@@ -19,7 +19,7 @@ const particulares: Produto[] = [
   {
     nome: "Seguro Saúde",
     descricao: "Cuide do seu bem-estar com planos flexíveis.",
-    imagem: "/health-insurance.svg",
+    imagem: `${import.meta.env.BASE_URL}health-insurance.svg`,
     to: "/produto-saude",
   },
   {
