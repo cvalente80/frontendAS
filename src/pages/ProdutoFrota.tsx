@@ -3,6 +3,7 @@ import DatePicker, { registerLocale } from "react-datepicker";
 import { pt } from "date-fns/locale/pt";
 import "react-datepicker/dist/react-datepicker.css";
 import emailjs from "@emailjs/browser";
+import { Link } from "react-router-dom";
 import { EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, EMAILJS_USER_ID } from "../emailjs.config";
 
 registerLocale("pt", pt);
@@ -207,7 +208,7 @@ export default function ProdutoFrota() {
             <span className="inline-block px-6 py-2 bg-red-600 text-white font-bold rounded-full shadow-lg mb-2">Produto Fidelidade</span>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <a href="#form-frota" className="inline-block px-8 py-3 bg-yellow-400 text-blue-900 font-bold rounded-full shadow-lg hover:bg-yellow-300 transition">Solicitar proposta</a>
-              <a href="/contato" className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition">Fale com um consultor</a>
+                <Link to="/contato" className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition">Fale com um consultor</Link>
             </div>
           </div>
         </div>
@@ -488,7 +489,7 @@ export default function ProdutoFrota() {
               <h3 className="text-xl font-semibold text-blue-700 mb-2 text-center">Passo 3 - Produto e coberturas adicionais</h3>
               <div className="mb-4 flex items-center gap-2">
                 <input type="checkbox" id="aceitaRgpd" name="aceitaRgpd" checked={!!form.aceitaRgpd} onChange={handleChange} className="accent-blue-700 w-5 h-5" required onInvalid={e => (e.target as HTMLInputElement).setCustomValidity('Necessário aceitar a Política de Privacidade & RGPD.')} onInput={e => (e.target as HTMLInputElement).setCustomValidity('')} />
-                <label htmlFor="aceitaRgpd" className="text-blue-900 text-sm select-none">Li e aceito a <a href="/politica-rgpd" target="_blank" rel="noopener noreferrer" className="underline text-blue-700 hover:text-blue-900">Política de Privacidade & RGPD</a>.</label>
+                <label htmlFor="aceitaRgpd" className="text-blue-900 text-sm select-none">Li e aceito a <a href={`${import.meta.env.BASE_URL}politica-rgpd`} target="_blank" rel="noopener noreferrer" className="underline text-blue-700 hover:text-blue-900">Política de Privacidade & RGPD</a>.</label>
               </div>
               <label className="block font-semibold mb-2 text-left" htmlFor="tipoSeguro">Tipo de seguro:</label>
               <select id="tipoSeguro" name="tipoSeguro" value={form.tipoSeguro} onChange={handleChange} className="w-full p-3 border border-blue-300 rounded-lg text-left" required onInvalid={e=>setCustomValidity(e,'Selecione o tipo de seguro.')} onInput={e=>setCustomValidity(e,'')}>

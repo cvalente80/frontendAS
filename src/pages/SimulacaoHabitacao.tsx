@@ -295,7 +295,7 @@ Cliente: ${form.nome} | Email: ${form.email} | Tel: ${form.telefone} | NIF: ${fo
   return (
     <div className="min-h-screen flex items-start justify-center bg-blue-50 relative pt-8 md:pt-12">
       <img
-        src="/imagens/insurance-background.jpg"
+  src={`${import.meta.env.BASE_URL}imagens/insurance-background.jpg`}
         alt="Seguro Habitação"
         className="absolute inset-0 w-full h-full object-cover opacity-25"
         onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/family-happy2.png'; }}
@@ -582,7 +582,7 @@ Cliente: ${form.nome} | Email: ${form.email} | Tel: ${form.telefone} | NIF: ${fo
               </div>
               <div className="mt-4 flex items-center gap-2">
                 <input type="checkbox" id="aceitaRgpd" name="aceitaRgpd" checked={form.aceitaRgpd} onChange={handleChange} className="accent-blue-700 w-5 h-5" required onInvalid={e=>setCustomValidity(e as any,'Necessário aceitar a Política de Privacidade.')} onInput={e=>setCustomValidity(e as any,'')} />
-                <label htmlFor="aceitaRgpd" className="text-blue-900 text-sm select-none">Li e aceito a <a href="/politica-rgpd" target="_blank" rel="noopener noreferrer" className="underline text-blue-700 hover:text-blue-900">Política de Privacidade & RGPD</a>.</label>
+                <label htmlFor="aceitaRgpd" className="text-blue-900 text-sm select-none">Li e aceito a <a href={`${import.meta.env.BASE_URL}politica-rgpd`} target="_blank" rel="noopener noreferrer" className="underline text-blue-700 hover:text-blue-900">Política de Privacidade & RGPD</a>.</label>
               </div>
             </>
           )}

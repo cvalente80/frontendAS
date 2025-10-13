@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay } from "swiper/modules";
 import "swiper/css";
@@ -12,7 +13,7 @@ const produtos: Array<{
 	{
 		nome: "Seguro Auto",
 		descricao: "Proteção completa para seu veículo.",
-		imagem: "/imagens/nosso-produtos-car.jpg", // imagem profissional correta
+		imagem: `${import.meta.env.BASE_URL}imagens/nosso-produtos-car.jpg`, // imagem profissional correta
 
 	},
 	{
@@ -23,7 +24,7 @@ const produtos: Array<{
 	{
 		nome: "Seguro Saúde",
 		descricao: "Cuide do seu bem-estar.",
-		imagem: "/health-insurance.svg",
+		imagem: `${import.meta.env.BASE_URL}health-insurance.svg`,
 
 	},
 	{
@@ -85,28 +86,28 @@ export default function Home() {
 										{slide.texto}
 									</p>
 									{idx === 0 && (
-										<a
-											href="/simulacao-auto"
+										<Link
+											to="/simulacao-auto"
 											className="px-8 py-4 bg-yellow-400 text-blue-900 font-bold rounded-full shadow-lg hover:bg-yellow-300 transition"
 										>
 											Simule seu seguro auto
-										</a>
+										</Link>
 									)}
 									{idx === 1 && (
-										<a
-											href="/simulacao-vida"
+										<Link
+											to="/simulacao-vida"
 											className="px-8 py-4 bg-green-400 text-blue-900 font-bold rounded-full shadow-lg hover:bg-green-300 transition"
 										>
 											Simule seguro vida
-										</a>
+										</Link>
 									)}
 									{idx === 2 && (
-										<a
-											href="/simulacao-habitacao"
+										<Link
+											to="/simulacao-habitacao"
 											className="px-8 py-4 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition"
 										>
 											Simule seguro multirriscos habitação
-										</a>
+										</Link>
 									)}
 								</div>
 							</div>
@@ -121,11 +122,7 @@ export default function Home() {
 				</h2>
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
 					{produtos.map((p) => (
-						<a
-							href={p.nome === "Seguro Auto" ? "/produto-auto" : p.nome === "Seguro Vida" ? "/produto-vida" : p.nome === "Seguro Saúde" ? "/produto-saude" : p.nome === "Seguro Multirriscos Habitação" ? "/produto-habitacao" : "/produtos"}
-							key={p.nome}
-							className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center hover:scale-105 transition cursor-pointer block"
-						>
+						<div key={p.nome} className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center hover:scale-105 transition cursor-pointer">
 							<img
 								src={p.imagem}
 								alt={p.nome}
@@ -137,13 +134,13 @@ export default function Home() {
 							<p className="text-gray-700 text-center mb-2">
 								{p.descricao}
 							</p>
-							<a
-								href={p.nome === "Seguro Auto" ? "/produto-auto" : p.nome === "Seguro Vida" ? "/produto-vida" : p.nome === "Seguro Saúde" ? "/produto-saude" : p.nome === "Seguro Multirriscos Habitação" ? "/produto-habitacao" : "/produtos"}
+							<Link
+								to={p.nome === "Seguro Auto" ? "/produto-auto" : p.nome === "Seguro Vida" ? "/produto-vida" : p.nome === "Seguro Saúde" ? "/produto-saude" : p.nome === "Seguro Multirriscos Habitação" ? "/produto-habitacao" : "/produtos"}
 								className="text-blue-600 underline hover:text-blue-900"
 							>
 								Saiba mais
-							</a>
-						</a>
+							</Link>
+						</div>
 					))}
 				</div>
 			</section>
@@ -180,11 +177,7 @@ export default function Home() {
 							imagem: "https://images.pexels.com/photos/439391/pexels-photo-439391.jpeg?auto=compress&w=400&q=60",
 						},
 					].map((p) => (
-						<a
-							href={p.nome === "Seguro Frota" ? "/produto-frota" : p.nome === "Seguro Acidentes de Trabalho" ? "/produto-acidentes-trabalho" : p.nome === "Seguro Responsabilidade Civil Profissional" ? "/produto-responsabilidade-civil-profissional" : p.nome === "Seguro Multirriscos Empresarial" ? "/produto-multirriscos-empresarial" : p.nome === "Seguro Condomínio" ? "/produto-condominio" : "/produtos"}
-							key={p.nome}
-							className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center hover:scale-105 transition cursor-pointer block"
-						>
+						<div key={p.nome} className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center hover:scale-105 transition cursor-pointer">
 							<img
 								src={p.imagem}
 								alt={p.nome}
@@ -196,13 +189,13 @@ export default function Home() {
 							<p className="text-gray-700 text-center mb-2">
 								{p.descricao}
 							</p>
-							<a
-								href={p.nome === "Seguro Frota" ? "/produto-frota" : p.nome === "Seguro Acidentes de Trabalho" ? "/produto-acidentes-trabalho" : p.nome === "Seguro Responsabilidade Civil Profissional" ? "/produto-responsabilidade-civil-profissional" : p.nome === "Seguro Multirriscos Empresarial" ? "/produto-multirriscos-empresarial" : "/produtos"}
+							<Link
+								to={p.nome === "Seguro Frota" ? "/produto-frota" : p.nome === "Seguro Acidentes de Trabalho" ? "/produto-acidentes-trabalho" : p.nome === "Seguro Responsabilidade Civil Profissional" ? "/produto-responsabilidade-civil-profissional" : p.nome === "Seguro Multirriscos Empresarial" ? "/produto-multirriscos-empresarial" : p.nome === "Seguro Condomínio" ? "/produto-condominio" : "/produtos"}
 								className="text-blue-600 underline hover:text-blue-900"
 							>
 								Saiba mais
-							</a>
-						</a>
+							</Link>
+						</div>
 					))}
 				</div>
 			</section>

@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, NavLink } from "react-router-dom";
+import { Routes, Route, NavLink } from "react-router-dom";
 import Home from "./pages/Home";
 import SimulacaoAuto from "./pages/SimulacaoAuto";
 import SimulacaoVida from "./pages/SimulacaoVida";
@@ -19,12 +19,13 @@ import ProdutoCondominio from "./pages/ProdutoCondominio";
 import SimulacaoCondominio from "./pages/SimulacaoCondominio";
 import PoliticaRGPD from "./pages/PoliticaRGPD";
 import './App.css';
+// Removed invalid import: ./pages/inicio (file does not exist). Use Home for "/inicio" route.
 
 
 function App(): React.ReactElement {
 
   return (
-    <Router>
+    <>
       {/* Marca de água da vila de Ansião no body */}
       <div style={{
         position: 'fixed',
@@ -32,12 +33,12 @@ function App(): React.ReactElement {
         zIndex: 0,
         pointerEvents: 'none',
         opacity: 0.12,
-        background: `url('/imagens/image.png') center center / cover no-repeat`
+        background: `url('${import.meta.env.BASE_URL}imagens/image.png') center center / cover no-repeat`
       }} />
       {/* Navbar sempre visível em todas as páginas */}
       <nav className="bg-white py-4 px-8 flex justify-between items-center sticky top-0 z-50">
         <NavLink to="/" className="flex items-center gap-2">
-          <img src="/logo-empresarial.svg" alt="Logo Ansião Seguros" className="h-12 w-12" />
+          <img src={`${import.meta.env.BASE_URL}logo-empresarial.svg`} alt="Logo Ansião Seguros" className="h-12 w-12" />
           <span className="text-3xl font-bold text-blue-900 hover:text-blue-700">Ansião Seguros</span>
         </NavLink>
         <div className="flex gap-6 text-blue-700 font-medium">
@@ -52,6 +53,7 @@ function App(): React.ReactElement {
       </nav>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/inicio" element={<Home />} />
         <Route path="/simulacao-auto" element={<SimulacaoAuto />} />
         <Route path="/simulacao-vida" element={<SimulacaoVida />} />
         <Route path="/simulacao-saude" element={<SimulacaoSaude />} />
@@ -82,7 +84,7 @@ function App(): React.ReactElement {
           </div>
         </div>
       </footer>
-    </Router>
+    </>
   );
 }
 

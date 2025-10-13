@@ -157,7 +157,7 @@ export default function SimulacaoVida() {
 		<div className="min-h-screen flex items-center justify-center bg-blue-50 relative">
 			{/* Background local (adicione o ficheiro em public/imagens/seguro-vida-bg.jpg). Fallback para imagem existente. */}
 			<img
-				src="/imagens/seguro-vida-bg.jpg"
+				src={`${import.meta.env.BASE_URL}imagens/seguro-vida-bg.jpg`}
 				alt="Plano de proteção familiar - Seguro de Vida"
 				className="absolute inset-0 w-full h-full object-cover opacity-30"
 				onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/family-happy2.png'; }}

@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 export default function ProdutoMultirriscosEmpresarial() {
   return (
@@ -10,7 +11,7 @@ export default function ProdutoMultirriscosEmpresarial() {
           <div className="relative z-10 text-center w-full">
             <h1 className="text-4xl md:text-5xl font-extrabold text-white drop-shadow mb-2">Seguro Multirriscos Empresarial</h1>
             <p className="text-lg text-blue-100 font-medium mb-4">Proteja o património da sua empresa contra imprevistos e garanta a continuidade do seu negócio</p>
-            <a href="/contato" className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition">Fale com um consultor</a>
+            <Link to="/contato" className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition">Fale com um consultor</Link>
           </div>
         </div>
         {/* Conteúdo principal */}
