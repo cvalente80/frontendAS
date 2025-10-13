@@ -1,6 +1,7 @@
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import React, { useState, ChangeEvent, FormEvent, useEffect, useRef } from "react";
 import emailjs from "@emailjs/browser";
 import { EMAILJS_SERVICE_ID_GENERIC, EMAILJS_TEMPLATE_ID_GENERIC, EMAILJS_USER_ID_GENERIC } from "../emailjs.config";
+import { Link, useLocation } from "react-router-dom";
 
 type Colaborador = {
   nome: string;
@@ -24,6 +25,9 @@ type FormState = {
 
 export default function ProdutoAcidentesTrabalho() {
   const [step, setStep] = useState<number>(1);
+  const [showForm, setShowForm] = useState<boolean>(false);
+  const formRef = useRef<HTMLDivElement | null>(null);
+  const { hash } = useLocation();
   const [form, setForm] = useState<FormState>({
     empresaNome: "",
     empresaNif: "",
@@ -35,6 +39,23 @@ export default function ProdutoAcidentesTrabalho() {
   });
   const [mensagem, setMensagem] = useState<string | null>(null);
   const [mensagemTipo, setMensagemTipo] = useState<"sucesso" | "erro" | null>(null);
+
+  // Exibir formulário se URL tiver âncora (#form-at) e rolar até ele
+  useEffect(() => {
+    if (hash === "#form-at") {
+      setShowForm(true);
+      setTimeout(() => {
+        formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 0);
+    }
+  }, [hash]);
+
+  function handleAbrirFormulario() {
+    setShowForm(true);
+    requestAnimationFrame(() => {
+      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
 
   function setCustomValidity(e: React.FormEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>, message: string) {
     (e.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement).setCustomValidity(message);
@@ -216,8 +237,8 @@ export default function ProdutoAcidentesTrabalho() {
       <h1 className="text-3xl md:text-5xl font-extrabold text-white drop-shadow mb-2">Seguro Acidentes de Trabalho Empresas</h1>
       <p className="text-base md:text-lg text-blue-100 font-medium mb-4">Proteja os colaboradores da sua empresa com cobertura obrigatória e assistência completa</p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <a href="#form-at" className="inline-block px-8 py-3 bg-yellow-400 text-blue-900 font-bold rounded-full shadow-lg hover:bg-yellow-300 transition">Solicitar proposta</a>
-              <a href="/contato" className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition">Fale com um consultor</a>
+              <button type="button" onClick={handleAbrirFormulario} className="inline-block px-8 py-3 bg-yellow-400 text-blue-900 font-bold rounded-full shadow-lg hover:bg-yellow-300 transition">Solicitar proposta</button>
+              <Link to="/contato" className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition">Fale com um consultor</Link>
             </div>
           </div>
         </div>
@@ -313,7 +334,8 @@ export default function ProdutoAcidentesTrabalho() {
         </div>
       </div>
       {/* Formulário Proposta - Acidentes de Trabalho */}
-      <div id="form-at" className="max-w-lg w-full mt-12 p-8 bg-white bg-opacity-90 rounded-2xl shadow-xl relative z-10">
+      {showForm && (
+      <div id="form-at" ref={formRef} className="max-w-lg w-full mt-12 p-8 bg-white bg-opacity-90 rounded-2xl shadow-xl relative z-10">
         <h2 className="text-3xl font-bold mb-6 text-blue-900 text-center">Solicitar Proposta - Acidentes de Trabalho</h2>
         {/* Stepper */}
         <div className="mb-6">
@@ -390,6 +412,7 @@ export default function ProdutoAcidentesTrabalho() {
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }
