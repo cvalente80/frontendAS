@@ -214,7 +214,7 @@ export default function ProdutoAcidentesTrabalho() {
           <img src="https://images.pexels.com/photos/3183197/pexels-photo-3183197.jpeg?auto=compress&w=800&q=60" alt="Seguro Acidentes de Trabalho" className="absolute inset-0 w-full h-full object-cover opacity-30" />
           <div className="relative z-10 text-center w-full">
       <h1 className="text-3xl md:text-5xl font-extrabold text-white drop-shadow mb-2">Seguro Acidentes de Trabalho Empresas</h1>
-            <p className="text-lg text-blue-100 font-medium mb-4">Proteja os colaboradores da sua empresa com cobertura obrigatória e assistência completa</p>
+      <p className="text-base md:text-lg text-blue-100 font-medium mb-4">Proteja os colaboradores da sua empresa com cobertura obrigatória e assistência completa</p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <a href="#form-at" className="inline-block px-8 py-3 bg-yellow-400 text-blue-900 font-bold rounded-full shadow-lg hover:bg-yellow-300 transition">Solicitar proposta</a>
               <a href="/contato" className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition">Fale com um consultor</a>

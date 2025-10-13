@@ -10,7 +10,7 @@ export default function ProdutoAuto() {
           <img src={`${import.meta.env.BASE_URL}imagens/nosso-produtos-car.jpg`} alt="Seguro Auto" className="absolute inset-0 w-full h-full object-cover opacity-30" />
           <div className="relative z-10 text-center w-full">
             <h1 className="text-3xl md:text-5xl font-extrabold text-white drop-shadow mb-2">Seguro Automóvel</h1>
-            <p className="text-lg text-blue-100 font-medium mb-4">Proteja o seu veículo com as melhores coberturas do mercado</p>
+            <p className="text-base md:text-lg text-blue-100 font-medium mb-4">Proteja o seu veículo com as melhores coberturas do mercado</p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                       <Link to="/simulacao-auto" className="inline-block px-8 py-3 bg-yellow-400 text-blue-900 font-bold rounded-full shadow-lg hover:bg-yellow-300 transition">Simular Seguro Auto</Link>
                       <Link to="/contato" className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition">Fale com um consultor</Link>

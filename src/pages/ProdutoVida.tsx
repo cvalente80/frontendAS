@@ -10,7 +10,7 @@ export default function ProdutoVida() {
           <img src="https://images.pexels.com/photos/1683975/pexels-photo-1683975.jpeg?auto=compress&w=800&q=60" alt="Seguro Vida" className="absolute inset-0 w-full h-full object-cover opacity-30" />
           <div className="relative z-10 text-center w-full">
             <h1 className="text-3xl md:text-5xl font-extrabold text-white drop-shadow mb-2">Seguro Vida</h1>
-            <p className="text-lg text-blue-100 font-medium mb-4">Proteção financeira e tranquilidade para você e sua família</p>
+            <p className="text-base md:text-lg text-blue-100 font-medium mb-4">Proteção financeira e tranquilidade para você e sua família</p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link to="/simulacao-vida" className="inline-block px-8 py-3 bg-yellow-400 text-blue-900 font-bold rounded-full shadow-lg hover:bg-yellow-300 transition">Simular seguro Vida</Link>
               <Link to="/contato" className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition">Fale com um consultor</Link>

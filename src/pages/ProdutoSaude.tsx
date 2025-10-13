@@ -10,7 +10,7 @@ export default function ProdutoSaude() {
           <img src="https://images.pexels.com/photos/5452201/pexels-photo-5452201.jpeg?auto=compress&w=800&q=60" alt="Seguro Saúde" className="absolute inset-0 w-full h-full object-cover opacity-30" />
           <div className="relative z-10 text-center w-full">
             <h1 className="text-3xl md:text-5xl font-extrabold text-white drop-shadow mb-2">Seguro Saúde</h1>
-            <p className="text-lg text-blue-100 font-medium mb-4">Cuide do seu bem-estar com planos flexíveis e ampla cobertura</p>
+            <p className="text-base md:text-lg text-blue-100 font-medium mb-4">Cuide do seu bem-estar com planos flexíveis e ampla cobertura</p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link to="/simulacao-saude" className="inline-block px-8 py-3 bg-green-400 text-blue-900 font-bold rounded-full shadow-lg hover:bg-green-300 transition">Simular Seguro Saúde</Link>
               <Link to="/contato" className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition">Fale com um consultor</Link>
