@@ -1,5 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import ProductCard from "../components/ProductCard";
+import ProductCardMobile from "../components/ProductCardMobile";
+import { ResponsiveGate } from "../components/ResponsiveGate";
 
 type Produto = { nome: string; descricao: string; imagem: string; to: string };
 
@@ -72,34 +75,42 @@ export default function Produtos() {
 
         <section className="mt-10">
           <h3 className="text-2xl font-semibold text-blue-800 mb-6">Particulares</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {particulares.map((p) => (
-              <Link to={p.to} key={p.nome} className="bg-white rounded-xl shadow hover:shadow-lg transition block overflow-hidden">
-                <div className="p-6 flex flex-col items-center">
-                  <img src={p.imagem} alt={p.nome} className="w-24 h-24 object-cover rounded-full mb-4 border-4 border-blue-200" />
-                  <h4 className="text-lg font-semibold text-blue-700 text-center">{p.nome}</h4>
-                  <p className="text-gray-700 text-sm text-center mt-1">{p.descricao}</p>
-                  <span className="mt-3 text-blue-600 underline">Saiba mais</span>
-                </div>
-              </Link>
-            ))}
-          </div>
+          <ResponsiveGate
+            mobile={
+              <div className="grid grid-cols-1 gap-3">
+                {particulares.map((p) => (
+                  <ProductCardMobile key={p.nome} {...p} />
+                ))}
+              </div>
+            }
+            desktop={
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {particulares.map((p) => (
+                  <ProductCard key={p.nome} {...p} />
+                ))}
+              </div>
+            }
+          />
         </section>
 
         <section className="mt-12">
           <h3 className="text-2xl font-semibold text-blue-800 mb-6">Empresas</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {empresas.map((p) => (
-              <Link to={p.to} key={p.nome} className="bg-white rounded-xl shadow hover:shadow-lg transition block overflow-hidden">
-                <div className="p-6 flex flex-col items-center">
-                  <img src={p.imagem} alt={p.nome} className="w-24 h-24 object-cover rounded-full mb-4 border-4 border-blue-200" />
-                  <h4 className="text-lg font-semibold text-blue-700 text-center">{p.nome}</h4>
-                  <p className="text-gray-700 text-sm text-center mt-1">{p.descricao}</p>
-                  <span className="mt-3 text-blue-600 underline">Saiba mais</span>
-                </div>
-              </Link>
-            ))}
-          </div>
+          <ResponsiveGate
+            mobile={
+              <div className="grid grid-cols-1 gap-3">
+                {empresas.map((p) => (
+                  <ProductCardMobile key={p.nome} {...p} />
+                ))}
+              </div>
+            }
+            desktop={
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {empresas.map((p) => (
+                  <ProductCard key={p.nome} {...p} />
+                ))}
+              </div>
+            }
+          />
         </section>
       </div>
     </div>
