@@ -3,7 +3,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - versao-para-GitHub
+      - versionMOBILE
   workflow_dispatch:
 
 permissions:

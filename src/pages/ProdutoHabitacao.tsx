@@ -6,11 +6,11 @@ export default function ProdutoHabitacao() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex flex-col items-center py-12 px-4">
       <div className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl p-0 overflow-hidden">
         {/* Header visual com imagem e título */}
-        <div className="relative h-64 w-full flex items-center justify-center bg-blue-900">
+  <div className="relative h-56 md:h-80 w-full flex items-center justify-center bg-blue-900">
           <img src="https://images.unsplash.com/photo-1507089947368-19c1da9775ae?auto=format&fit=crop&w=800&q=60" alt="Seguro Habitação" className="absolute inset-0 w-full h-full object-cover opacity-30" />
           <div className="relative z-10 text-center w-full">
-            <h1 className="text-5xl font-extrabold text-white drop-shadow mb-2">Seguro Multirriscos Habitação</h1>
-            <p className="text-lg text-blue-100 font-medium mb-4">Proteja seu lar contra imprevistos e garanta tranquilidade para sua família</p>
+            <h1 className="text-3xl md:text-5xl font-extrabold text-white drop-shadow mb-2">Seguro Multirriscos Habitação</h1>
+            <p className="text-base md:text-lg text-blue-100 font-medium mb-4">Proteja seu lar contra imprevistos e garanta tranquilidade para sua família</p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link to="/simulacao-habitacao" className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition">Simular Seguro Habitação</Link>
               <Link to="/contato" className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition">Fale com um consultor</Link>

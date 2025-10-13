@@ -1,9 +1,9 @@
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import React, { useState, ChangeEvent, FormEvent, useEffect, useRef } from "react";
 import DatePicker, { registerLocale } from "react-datepicker";
 import { pt } from "date-fns/locale/pt";
 import "react-datepicker/dist/react-datepicker.css";
 import emailjs from "@emailjs/browser";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, EMAILJS_USER_ID } from "../emailjs.config";
 
 registerLocale("pt", pt);
@@ -37,6 +37,9 @@ type FormState = {
 export default function ProdutoFrota() {
   // Estado do formulário (similar ao SimulacaoAuto)
   const [step, setStep] = useState<number>(1);
+  const [showForm, setShowForm] = useState<boolean>(false);
+  const formRef = useRef<HTMLDivElement | null>(null);
+  const { hash } = useLocation();
   const [form, setForm] = useState<FormState>({
     nome: "",
     email: "",
@@ -59,6 +62,24 @@ export default function ProdutoFrota() {
   const [erroCarta, setErroCarta] = useState<string>("");
   const [mensagem, setMensagem] = useState<string | null>(null);
   const [mensagemTipo, setMensagemTipo] = useState<"sucesso" | "erro" | null>(null);
+
+  // Exibir formulário se URL tiver âncora (#form-frota) e fazer scroll suave
+  useEffect(() => {
+    if (hash === "#form-frota") {
+      setShowForm(true);
+      // Aguarda render para rolar
+      setTimeout(() => {
+        formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 0);
+    }
+  }, [hash]);
+
+  function handleAbrirFormulario() {
+    setShowForm(true);
+    requestAnimationFrame(() => {
+      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
 
   function setCustomValidity(e: React.FormEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>, message: string) {
     (e.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement).setCustomValidity(message);
@@ -200,14 +221,14 @@ export default function ProdutoFrota() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex flex-col items-center py-12 px-4">
       <div className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl p-0 overflow-hidden">
         {/* Header visual com imagem e título */}
-        <div className="relative h-64 w-full flex items-center justify-center bg-blue-900">
+  <div className="relative h-56 md:h-80 w-full flex items-center justify-center bg-blue-900">
           <img src="https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=800&q=60" alt="Seguro Frota Empresarial" className="absolute inset-0 w-full h-full object-cover opacity-30" />
           <div className="relative z-10 text-center w-full">
-            <h1 className="text-5xl font-extrabold text-white drop-shadow mb-2">Seguro Frota Empresarial</h1>
-            <p className="text-lg text-blue-100 font-medium mb-4">Gestão eficiente e proteção completa para todos os veículos da sua empresa</p>
+  <h1 className="text-2xl md:text-5xl leading-tight font-extrabold text-white drop-shadow mb-2">Seguro Frota Empresarial</h1>
+  <p className="text-sm md:text-lg text-blue-100 font-medium mb-4">Gestão eficiente e proteção completa para todos os veículos da sua empresa</p>
             <span className="inline-block px-6 py-2 bg-red-600 text-white font-bold rounded-full shadow-lg mb-2">Produto Fidelidade</span>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <a href="#form-frota" className="inline-block px-8 py-3 bg-yellow-400 text-blue-900 font-bold rounded-full shadow-lg hover:bg-yellow-300 transition">Solicitar proposta</a>
+              <button type="button" onClick={handleAbrirFormulario} className="inline-block px-8 py-3 bg-yellow-400 text-blue-900 font-bold rounded-full shadow-lg hover:bg-yellow-300 transition">Solicitar proposta</button>
                 <Link to="/contato" className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition">Fale com um consultor</Link>
             </div>
           </div>
@@ -304,7 +325,8 @@ export default function ProdutoFrota() {
         </div>
       </div>
       {/* Formulário de Proposta Frota (3 passos) */}
-      <div id="form-frota" className="max-w-lg w-full mt-12 p-8 bg-white bg-opacity-90 rounded-2xl shadow-xl relative z-10">
+      {showForm && (
+      <div id="form-frota" ref={formRef} className="max-w-lg w-full mt-12 p-8 bg-white bg-opacity-90 rounded-2xl shadow-xl relative z-10">
         <h2 className="text-3xl font-bold mb-6 text-blue-900 text-center">Solicitar Proposta - Frota</h2>
         {/* Stepper */}
         <div className="mb-6">
@@ -531,6 +553,7 @@ export default function ProdutoFrota() {
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }
