@@ -6,7 +6,7 @@ export default function ProdutoSaude() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex flex-col items-center py-12 px-4">
       <div className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl p-0 overflow-hidden">
         {/* Header visual com imagem e título */}
-        <div className="relative h-64 w-full flex items-center justify-center bg-blue-900">
+  <div className="relative h-56 md:h-80 w-full flex items-center justify-center bg-blue-900">
           <img src="https://images.pexels.com/photos/5452201/pexels-photo-5452201.jpeg?auto=compress&w=800&q=60" alt="Seguro Saúde" className="absolute inset-0 w-full h-full object-cover opacity-30" />
           <div className="relative z-10 text-center w-full">
             <h1 className="text-3xl md:text-5xl font-extrabold text-white drop-shadow mb-2">Seguro Saúde</h1>
