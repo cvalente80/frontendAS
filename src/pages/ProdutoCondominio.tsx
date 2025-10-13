@@ -9,8 +9,8 @@ export default function ProdutoCondominio() {
   <div className="relative h-56 md:h-80 w-full flex items-center justify-center bg-blue-900">
           <img src="https://images.pexels.com/photos/439391/pexels-photo-439391.jpeg?auto=compress&w=1000&q=60" alt="Seguro Condomínio" className="absolute inset-0 w-full h-full object-cover opacity-30" />
           <div className="relative z-10 text-center w-full">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-white drop-shadow mb-2">Seguro Condomínio</h1>
-            <p className="text-lg text-blue-100 font-medium mb-4">Proteção completa para edifícios e áreas comuns do seu condomínio</p>
+            <h1 className="text-2xl md:text-5xl leading-tight font-extrabold text-white drop-shadow mb-2">Seguro Condomínio</h1>
+            <p className="text-sm md:text-lg text-blue-100 font-medium mb-4">Proteção completa para edifícios e áreas comuns do seu condomínio</p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link to="/simulacao-condominio" className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition">Simular seguro Condomínio</Link>
               <Link to="/contato" className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition">Fale com um consultor</Link>

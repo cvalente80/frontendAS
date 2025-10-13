@@ -9,8 +9,8 @@ export default function ProdutoMultirriscosEmpresarial() {
   <div className="relative h-56 md:h-80 w-full flex items-center justify-center bg-blue-900">
           <img src="https://images.pexels.com/photos/323705/pexels-photo-323705.jpeg?auto=compress&w=800&q=60" alt="Seguro Multirriscos Empresarial" className="absolute inset-0 w-full h-full object-cover opacity-30" />
           <div className="relative z-10 text-center w-full">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-white drop-shadow mb-2">Seguro Multirriscos Empresarial</h1>
-            <p className="text-lg text-blue-100 font-medium mb-4">Proteja o património da sua empresa contra imprevistos e garanta a continuidade do seu negócio</p>
+            <h1 className="text-2xl md:text-5xl leading-tight font-extrabold text-white drop-shadow mb-2">Seguro Multirriscos Empresarial</h1>
+            <p className="text-sm md:text-lg text-blue-100 font-medium mb-4">Proteja o património da sua empresa contra imprevistos e garanta a continuidade do seu negócio</p>
             <Link to="/contato" className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition">Fale com um consultor</Link>
           </div>
         </div>

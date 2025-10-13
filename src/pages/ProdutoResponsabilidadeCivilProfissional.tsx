@@ -13,10 +13,10 @@ export default function ProdutoResponsabilidadeCivilProfissional() {
             className="absolute inset-0 w-full h-full object-cover opacity-30"
           />
           <div className="relative z-10 text-center w-full">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-white drop-shadow mb-2">
+            <h1 className="text-2xl md:text-5xl leading-tight font-extrabold text-white drop-shadow mb-2">
               Seguro Responsabilidade Civil Profissional
             </h1>
-            <p className="text-lg text-blue-100 font-medium mb-4">
+            <p className="text-sm md:text-lg text-blue-100 font-medium mb-4">
               Proteja a sua atividade profissional contra reclamações e imprevistos.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">

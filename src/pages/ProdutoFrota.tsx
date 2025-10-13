@@ -224,8 +224,8 @@ export default function ProdutoFrota() {
   <div className="relative h-56 md:h-80 w-full flex items-center justify-center bg-blue-900">
           <img src="https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=800&q=60" alt="Seguro Frota Empresarial" className="absolute inset-0 w-full h-full object-cover opacity-30" />
           <div className="relative z-10 text-center w-full">
-      <h1 className="text-3xl md:text-5xl font-extrabold text-white drop-shadow mb-2">Seguro Frota Empresarial</h1>
-      <p className="text-base md:text-lg text-blue-100 font-medium mb-4">Gestão eficiente e proteção completa para todos os veículos da sua empresa</p>
+  <h1 className="text-2xl md:text-5xl leading-tight font-extrabold text-white drop-shadow mb-2">Seguro Frota Empresarial</h1>
+  <p className="text-sm md:text-lg text-blue-100 font-medium mb-4">Gestão eficiente e proteção completa para todos os veículos da sua empresa</p>
             <span className="inline-block px-6 py-2 bg-red-600 text-white font-bold rounded-full shadow-lg mb-2">Produto Fidelidade</span>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <button type="button" onClick={handleAbrirFormulario} className="inline-block px-8 py-3 bg-yellow-400 text-blue-900 font-bold rounded-full shadow-lg hover:bg-yellow-300 transition">Solicitar proposta</button>
