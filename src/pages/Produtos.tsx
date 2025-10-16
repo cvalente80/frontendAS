@@ -1,4 +1,5 @@
 import React from "react";
+import Seo from "../components/Seo";
 import { Link } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import ProductCardMobile from "../components/ProductCardMobile";
@@ -69,6 +70,11 @@ const empresas: Produto[] = [
 export default function Produtos() {
   return (
     <div className="min-h-screen bg-gray-50">
+      <Seo
+        title="Produtos de Seguros — Particulares e Empresas"
+        description="Conheça todas as soluções: Auto, Vida, Saúde, Habitação, Frota, Acidentes de Trabalho, Multirriscos Empresarial e RC Profissional."
+        canonicalPath="/produtos"
+      />
       <div className="max-w-6xl mx-auto px-6 py-12">
         <h2 className="text-3xl md:text-4xl font-bold text-blue-900 text-center">Os nossos produtos</h2>
         <p className="text-blue-700 text-center mt-2">Soluções para particulares e empresas.</p>

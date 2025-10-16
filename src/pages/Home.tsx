@@ -1,4 +1,5 @@
 import React from "react";
+import Seo from "../components/Seo";
 import { Link } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import ProductCardMobile from "../components/ProductCardMobile";
@@ -39,6 +40,22 @@ const produtos: Array<{
 export default function Home() {
 	return (
 		<div className="min-h-screen bg-white flex flex-col">
+			<Seo
+				title="Seguros em Ansião (Leiria) — Auto, Vida, Saúde e Habitação"
+				description="Ansião Seguros: simulações rápidas e propostas personalizadas para Auto, Vida, Saúde, Habitação e soluções para empresas."
+				image={`${import.meta.env.BASE_URL}logo-empresarial.svg`}
+				canonicalPath="/"
+				structuredData={[
+					{
+						"@context": "https://schema.org",
+						"@type": "Organization",
+						name: "Ansião Seguros",
+						url: typeof window !== 'undefined' ? window.location.origin + (import.meta.env.BASE_URL || '/') : undefined,
+						logo: `${import.meta.env.BASE_URL}logo-empresarial.svg`,
+						address: { "@type": "PostalAddress", addressLocality: "Ansião", addressRegion: "Leiria", addressCountry: "PT" },
+					},
+				]}
+			/>
 			{/* Hero responsivo */}
 			<ResponsiveGate mobile={<HeroMobile />} desktop={<HeroDesktop />} />
 			{/* Produtos em destaque */}

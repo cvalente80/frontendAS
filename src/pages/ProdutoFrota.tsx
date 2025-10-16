@@ -5,6 +5,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import emailjs from "@emailjs/browser";
 import { Link, useLocation } from "react-router-dom";
 import { EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, EMAILJS_USER_ID } from "../emailjs.config";
+import Seo from "../components/Seo";
 
 registerLocale("pt", pt);
 
@@ -219,6 +220,11 @@ export default function ProdutoFrota() {
   }
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex flex-col items-center py-12 px-4">
+      <Seo
+        title="Seguro Frota Empresarial"
+        description="Gestão eficiente e proteção completa para os veículos da sua empresa. Solicite uma proposta personalizada."
+        canonicalPath="/produto-frota"
+      />
       <div className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl p-0 overflow-hidden">
         {/* Header visual com imagem e título */}
   <div className="relative h-56 md:h-80 w-full flex items-center justify-center bg-blue-900">

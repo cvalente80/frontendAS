@@ -1,9 +1,15 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import Seo from "../components/Seo";
 
 export default function ProdutoResponsabilidadeCivilProfissional() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex flex-col items-center py-12 px-4">
+      <Seo
+        title="Seguro Responsabilidade Civil Profissional"
+        description="Proteção financeira contra reclamações por erros e omissões no exercício profissional. Simule já."
+        canonicalPath="/produto-responsabilidade-civil-profissional"
+      />
       <div className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl p-0 overflow-hidden">
         {/* Header visual com imagem e título */}
   <div className="relative h-56 md:h-80 w-full flex items-center justify-center bg-blue-900">

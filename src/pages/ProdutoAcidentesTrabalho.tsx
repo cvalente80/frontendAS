@@ -1,6 +1,7 @@
 import React, { useState, ChangeEvent, FormEvent, useEffect, useRef } from "react";
 import emailjs from "@emailjs/browser";
 import { EMAILJS_SERVICE_ID_GENERIC, EMAILJS_TEMPLATE_ID_GENERIC, EMAILJS_USER_ID_GENERIC } from "../emailjs.config";
+import Seo from "../components/Seo";
 import { Link, useLocation } from "react-router-dom";
 
 type Colaborador = {
@@ -229,6 +230,11 @@ export default function ProdutoAcidentesTrabalho() {
   }
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex flex-col items-center py-12 px-4">
+      <Seo
+        title="Seguro Acidentes de Trabalho Empresas"
+        description="Proteção obrigatória e assistência completa para colaboradores. Peça a sua proposta."
+        canonicalPath="/produto-acidentes-trabalho"
+      />
       <div className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl p-0 overflow-hidden">
         {/* Header visual com imagem e título */}
   <div className="relative h-56 md:h-80 w-full flex items-center justify-center bg-blue-900">

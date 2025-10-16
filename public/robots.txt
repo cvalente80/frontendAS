@@ -1,0 +1,5 @@
+# robots.txt for Ansião Seguros
+User-agent: *
+Allow: /
+
+Sitemap: https://cvalente80.github.io/frontendAS/sitemap.xml
