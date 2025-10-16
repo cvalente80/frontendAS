@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import Seo from "../components/Seo";
 import emailjs from "@emailjs/browser";
 import { EMAILJS_SERVICE_ID_GENERIC, EMAILJS_TEMPLATE_ID_GENERIC, EMAILJS_USER_ID_GENERIC } from "../emailjs.config";
 
@@ -135,6 +136,11 @@ export default function Contato() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <Seo
+        title="Contacto"
+        description="Fale connosco para pedidos de informação, simulações ad hoc ou propostas personalizadas."
+        canonicalPath="/contato"
+      />
       <div className="bg-white/80 backdrop-blur rounded-xl shadow-md p-6 md:p-8">
         <h2 className="text-3xl md:text-4xl font-bold text-blue-900 text-center">Fale connosco</h2>
         <p className="text-blue-700 text-center mt-2">Envie-nos um pedido de informação ou uma simulação ad hoc. Respondemos com brevidade.</p>

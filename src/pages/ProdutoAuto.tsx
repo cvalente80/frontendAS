@@ -1,9 +1,15 @@
 import React from "react";
+import Seo from "../components/Seo";
 import { Link } from "react-router-dom";
 
 export default function ProdutoAuto() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex flex-col items-center py-12 px-4">
+      <Seo
+        title="Seguro Automóvel"
+        description="Proteja o seu veículo com coberturas completas e assistência 24h. Simule e fale com um consultor."
+        canonicalPath="/produto-auto"
+      />
       <div className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl p-0 overflow-hidden">
         {/* Header visual com imagem e título */}
   <div className="relative h-56 md:h-80 w-full flex items-center justify-center bg-blue-900">

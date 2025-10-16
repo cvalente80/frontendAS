@@ -1,8 +1,10 @@
 import React from "react";
+import Seo from "../components/Seo";
 
 export default function PoliticaRGPD() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex flex-col items-center py-12 px-4">
+      <Seo title="Política de Privacidade & RGPD" canonicalPath="/politica-rgpd" noIndex />
       <div className="max-w-3xl w-full bg-white rounded-3xl shadow-2xl p-8">
         <h1 className="text-4xl font-extrabold text-blue-900 mb-6 text-center">Política de Privacidade e Proteção de Dados (RGPD)</h1>
         <p className="mb-4 text-lg text-gray-700">
