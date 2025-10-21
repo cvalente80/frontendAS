@@ -1607,6 +1607,9 @@ const resources = {
   }
 };
 
+const baseUrl = (import.meta as any)?.env?.BASE_URL || '/';
+const pathIndex = baseUrl === '/' ? 0 : 1;
+
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
@@ -1620,7 +1623,7 @@ i18n
     detection: {
       order: ['path', 'localStorage', 'navigator', 'htmlTag'],
       caches: ['localStorage'],
-      lookupFromPathIndex: 0,
+      lookupFromPathIndex: pathIndex,
     },
   });
 
