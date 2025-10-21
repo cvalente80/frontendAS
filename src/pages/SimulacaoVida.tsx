@@ -3,21 +3,20 @@ import emailjs from "@emailjs/browser";
 import { EMAILJS_SERVICE_ID, EMAILJS_USER_ID } from "../emailjs.config";
 import DatePicker, { registerLocale } from "react-datepicker";
 import { pt } from "date-fns/locale/pt";
+import { enGB } from "date-fns/locale/en-GB";
 import "react-datepicker/dist/react-datepicker.css";
 import './SimulacaoVida.css';
+import { useTranslation, Trans } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 registerLocale("pt", pt);
+registerLocale("en", enGB);
 
-const EXPLICACAO_INVALIDEZ = {
-	IAD: "Invalidez Absoluta e Definitiva (IAD): A indemnização é realizada quando o segurado fica totalmente dependente de terceiros para as atividades básicas do dia a dia.",
-	ITP: "Invalidez Total e Permanente (ITP): A indemnização é realizada quando segurado fica impossibilitado de exercer qualquer atividade profissional, mas pode realizar tarefas básicas sozinho."
-};
-// Novo mapeamento para valor enviado no email (sem o texto longo explicativo)
-const LABEL_INVALIDEZ_EMAIL = {
-	IAD: 'Invalidez Absoluta e Definitiva (IAD)',
-	ITP: 'Invalidez Total e Permanente (ITP)'
-} as const;
+// i18n-backed labels and explanations will be used instead of hard-coded strings
 
 export default function SimulacaoVida() {
+	const { t } = useTranslation('sim_vida');
+	const { lang } = useParams();
+	const base = lang === 'en' ? 'en' : 'pt';
 	const [form, setForm] = useState({
 		tipoSeguro: "Vida Individual",
 		capital: "",
@@ -42,7 +41,7 @@ export default function SimulacaoVida() {
 		if (!valor) return '';
 		const num = Number(valor.replace(/\D/g, ''));
 		if (isNaN(num)) return valor;
-		return num.toLocaleString('pt-PT');
+		return num.toLocaleString(base === 'en' ? 'en-GB' : 'pt-PT');
 	}
 
 	function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
@@ -83,7 +82,7 @@ export default function SimulacaoVida() {
 		// Validação final extra (proteção caso avance por DevTools)
 		const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 		if (!form.email || !emailRegex.test(form.email)) {
-			alert('Por favor, insira um email válido no formato nome@servidor.pt');
+			alert(t('validations.emailInvalid'));
 			return;
 		}
 		const templateParams = {
@@ -91,12 +90,12 @@ export default function SimulacaoVida() {
 			capital: form.capital,
 			prazo: form.prazo,
 			fumador: form.fumador,
-			tipoInvalidez: LABEL_INVALIDEZ_EMAIL[form.tipoInvalidez as 'IAD' | 'ITP'],
-			explicacaoInvalidez: EXPLICACAO_INVALIDEZ[form.tipoInvalidez as keyof typeof EXPLICACAO_INVALIDEZ],
+			tipoInvalidez: t(`disability.emailLabels.${form.tipoInvalidez}`),
+			explicacaoInvalidez: t(`disability.explanations.${form.tipoInvalidez}`),
 			nome: form.nome,
 			email: form.email,
 			telefone: form.telefone,
-			pessoasSeguras: form.segurados.map((s, i) => `Pessoa ${i+1}: Nome: ${s.nome}, Nascimento: ${s.nascimentoManual}, NIF: ${s.contribuinte}`).join(" | ")
+			pessoasSeguras: form.segurados.map((s, i) => `${t('emailSummary.person')} ${i+1}: ${t('emailSummary.name')} ${s.nome}, ${t('emailSummary.birth')} ${s.nascimentoManual}, ${t('emailSummary.nif')} ${s.contribuinte}`).join(" | ")
 		};
 		emailjs.send(
 			EMAILJS_SERVICE_ID,
@@ -104,7 +103,7 @@ export default function SimulacaoVida() {
 			templateParams,
 			EMAILJS_USER_ID
 		).then(() => {
-			setMensagemSucesso('Pedido efetuado com sucesso! Irá receber as próximas instruções por email.');
+			setMensagemSucesso(t('messages.submitSuccess'));
 			// Reset mantendo o tipoSeguro atual
 			setForm(f => ({
 				...f,
@@ -119,7 +118,7 @@ export default function SimulacaoVida() {
 			setStep(1);
 			setTimeout(() => setMensagemSucesso(null), 7000);
 		}).catch(() => {
-			setMensagemSucesso('Erro ao enviar pedido. Tente novamente ou contacte-nos.');
+			setMensagemSucesso(t('messages.submitError'));
 			setTimeout(() => setMensagemSucesso(null), 7000);
 		});
 	}
@@ -129,24 +128,24 @@ export default function SimulacaoVida() {
 		// Valida agora para ambos os tipos de seguro
 		if (step === 1) {
 			const novosErros = form.segurados.map(seg => ({
-				nome: !seg.nome ? 'Por favor, preencha o nome completo.' : undefined,
-				nascimento: !seg.nascimento ? 'Por favor, preencha a data de nascimento.' : undefined,
-				contribuinte: !seg.contribuinte ? 'Por favor, preencha o NIF.' : undefined,
+				nome: !seg.nome ? t('validations.insuredNameRequired') : undefined,
+				nascimento: !seg.nascimento ? t('validations.insuredBirthRequired') : undefined,
+				contribuinte: !seg.contribuinte ? t('validations.insuredNifRequired') : undefined,
 			}));
 			setErrosSegurados(novosErros);
 			if (novosErros.some(err => err.nome || err.nascimento || err.contribuinte)) return;
 		}
 		if (step === 2) {
 			const erros: { capital?: string; prazo?: string } = {};
-			if (!form.capital) erros.capital = 'Por favor, preencha o capital seguro.';
-			if (!form.prazo) erros.prazo = 'Por favor, preencha o prazo do seguro.';
+			if (!form.capital) erros.capital = t('validations.capitalRequired');
+			if (!form.prazo) erros.prazo = t('validations.prazoRequired');
 			setErrosPasso2(erros);
 			if (erros.capital || erros.prazo) return;
 		}
 		if (step === 3) {
 			const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 			if (!form.email || !emailRegex.test(form.email)) {
-				alert('Por favor, insira um email válido no formato nome@servidor.pt');
+				alert(t('validations.emailInvalid'));
 				return;
 			}
 		}
@@ -158,18 +157,18 @@ export default function SimulacaoVida() {
 			{/* Background local (adicione o ficheiro em public/imagens/seguro-vida-bg.jpg). Fallback para imagem existente. */}
 			<img
 				src={`${import.meta.env.BASE_URL}imagens/seguro-vida-bg.jpg`}
-				alt="Plano de proteção familiar - Seguro de Vida"
+				alt={t('backgroundAlt')}
 				className="absolute inset-0 w-full h-full object-cover opacity-30"
 				onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/family-happy2.png'; }}
 			/>
 			<div className="relative z-10 max-w-lg w-full bg-white bg-opacity-90 rounded-xl shadow-xl p-8">
 				<h1 className="text-3xl font-bold text-blue-900 mb-6 text-center">
-					Simulação Seguro Vida
+					{t('title')}
 				</h1>
 				<form className="space-y-4" onSubmit={handleSubmit}>
 					<select name="tipoSeguro" value={form.tipoSeguro} onChange={handleChange} className="w-full p-3 rounded border" required>
-						<option value="Vida Individual">Vida Individual</option>
-						<option value="Vida Crédito Habitação">Vida Crédito Habitação</option>
+						<option value="Vida Individual">{t('insuranceType.individual')}</option>
+						<option value="Vida Crédito Habitação">{t('insuranceType.mortgage')}</option>
 					</select>
 					{/* Removido o formulário simples; wizard usado para ambos os tipos */}
 					{(
@@ -177,7 +176,7 @@ export default function SimulacaoVida() {
 							{/* Wizard de 3 passos */}
 							{step === 1 && (
 								<div>
-									<h2 className="text-xl font-bold text-blue-800 mb-4">1. Pessoas Seguras</h2>
+									<h2 className="text-xl font-bold text-blue-800 mb-4">{t('step1Title')}</h2>
 									{form.segurados.map((seg, idx) => (
 										<div key={idx} className="mb-4 p-3 bg-blue-50 flex flex-col gap-4 rounded">
 											<div className="relative">
@@ -190,7 +189,7 @@ export default function SimulacaoVida() {
 													name="nome"
 													value={seg.nome}
 													onChange={e => { handleChangeSegurado(e as any, idx); setErrosSegurados(errs => { const copy = [...errs]; if (copy[idx]) copy[idx].nome = ''; return copy; }); }}
-													placeholder="Nome completo"
+													placeholder={t('placeholders.fullName')}
 													className={`w-full rounded border h-11 pl-10 ${errosSegurados[idx]?.nome ? 'border-red-500' : ''}`}
 													required
 												/>
@@ -212,9 +211,9 @@ export default function SimulacaoVida() {
 															handleChangeSegurado({ target: { name: 'nascimentoManual', value: '' } } as any, idx);
 														}
 													}}
-													locale="pt"
+													locale={base}
 													dateFormat="dd-MM-yyyy"
-													placeholderText="Data de nascimento (dd-mm-aaaa)"
+													placeholderText={t('placeholders.birthDate')}
 													className="w-full rounded pr-10"
 													required
 													showMonthDropdown
@@ -233,7 +232,7 @@ export default function SimulacaoVida() {
 																value={seg.nascimentoManual || ''}
 																required
 																readOnly
-																placeholder="Data de nascimento (dd-mm-aaaa)"
+																placeholder={t('placeholders.birthDate')}
 															/>
 															<button type="button" onClick={() => setOpenNascimento(idx)} className="absolute right-2 top-1/2 -translate-y-1/2" tabIndex={-1}>
 																<svg width="22" height="22" fill="none" stroke="#2563eb" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="14" rx="2" stroke="#2563eb" strokeWidth="2"/><path d="M16 3v4M8 3v4" stroke="#2563eb" strokeWidth="2" strokeLinecap="round"/><circle cx="12" cy="14" r="3" stroke="#2563eb" strokeWidth="2"/></svg>
@@ -255,35 +254,35 @@ export default function SimulacaoVida() {
 													name="contribuinte"
 													value={seg.contribuinte}
 													onChange={e => { handleChangeSegurado(e as any, idx); setErrosSegurados(errs => { const copy = [...errs]; if (copy[idx]) copy[idx].contribuinte = ''; return copy; }); }}
-													placeholder="NIF"
+													placeholder={t('placeholders.nif')}
 													className={`w-full rounded border h-11 pl-10 ${errosSegurados[idx]?.contribuinte ? 'border-red-500' : ''}`}
 													required
 													pattern="^[0-9]{9}$"
 													maxLength={9}
-													onInvalid={e => (e.target as HTMLInputElement).setCustomValidity('Por favor, preencha o NIF com 9 dígitos.')}
+													onInvalid={e => (e.target as HTMLInputElement).setCustomValidity(t('validations.insuredNifRequired'))}
 													onInput={e => (e.target as HTMLInputElement).setCustomValidity('')}
 												/>
 											</div>
 											{errosSegurados[idx]?.contribuinte && <div className="text-red-600 text-sm mt-1 text-left">{errosSegurados[idx].contribuinte}</div>}
 											{form.segurados.length > 1 && (
-												<button type="button" onClick={() => removeSegurado(idx)} className="text-red-500 text-sm">Remover</button>
+												<button type="button" onClick={() => removeSegurado(idx)} className="text-red-500 text-sm">{t('buttons.remove')}</button>
 											)}
 										</div>
 									))}
 									{form.segurados.length < 2 && (
-										<button type="button" onClick={addSegurado} className="w-full py-2 bg-blue-200 text-blue-900 font-bold rounded hover:bg-blue-300 transition mb-2">Adicionar pessoa segura</button>
+										<button type="button" onClick={addSegurado} className="w-full py-2 bg-blue-200 text-blue-900 font-bold rounded hover:bg-blue-300 transition mb-2">{t('buttons.addInsured')}</button>
 									)}
 									{form.segurados.length >= 2 && (
-										<p className="text-xs text-blue-700 font-medium -mt-2 mb-2 text-right">Máximo de 2 pessoas atingido</p>
+										<p className="text-xs text-blue-700 font-medium -mt-2 mb-2 text-right">{t('buttons.maxReached')}</p>
 									)}
 									<div className="flex justify-end">
-										<button type="button" onClick={handleNext} className="px-6 py-2 bg-blue-700 text-white rounded font-bold hover:bg-blue-900 transition">Próximo</button>
+										<button type="button" onClick={handleNext} className="px-6 py-2 bg-blue-700 text-white rounded font-bold hover:bg-blue-900 transition">{t('buttons.next')}</button>
 									</div>
 								</div>
 							)}
 							{step === 2 && (
 								<div>
-									<h2 className="text-xl font-bold text-blue-800 mb-4">2. Capitais a Segurar</h2>
+									<h2 className="text-xl font-bold text-blue-800 mb-4">{t('step2Title')}</h2>
 									<div className="flex flex-col gap-5 mb-4">
 										<div className="relative">
 											<span className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-700">
@@ -299,7 +298,7 @@ export default function SimulacaoVida() {
 													const raw = e.target.value.replace(/\D/g, '');
 													setForm(f => ({ ...f, capital: raw }));
 												}}
-												placeholder="Capital seguro"
+												placeholder={t('placeholders.capital')}
 												className="w-full p-3 rounded border h-11 pr-10 pl-10"
 												min="10000"
 												max="1000000"
@@ -319,7 +318,7 @@ export default function SimulacaoVida() {
 												name="prazo"
 												value={form.prazo}
 												onChange={handleChange}
-												placeholder="Prazo do seguro (anos)"
+												placeholder={t('placeholders.prazo')}
 												className="w-full p-3 rounded border h-11 mb-2 pl-10"
 												min="1"
 												max="40"
@@ -334,20 +333,20 @@ export default function SimulacaoVida() {
 										</div>
 									)}
 									<div className="flex justify-between mt-4">
-										<button type="button" onClick={() => setStep(1)} className="px-6 py-2 bg-gray-200 rounded">Anterior</button>
-										<button type="button" onClick={handleNext} className="px-6 py-2 bg-blue-700 text-white rounded font-bold hover:bg-blue-900 transition">Próximo</button>
+										<button type="button" onClick={() => setStep(1)} className="px-6 py-2 bg-gray-200 rounded">{t('buttons.prev')}</button>
+										<button type="button" onClick={handleNext} className="px-6 py-2 bg-blue-700 text-white rounded font-bold hover:bg-blue-900 transition">{t('buttons.next')}</button>
 									</div>
 								</div>
 							)}
 							{step === 3 && (
 								<div>
-									<h2 className="text-xl font-bold text-blue-800 mb-4">3. Tipo de Invalidez</h2>
+									<h2 className="text-xl font-bold text-blue-800 mb-4">{t('step3Title')}</h2>
 									<select name="tipoInvalidez" value={form.tipoInvalidez} onChange={handleChange} className="w-full p-3 rounded border mb-4" required>
-										<option value="IAD">IAD</option>
-										<option value="ITP">ITP</option>
+										<option value="IAD">{t('disability.options.IAD')}</option>
+										<option value="ITP">{t('disability.options.ITP')}</option>
 									</select>
 									<div className="bg-blue-50 p-3 rounded mb-4 text-blue-900 text-sm">
-										<strong>Explicação:</strong> {EXPLICACAO_INVALIDEZ[form.tipoInvalidez as keyof typeof EXPLICACAO_INVALIDEZ]}
+										<strong>{t('disability.explanationPrefix')}</strong> {t(`disability.explanations.${form.tipoInvalidez}`)}
 									</div>
 									<div className="flex flex-col gap-5 mb-4">
 										<div className="relative">
@@ -359,10 +358,10 @@ export default function SimulacaoVida() {
 												name="nome"
 												value={form.nome}
 												onChange={handleChange}
-												placeholder="Nome"
+												placeholder={t('placeholders.yourName')}
 												className="w-full rounded border h-11 pl-10"
 												required
-												onInvalid={e => (e.target as HTMLInputElement).setCustomValidity('Por favor, preencha o nome completo.')}
+												onInvalid={e => (e.target as HTMLInputElement).setCustomValidity(t('validations.nameRequired'))}
 												onInput={e => (e.target as HTMLInputElement).setCustomValidity('')}
 											/>
 										</div>
@@ -375,16 +374,16 @@ export default function SimulacaoVida() {
 												name="email"
 												value={form.email}
 												onChange={handleChange}
-												placeholder="Email"
+												placeholder={t('placeholders.email')}
 												className="w-full rounded border h-11 pl-10"
 												required
 												pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
 												onInvalid={e => {
 													const input = e.target as HTMLInputElement;
 													if (input.validity.valueMissing) {
-														input.setCustomValidity('Por favor, preencha o email.');
+														input.setCustomValidity(t('validations.emailRequired'));
 													} else if (input.validity.typeMismatch || input.validity.patternMismatch || !/^([a-zA-Z0-9._%+-]+)@([a-zA-Z0-9.-]+)\.([a-zA-Z]{2,})$/.test(input.value)) {
-														input.setCustomValidity('Por favor, insira um email válido no formato nome@servidor.pt');
+														input.setCustomValidity(t('validations.emailInvalid'));
 													} else {
 														input.setCustomValidity('');
 													}
@@ -401,18 +400,18 @@ export default function SimulacaoVida() {
 												name="telefone"
 												value={form.telefone}
 												onChange={handleChange}
-												placeholder="Telefone"
+												placeholder={t('placeholders.phone')}
 												className="w-full rounded border h-11 pl-10"
 												pattern="[0-9]{9}"
 												required
-												onInvalid={e => (e.target as HTMLInputElement).setCustomValidity('Por favor, preencha o telefone (9 dígitos).')}
+												onInvalid={e => (e.target as HTMLInputElement).setCustomValidity(t('validations.phoneRequired'))}
 												onInput={e => (e.target as HTMLInputElement).setCustomValidity('')}
 											/>
 										</div>
 									</div>
 									<div className="flex justify-between mt-4">
-										<button type="button" onClick={() => setStep(2)} className="px-6 py-2 bg-gray-200 rounded">Anterior</button>
-										<button type="submit" className="px-6 py-2 bg-green-600 text-white rounded font-bold hover:bg-green-700 transition">Simular</button>
+										<button type="button" onClick={() => setStep(2)} className="px-6 py-2 bg-gray-200 rounded">{t('buttons.prev')}</button>
+										<button type="submit" className="px-6 py-2 bg-green-600 text-white rounded font-bold hover:bg-green-700 transition">{t('buttons.simulate')}</button>
 									</div>
 								</div>
 							)}

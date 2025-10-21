@@ -1,10 +1,14 @@
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import DatePicker, { registerLocale } from "react-datepicker";
 import { pt } from "date-fns/locale/pt";
+import { enGB } from "date-fns/locale/en-GB";
 import "react-datepicker/dist/react-datepicker.css";
 import { EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, EMAILJS_USER_ID } from "../emailjs.config";
 import emailjs from "@emailjs/browser";
+import { Trans, useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 registerLocale("pt", pt);
+registerLocale("en", enGB);
 
 
 interface FormState {
@@ -26,6 +30,9 @@ interface FormState {
 }
 
 export default function SimulacaoAuto() {
+  const { t } = useTranslation('sim_auto');
+  const { lang } = useParams();
+  const base = lang === 'en' ? 'en' : 'pt';
   const [step, setStep] = useState<number>(1);
   const [form, setForm] = useState<FormState>({
     nome: "",
@@ -101,7 +108,7 @@ export default function SimulacaoAuto() {
     if (step === 1) {
       if (!validarDatas()) return;
       if (idadeMenorQue18(form.dataNascimento)) {
-        setErroNascimento("Apenas condutores com 18 anos ou mais podem prosseguir.");
+        setErroNascimento(t('validations.under18'));
         return;
       }
     }
@@ -118,7 +125,7 @@ export default function SimulacaoAuto() {
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!form.tipoSeguro) {
-      setMensagem('Por favor, selecione o tipo de seguro.');
+      setMensagem(t('messages.selectType'));
       setMensagemTipo('erro');
       setTimeout(() => {
         setMensagem(null);
@@ -126,7 +133,7 @@ export default function SimulacaoAuto() {
       }, 6000);
       return;
     }
-  const resumo = `Simulação para ${form.marca} ${form.modelo} (${form.ano}) - ${form.tipoSeguro}\nNIF: ${form.contribuinte}\nData Nascimento: ${form.dataNascimento ? formatDate(form.dataNascimento) : '-'}\nData Carta: ${form.dataCartaConducao ? formatDate(form.dataCartaConducao) : '-'}\nCódigo Postal: ${form.codigoPostal || '-'}\nCoberturas: ${form.coberturas.join(", ")}\nOutros pedidos: ${form.outrosPedidos?.trim() ? form.outrosPedidos.trim() : '-'}`;
+  const resumo = `${t('summary.title')} ${form.marca} ${form.modelo} (${form.ano}) - ${form.tipoSeguro}\n${t('summary.labels.nif')} ${form.contribuinte}\n${t('summary.labels.birthDate')} ${form.dataNascimento ? formatDate(form.dataNascimento) : '-'}\n${t('summary.labels.licenseDate')} ${form.dataCartaConducao ? formatDate(form.dataCartaConducao) : '-'}\n${t('summary.labels.postalCode')} ${form.codigoPostal || '-'}\n${t('summary.labels.coverages')} ${form.coberturas.join(", ")}\n${t('summary.labels.otherRequests')} ${form.outrosPedidos?.trim() ? form.outrosPedidos.trim() : '-'}`;
     setResultado(resumo);
 
     // Enviar email via EmailJS
@@ -148,11 +155,11 @@ export default function SimulacaoAuto() {
     };
     emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams, EMAILJS_USER_ID)
       .then(() => {
-        setMensagem('Simulação submetida com sucesso!\nEmail enviado.');
+        setMensagem(t('messages.submitSuccess'));
         setMensagemTipo('sucesso');
       })
       .catch((error) => {
-        setMensagem('Simulação submetida, mas houve erro ao enviar o email.');
+        setMensagem(t('messages.submitEmailError'));
         setMensagemTipo('erro');
         // Exibe o erro no canto inferior esquerdo, incluindo o user_id
         const errorDiv = document.createElement('div');
@@ -205,9 +212,9 @@ export default function SimulacaoAuto() {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative">
-      <img src="https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=1200&q=80" alt="Estrada" className="absolute inset-0 w-full h-full object-cover opacity-30" />
+      <img src="https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=1200&q=80" alt="Road" className="absolute inset-0 w-full h-full object-cover opacity-30" />
       <div className="max-w-lg w-full p-8 bg-white bg-opacity-90 rounded-2xl shadow-xl relative z-10">
-        <h2 className="text-3xl font-bold mb-6 text-blue-900 text-center">Simulação de Seguro Auto</h2>
+        <h2 className="text-3xl font-bold mb-6 text-blue-900 text-center">{t('title')}</h2>
         <div className="mb-6">
           <div className="flex items-center justify-center gap-2 mb-2">
             {[1,2,3].map(n => (
@@ -225,47 +232,47 @@ export default function SimulacaoAuto() {
               style={{ width: `${step * 33.33}%` }}
             />
           </div>
-          <div className="text-center text-blue-700 font-medium mt-2">Passo {step} de 3</div>
+          <div className="text-center text-blue-700 font-medium mt-2">{t('stepProgress', { step, defaultValue: base==='en' ? `Step ${step} of 3` : `Passo ${step} de 3` })}</div>
         </div>
         <form onSubmit={step === 3 ? handleSubmit : handleNext} className="space-y-5">
           {step === 1 && (
             <>
-              <h3 className="text-xl font-semibold text-blue-700 mb-2 text-center">Passo 1 - Identificação do condutor</h3>
+              <h3 className="text-xl font-semibold text-blue-700 mb-2 text-center">{t('step1Title')}</h3>
               <input
                 name="nome"
                 value={form.nome}
                 onChange={handleChange}
-                placeholder="Nome completo"
+                placeholder={t('placeholders.name')}
                 className={`w-full p-3 border rounded-lg ${form.nome && !nomeCompletoValido(form.nome) ? 'border-red-500' : 'border-blue-300'}`}
                 required
                 onBlur={e => {
                   if (!nomeCompletoValido(e.target.value)) {
-                    e.target.setCustomValidity('Por favor, indique o nome completo.');
+                    e.target.setCustomValidity(t('validations.nameFull'));
                   } else {
                     e.target.setCustomValidity('');
                   }
                 }}
-                onInvalid={e => (e.target as HTMLInputElement).setCustomValidity('Por favor, indique o nome completo (pelo menos dois nomes).')}
+                onInvalid={e => (e.target as HTMLInputElement).setCustomValidity(t('validations.nameFull'))}
                 onInput={e => (e.target as HTMLInputElement).setCustomValidity('')}
               />
               {form.nome && !nomeCompletoValido(form.nome) && (
-                <div className="text-red-600 text-sm mt-1">Por favor, indique o nome completo.</div>
+                <div className="text-red-600 text-sm mt-1">{t('validations.nameFull')}</div>
               )}
               <input
                 name="email"
                 type="email"
                 value={form.email}
                 onChange={handleChange}
-                placeholder="Email"
+                placeholder={t('placeholders.email')}
                 className="w-full p-3 border border-blue-300 rounded-lg"
                 required
                 pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
                 onInvalid={e => {
                   const input = e.target as HTMLInputElement;
                   if (input.validity.valueMissing) {
-                    input.setCustomValidity('Por favor, preencha o email.');
+                    input.setCustomValidity(t('validations.emailRequired'));
                   } else if (input.validity.typeMismatch || input.validity.patternMismatch) {
-                    input.setCustomValidity('Por favor, insira um email válido.');
+                    input.setCustomValidity(t('validations.emailInvalid'));
                   } else {
                     input.setCustomValidity('');
                   }
@@ -286,14 +293,14 @@ export default function SimulacaoAuto() {
                       setForm(f => ({ ...f, dataNascimento: "", dataNascimentoManual: "" }));
                     }
                   }}
-                  locale="pt"
+                  locale={base}
                   dateFormat="dd-MM-yyyy"
-                  placeholderText="Data de nascimento (dd-mm-aaaa)"
+                  placeholderText={t('placeholders.birthDate')}
                   className="w-full p-3 border border-blue-300 rounded-lg pr-10"
                   required
-                  todayButton="Hoje"
+                  todayButton={base==='en' ? 'Today' : 'Hoje'}
                   isClearable
-                  clearButtonTitle="Limpar"
+                  clearButtonTitle={base==='en' ? 'Clear' : 'Limpar'}
                   showMonthDropdown
                   showYearDropdown
                   yearDropdownItemNumber={100}
@@ -306,7 +313,7 @@ export default function SimulacaoAuto() {
                       value: form.dataNascimentoManual || '',
                       required: true,
                       readOnly: true,
-                      placeholder: 'Data de nascimento (dd-mm-aaaa)'
+                      placeholder: t('placeholders.birthDate')
                     })
                   }
                   open={openNascimento}
@@ -323,8 +330,7 @@ export default function SimulacaoAuto() {
                           onChange={e => props.changeMonth(Number(e.target.value))}
                           className="border rounded px-2 py-1"
                         >
-
-                          {["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"].map((month, idx) => (
+                          {(base==='en' ? ["January","February","March","April","May","June","July","August","September","October","November","December"] : ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]).map((month, idx) => (
                             <option key={month} value={idx}>{month}</option>
                           ))}
                         </select>
@@ -354,20 +360,29 @@ export default function SimulacaoAuto() {
               <div className="w-full mt-2 relative">
                 <DatePicker
                   selected={form.dataCartaConducao ? new Date(form.dataCartaConducao) : null}
-                  onChange={date => setForm(f => ({ ...f, dataCartaConducao: date ? date.toISOString().slice(0, 10) : "" }))}
-                  locale="pt"
+                  onChange={date => {
+                    if (date) {
+                      const iso = date.toISOString().slice(0, 10);
+                      const [year, month, day] = iso.split('-');
+                      const manual = `${day}-${month}-${year}`;
+                      setForm(f => ({ ...f, dataCartaConducao: iso, dataCartaConducaoManual: manual }));
+                    } else {
+                      setForm(f => ({ ...f, dataCartaConducao: "", dataCartaConducaoManual: "" }));
+                    }
+                  }}
+                  locale={base}
                   dateFormat="dd-MM-yyyy"
-                  placeholderText="Data da Carta de condução (dd-mm-aaaa)"
+                  placeholderText={t('placeholders.licenseDate')}
                   className="w-full p-3 border border-blue-300 rounded-lg pr-10"
                   required
-                  todayButton="Hoje"
+                  todayButton={base==='en' ? 'Today' : 'Hoje'}
                   isClearable
-                  clearButtonTitle="Limpar"
+                  clearButtonTitle={base==='en' ? 'Clear' : 'Limpar'}
                   showMonthDropdown
                   showYearDropdown
                   yearDropdownItemNumber={100}
                   scrollableYearDropdown
-                  value={form.dataCartaConducao ? `${formatDate(form.dataCartaConducao)} (data da carta de condução)` : ""}
+                  value={form.dataCartaConducaoManual || ""}
                   customInput={
                     React.createElement('input', {
                       type: 'text',
@@ -375,7 +390,7 @@ export default function SimulacaoAuto() {
                       value: form.dataCartaConducaoManual !== undefined ? form.dataCartaConducaoManual : (form.dataCartaConducao ? formatDate(form.dataCartaConducao) : ''),
                       required: true,
                       readOnly: true,
-                      placeholder: 'Data da Carta de condução (dd-mm-aaaa)'
+                      placeholder: t('placeholders.licenseDate')
                     })
                   }
                   open={openCarta}
@@ -392,7 +407,7 @@ export default function SimulacaoAuto() {
                           onChange={e => props.changeMonth(Number(e.target.value))}
                           className="border rounded px-2 py-1"
                         >
-                          {["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"].map((month, idx) => (
+                          {(base==='en' ? ["January","February","March","April","May","June","July","August","September","October","November","December"] : ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]).map((month, idx) => (
 
                             <option key={month} value={idx}>{month}</option>
                           ))}
@@ -429,7 +444,7 @@ export default function SimulacaoAuto() {
                   if (v.length > 8) v = v.slice(0, 8);
                   setForm({ ...form, codigoPostal: v });
                 }}
-                placeholder="Código Postal (____-___)"
+                placeholder={t('placeholders.postalCode')}
                 className="w-full p-3 border border-blue-300 rounded-lg mt-2"
                 maxLength={8}
                 required
@@ -439,18 +454,18 @@ export default function SimulacaoAuto() {
                     setForm({ ...form, codigoPostal: "" });
                   }
                 }}
-                onInvalid={e => setCustomValidity(e, 'Por favor, insira o código postal no formato XXXX-XXX com 7 dígitos numéricos.')}
+                onInvalid={e => setCustomValidity(e, t('validations.postalHelp'))}
                 onInput={e => setCustomValidity(e, '')}
               />
               {form.codigoPostal && !/^\d{4}-\d{3}$/.test(form.codigoPostal) && (
-                <div className="text-red-600 text-sm mt-1">O código postal deve ter 7 dígitos numéricos (formato XXXX-XXX).</div>
+                <div className="text-red-600 text-sm mt-1">{t('validations.postalFormat')}</div>
               )}
               <input
                 name="contribuinte"
                 type="text"
                 value={form.contribuinte || ""}
                 onChange={handleChange}
-                placeholder="NIF (Contribuinte)"
+                placeholder={t('placeholders.nif')}
                 className={`w-full p-3 border rounded-lg ${form.contribuinte && !validarNIF(form.contribuinte) ? 'border-red-500' : 'border-blue-300'}`}
                 required
                 pattern="[0-9]{9}"
@@ -458,33 +473,33 @@ export default function SimulacaoAuto() {
                 minLength={9}
                 onBlur={e => {
                   if (e.target.value && !validarNIF(e.target.value)) {
-                    e.target.setCustomValidity('NIF inválido.');
+                    e.target.setCustomValidity(t('validations.nifInvalid'));
                   } else {
                     e.target.setCustomValidity('');
                   }
                 }}
-                onInvalid={e => (e.target as HTMLInputElement).setCustomValidity('Por favor, preencha o NIF válido com 9 dígitos.')}
+                onInvalid={e => (e.target as HTMLInputElement).setCustomValidity(t('validations.nifRequired'))}
                 onInput={e => (e.target as HTMLInputElement).setCustomValidity('')}
               />
               {form.contribuinte && !validarNIF(form.contribuinte) && (
-                <div className="text-red-600 text-sm mt-1">NIF inválido.</div>
+                <div className="text-red-600 text-sm mt-1">{t('validations.nifInvalid')}</div>
               )}
               <div className="flex justify-end gap-2">
-                <button type="button" className="px-6 py-2 bg-gray-200 rounded" disabled>Anterior</button>
-                <button type="submit" className="px-6 py-2 bg-blue-700 text-white rounded font-bold hover:bg-blue-900 transition">Próximo</button>
+                <button type="button" className="px-6 py-2 bg-gray-200 rounded" disabled>{t('buttons.prev')}</button>
+                <button type="submit" className="px-6 py-2 bg-blue-700 text-white rounded font-bold hover:bg-blue-900 transition">{t('buttons.next')}</button>
               </div>
             </>
           )}
           {step === 2 && (
             <>
-              <h3 className="text-xl font-semibold text-blue-700 mb-2 text-center">Passo 2 - Identificação da viatura</h3>
-              <input name="marca" value={form.marca || ""} onChange={handleChange} placeholder="Marca do carro" className="w-full p-3 border border-blue-300 rounded-lg" required onInvalid={e => setCustomValidity(e, 'Por favor, preencha a marca do carro.')} onInput={e => setCustomValidity(e, '')} />
-              <input name="modelo" value={form.modelo} onChange={handleChange} placeholder="Modelo do carro" className="w-full p-3 border border-blue-300 rounded-lg" required onInvalid={e => setCustomValidity(e, 'Por favor, preencha o modelo do carro.')} onInput={e => setCustomValidity(e, '')} />
+              <h3 className="text-xl font-semibold text-blue-700 mb-2 text-center">{t('step2Title')}</h3>
+              <input name="marca" value={form.marca || ""} onChange={handleChange} placeholder={t('placeholders.carBrand')} className="w-full p-3 border border-blue-300 rounded-lg" required onInvalid={e => setCustomValidity(e, t('validations.brandRequired'))} onInput={e => setCustomValidity(e, '')} />
+              <input name="modelo" value={form.modelo} onChange={handleChange} placeholder={t('placeholders.carModel')} className="w-full p-3 border border-blue-300 rounded-lg" required onInvalid={e => setCustomValidity(e, t('validations.modelRequired'))} onInput={e => setCustomValidity(e, '')} />
               <input name="ano" value={form.ano} onChange={e => {
   let v = e.target.value.replace(/[^\d]/g, "");
   if (v.length > 4) v = v.slice(0, 4);
   setForm({ ...form, ano: v });
-}} placeholder="Ano" className="w-full p-3 border border-blue-300 rounded-lg" required maxLength={4} onInvalid={e => setCustomValidity(e, 'Por favor, preencha o ano do carro.')} onInput={e => setCustomValidity(e, '')} />
+}} placeholder={t('placeholders.carYear')} className="w-full p-3 border border-blue-300 rounded-lg" required maxLength={4} onInvalid={e => setCustomValidity(e, t('validations.yearRequired'))} onInput={e => setCustomValidity(e, '')} />
 
               <div className="flex justify-center my-2">
   <div className="border-4 border-gray-700 rounded-lg flex items-center px-4 py-2 shadow-md" style={{ minWidth: '180px', maxWidth: '220px', background: 'white' }}>
@@ -498,11 +513,11 @@ export default function SimulacaoAuto() {
         if (v.length > 8) v = v.slice(0,8);
         setForm({ ...form, matricula: v });
       }}
-      placeholder="XX-XX-XX"
+  placeholder={t('placeholders.plate')}
       className="text-center font-mono text-lg bg-transparent outline-none w-full"
       maxLength={8}
       required
-      onInvalid={e => setCustomValidity(e, 'Por favor, preencha a matrícula no formato XX-XX-XX.')}
+  onInvalid={e => setCustomValidity(e, t('validations.plateFormat'))}
       onInput={e => setCustomValidity(e, '')}
       style={{ letterSpacing: '2px' }}
     />
@@ -510,14 +525,14 @@ export default function SimulacaoAuto() {
   </div>
 </div>
               <div className="flex justify-between gap-2">
-                <button type="button" onClick={handlePrev} className="px-6 py-2 bg-gray-200 rounded">Anterior</button>
-                <button type="submit" className="px-6 py-2 bg-blue-700 text-white rounded font-bold hover:bg-blue-900 transition">Próximo</button>
+                <button type="button" onClick={handlePrev} className="px-6 py-2 bg-gray-200 rounded">{t('buttons.prev')}</button>
+                <button type="submit" className="px-6 py-2 bg-blue-700 text-white rounded font-bold hover:bg-blue-900 transition">{t('buttons.next')}</button>
               </div>
             </>
           )}
           {step === 3 && (
             <>
-              <h3 className="text-xl font-semibold text-blue-700 mb-2 text-center">Passo 3 - Produto e coberturas adicionais</h3>
+              <h3 className="text-xl font-semibold text-blue-700 mb-2 text-center">{t('step3Title')}</h3>
               {/* RGPD Checkbox */}
               <div className="mb-4 flex items-center gap-2">
                 <input
@@ -526,70 +541,71 @@ export default function SimulacaoAuto() {
                   required
                   className="accent-blue-700 w-5 h-5"
                   style={{ minWidth: 20, minHeight: 20 }}
-                  onInvalid={e => (e.target as HTMLInputElement).setCustomValidity('Por favor, aceite a Política de Privacidade & RGPD para prosseguir.')}
+                  onInvalid={e => (e.target as HTMLInputElement).setCustomValidity(t('validations.rgpdRequired'))}
                   onInput={e => (e.target as HTMLInputElement).setCustomValidity('')}
                 />
                 <label htmlFor="aceitaRgpd" className="text-blue-900 text-sm select-none">
-                  Li e aceito a <a href={`${import.meta.env.BASE_URL}politica-rgpd`} target="_blank" rel="noopener noreferrer" className="underline text-blue-700 hover:text-blue-900">Política de Privacidade &amp; RGPD</a> da Ansião Seguros.
+                  <Trans i18nKey="contact:rgpdText" components={[<a href={`/${base}/politica-rgpd`} target="_blank" rel="noopener noreferrer" className="underline text-blue-700 hover:text-blue-900" />]} />
                 </label>
               </div>
-              <label className="block font-semibold mb-2 text-left" htmlFor="tipoSeguro">Tipo de seguro:</label>
-<select id="tipoSeguro" name="tipoSeguro" value={form.tipoSeguro || ""} onChange={handleChange} className="w-full p-3 border border-blue-300 rounded-lg text-left" required onInvalid={e => setCustomValidity(e, 'Por favor, selecione o tipo de seguro.')} onInput={e => setCustomValidity(e, '')}>
+              <label className="block font-semibold mb-2 text-left" htmlFor="tipoSeguro">{t('typeLabel')}</label>
+<select id="tipoSeguro" name="tipoSeguro" value={form.tipoSeguro || ""} onChange={handleChange} className="w-full p-3 border border-blue-300 rounded-lg text-left" required onInvalid={e => setCustomValidity(e, t('messages.selectType'))} onInput={e => setCustomValidity(e, '')}>
 
-  <option value="">Selecione o tipo de seguro</option>
-  <option value="Terceiros">Terceiros</option>
-  <option value="Danos Próprios">Danos Próprios</option>
+  <option value="">{t('typeSelectPlaceholder')}</option>
+  <option value={t('typeThirdParty')}>{t('typeThirdParty')}</option>
+  <option value={t('typeOwnDamage')}>{t('typeOwnDamage')}</option>
 </select>
-              {form.tipoSeguro === "Terceiros" && (
-                <div className="text-sm text-blue-700 mt-1 bg-blue-50 rounded p-2">Seguro de <b>Terceiros</b>: cobre danos causados a outros veículos, pessoas ou propriedades, mas não cobre danos ao seu próprio veículo.</div>
+              {form.tipoSeguro === t('typeThirdParty') && (
+                <div className="text-sm text-blue-700 mt-1 bg-blue-50 rounded p-2">{t('typeThirdPartyInfo')}</div>
               )}
-              {form.tipoSeguro === "Danos Próprios" && (
-                <div className="text-sm text-blue-700 mt-1 bg-blue-50 rounded p-2">Seguro de <b>Danos Próprios</b>: cobre danos ao seu próprio veículo, além dos danos causados a terceiros.</div>
+              {form.tipoSeguro === t('typeOwnDamage') && (
+                <div className="text-sm text-blue-700 mt-1 bg-blue-50 rounded p-2">{t('typeOwnDamageInfo')}</div>
               )}
-              <label className="block font-semibold mb-2">Coberturas base:</label>
-              {form.tipoSeguro === "Terceiros" && (
+              <label className="block font-semibold mb-2">{t('baseCoverLabel')}</label>
+              {form.tipoSeguro === t('typeThirdParty') && (
   <div className="flex flex-col gap-2 mb-2">
-    <label><input type="checkbox" checked disabled /> Responsabilidade civil</label>
-    <label><input type="checkbox" checked disabled /> Proteção jurídica</label>
+    {(t('baseCoversThirdParty', { returnObjects: true }) as string[]).map((label, i) => (
+      <label key={i}><input type="checkbox" checked disabled /> {label}</label>
+    ))}
   </div>
 )}
-{form.tipoSeguro === "Danos Próprios" && (
+{form.tipoSeguro === t('typeOwnDamage') && (
   <div className="flex flex-col gap-2 mb-2">
-    <label><input type="checkbox" checked disabled /> Choque, colisão e capotamento</label>
-    <label><input type="checkbox" checked disabled /> Furto ou roubo</label>
-    <label><input type="checkbox" checked disabled /> Incêndio</label>
+    {(t('baseCoversOwnDamage', { returnObjects: true }) as string[]).map((label, i) => (
+      <label key={i}><input type="checkbox" checked disabled /> {label}</label>
+    ))}
   </div>
 )}
-<label className="block font-semibold mb-2">Coberturas adicionais:</label>
-              {form.tipoSeguro === "Terceiros" && (
+<label className="block font-semibold mb-2">{t('additionalCoverages')}</label>
+              {form.tipoSeguro === t('typeThirdParty') && (
   <div className="flex flex-col gap-2">
-    <label><input type="checkbox" name="coberturas" value="Ocupantes" checked={form.coberturas.includes("Ocupantes")} onChange={handleChange} /> Ocupantes</label>
-    <label><input type="checkbox" name="coberturas" value="Vidros" checked={form.coberturas.includes("Vidros")} onChange={handleChange} /> Vidros</label>
-    <label><input type="checkbox" name="coberturas" value="Assistência em viagem" checked={form.coberturas.includes("Assistência em viagem")} onChange={handleChange} /> Assistência em viagem</label>
-    <label><input type="checkbox" name="coberturas" value="Incêndio" checked={form.coberturas.includes("Incêndio")} onChange={handleChange} /> Incêndio</label>
-    <label><input type="checkbox" name="coberturas" value="Roubo" checked={form.coberturas.includes("Roubo")} onChange={handleChange} /> Roubo</label>
+    <label><input type="checkbox" name="coberturas" value={t('coverageLabels.occupants')} checked={form.coberturas.includes(t('coverageLabels.occupants'))} onChange={handleChange} /> {t('coverageLabels.occupants')}</label>
+    <label><input type="checkbox" name="coberturas" value={t('coverageLabels.glass')} checked={form.coberturas.includes(t('coverageLabels.glass'))} onChange={handleChange} /> {t('coverageLabels.glass')}</label>
+    <label><input type="checkbox" name="coberturas" value={t('coverageLabels.assistance')} checked={form.coberturas.includes(t('coverageLabels.assistance'))} onChange={handleChange} /> {t('coverageLabels.assistance')}</label>
+    <label><input type="checkbox" name="coberturas" value={t('coverageLabels.fire')} checked={form.coberturas.includes(t('coverageLabels.fire'))} onChange={handleChange} /> {t('coverageLabels.fire')}</label>
+    <label><input type="checkbox" name="coberturas" value={t('coverageLabels.theft')} checked={form.coberturas.includes(t('coverageLabels.theft'))} onChange={handleChange} /> {t('coverageLabels.theft')}</label>
   </div>
 )}
-{form.tipoSeguro === "Danos Próprios" && (
+{form.tipoSeguro === t('typeOwnDamage') && (
   <div className="flex flex-col gap-2">
-    <label><input type="checkbox" name="coberturas" value="Riscos catastróficos da natureza" checked={form.coberturas.includes("Riscos catastróficos da natureza")} onChange={handleChange} /> Riscos catastróficos da natureza</label>
-    <label><input type="checkbox" name="coberturas" value="Atos de vandalismo" checked={form.coberturas.includes("Atos de vandalismo")} onChange={handleChange} /> Atos de vandalismo</label>
-    <label><input type="checkbox" name="coberturas" value="Veículo de Substituição" checked={form.coberturas.includes("Veículo de Substituição")} onChange={handleChange} /> Veículo de Substituição</label>
+    <label><input type="checkbox" name="coberturas" value={t('coverageLabels.naturalCatastrophes')} checked={form.coberturas.includes(t('coverageLabels.naturalCatastrophes'))} onChange={handleChange} /> {t('coverageLabels.naturalCatastrophes')}</label>
+    <label><input type="checkbox" name="coberturas" value={t('coverageLabels.vandalism')} checked={form.coberturas.includes(t('coverageLabels.vandalism'))} onChange={handleChange} /> {t('coverageLabels.vandalism')}</label>
+    <label><input type="checkbox" name="coberturas" value={t('coverageLabels.replacementVehicle')} checked={form.coberturas.includes(t('coverageLabels.replacementVehicle'))} onChange={handleChange} /> {t('coverageLabels.replacementVehicle')}</label>
   </div>
 )}
 <div className="mt-4">
-  <label className="block text-sm font-semibold mb-1">Outros pedidos / detalhes</label>
+  <label className="block text-sm font-semibold mb-1">{t('summary.labels.otherRequests')}</label>
   <textarea
     name="outrosPedidos"
     value={form.outrosPedidos || ''}
     onChange={handleChange}
-    placeholder="Ex.: limites, condutor jovem, franquias desejadas, observações..."
+    placeholder={t('placeholders.otherRequests')}
     className="w-full p-3 border rounded bg-white min-h-[90px]"
   />
 </div>
               <div className="flex justify-between gap-2 mt-4">
-                <button type="button" onClick={handlePrev} className="px-6 py-2 bg-gray-200 rounded">Anterior</button>
-                <button type="submit" className="px-6 py-2 bg-green-600 text-white rounded font-bold hover:bg-green-700 transition">Simular</button>
+                <button type="button" onClick={handlePrev} className="px-6 py-2 bg-gray-200 rounded">{t('buttons.prev')}</button>
+                <button type="submit" className="px-6 py-2 bg-green-600 text-white rounded font-bold hover:bg-green-700 transition">{t('buttons.simulate')}</button>
               </div>
             </>
           )}

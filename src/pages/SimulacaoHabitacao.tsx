@@ -1,6 +1,8 @@
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import emailjs from "@emailjs/browser";
 import { EMAILJS_SERVICE_ID_SAUDE, EMAILJS_TEMPLATE_ID_HABITACAO, EMAILJS_USER_ID_SAUDE } from "../emailjs.config";
+import { Trans, useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 
 type FormState = {
   // Passo 1 - Imóvel
@@ -29,6 +31,9 @@ type FormState = {
 };
 
 export default function SimulacaoHabitacao() {
+  const { t } = useTranslation(['sim_home','contact']);
+  const { lang } = useParams();
+  const base = lang === 'en' ? 'en' : 'pt';
   const [step, setStep] = useState<number>(1);
   const [form, setForm] = useState<FormState>({
     situacao: "",
@@ -58,7 +63,7 @@ export default function SimulacaoHabitacao() {
     const n = Number(v);
     if (!v || !isFinite(n) || n <= 0) return 'n/a';
     try {
-      return new Intl.NumberFormat('pt-PT', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n) + ' €';
+      return new Intl.NumberFormat(base === 'pt' ? 'pt-PT' : 'en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n) + ' €';
     } catch {
       return n.toString() + ' €';
     }
@@ -70,7 +75,7 @@ export default function SimulacaoHabitacao() {
     const n = Number(v);
     if (!isFinite(n)) return '';
     try {
-      return new Intl.NumberFormat('pt-PT', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
+      return new Intl.NumberFormat(base === 'pt' ? 'pt-PT' : 'en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
     } catch {
       return v;
     }
@@ -138,7 +143,7 @@ export default function SimulacaoHabitacao() {
 
   function validarPasso1(): boolean {
     if (!form.situacao || !form.tipoImovel || !form.utilizacao || !form.anoConstrucao || !form.area || !form.codigoPostal || !form.construcao) {
-      setMensagem("Por favor, preencha todos os campos obrigatórios do imóvel.");
+      setMensagem(t('sim_home:messages.step1Missing'));
       setMensagemTipo("erro");
       return false;
     }
@@ -146,17 +151,17 @@ export default function SimulacaoHabitacao() {
     const capitalEdificioValido = !!form.capitalEdificio && Number(form.capitalEdificio) > 0;
     const capitalConteudoValido = !!form.capitalConteudo && Number(form.capitalConteudo) > 0;
     if (!capitalEdificioValido && !capitalConteudoValido) {
-      setMensagem("Indique pelo menos um capital: edifício ou conteúdo.");
+      setMensagem(t('sim_home:messages.atLeastOneCapital'));
       setMensagemTipo("erro");
       return false;
     }
     if (!/^[0-9]{4}-[0-9]{3}$/.test(form.codigoPostal)) {
-      setMensagem("Código Postal inválido. Formato XXXX-XXX.");
+      setMensagem(t('sim_home:messages.postalInvalid'));
       setMensagemTipo("erro");
       return false;
     }
     if (!/^\d{4}$/.test(form.anoConstrucao)) {
-      setMensagem("Ano de construção inválido (AAAA).");
+      setMensagem(t('sim_home:messages.yearInvalid'));
       setMensagemTipo("erro");
       return false;
     }
@@ -166,10 +171,10 @@ export default function SimulacaoHabitacao() {
 
   function validarPasso2(): boolean {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!form.nome) { setMensagem("Preencha o nome."); setMensagemTipo("erro"); return false; }
-    if (!form.email || !emailRegex.test(form.email)) { setMensagem("Insira um email válido."); setMensagemTipo("erro"); return false; }
-  if (!/^[0-9]{9}$/.test(form.telefone)) { setMensagem("Telefone deve ter 9 dígitos."); setMensagemTipo("erro"); return false; }
-  if (!/^[0-9]{9}$/.test(form.contribuinte)) { setMensagem("NIF deve ter 9 dígitos."); setMensagemTipo("erro"); return false; }
+    if (!form.nome) { setMensagem(t('sim_home:messages.nameRequired')); setMensagemTipo("erro"); return false; }
+    if (!form.email || !emailRegex.test(form.email)) { setMensagem(t('sim_home:messages.emailInvalid')); setMensagemTipo("erro"); return false; }
+  if (!/^[0-9]{9}$/.test(form.telefone)) { setMensagem(t('sim_home:messages.phoneInvalid')); setMensagemTipo("erro"); return false; }
+  if (!/^[0-9]{9}$/.test(form.contribuinte)) { setMensagem(t('sim_home:messages.nifInvalid')); setMensagemTipo("erro"); return false; }
     setMensagem(null); setMensagemTipo(null);
     return true;
   }
@@ -191,12 +196,12 @@ export default function SimulacaoHabitacao() {
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!form.produto) {
-      setMensagem("Selecione o produto.");
+      setMensagem(t('sim_home:messages.productRequired'));
       setMensagemTipo("erro");
       return;
     }
     if (!form.aceitaRgpd) {
-      setMensagem("É necessário aceitar a Política de Privacidade & RGPD.");
+      setMensagem(t('sim_home:messages.rgpdRequired'));
       setMensagemTipo("erro");
       return;
     }
@@ -242,6 +247,7 @@ Cliente: ${form.nome} | Email: ${form.email} | Tel: ${form.telefone} | NIF: ${fo
     } as Record<string, any>;
 
     const isDev = (import.meta as any)?.env?.DEV;
+    const dryRun = isDev || (import.meta as any)?.env?.VITE_EMAIL_DRY_RUN === 'true';
     if (isDev) {
       // Log seguro (não mostra todos os dados sensíveis, mas suficiente para debug)
       // Atenção: remover se for exposto em produção.
@@ -253,11 +259,40 @@ Cliente: ${form.nome} | Email: ${form.email} | Tel: ${form.telefone} | NIF: ${fo
       });
     }
 
+    if (dryRun) {
+      console.log('[EmailJS][DRY_RUN][Habitacao] Would send with params:', templateParams);
+      setMensagem(t('sim_home:messages.submitSuccess'));
+      setMensagemTipo("sucesso");
+      setForm({
+        situacao: "",
+        tipoImovel: "",
+        utilizacao: "",
+        anoConstrucao: "",
+        area: "",
+        codigoPostal: "",
+        construcao: "",
+        seguranca: [],
+        capitalEdificio: "",
+        capitalConteudo: "",
+        nome: "",
+        email: "",
+        telefone: "",
+        contribuinte: "",
+        aceitaRgpd: false,
+        produto: "",
+        extras: [],
+        detalhes: "",
+      });
+      setStep(1);
+      setTimeout(() => { setMensagem(null); setMensagemTipo(null); }, 6000);
+      return;
+    }
+
     emailjs
       .send(EMAILJS_SERVICE_ID_SAUDE, EMAILJS_TEMPLATE_ID_HABITACAO, templateParams, EMAILJS_USER_ID_SAUDE)
       .then((resp) => {
         if (isDev) console.log('[EmailJS][DEBUG] Sucesso', resp.status, resp.text);
-        setMensagem("Pedido enviado com sucesso! Receberá instruções por email.");
+  setMensagem(t('sim_home:messages.submitSuccess'));
         setMensagemTipo("sucesso");
         // reset parcial
         setForm({
@@ -285,7 +320,7 @@ Cliente: ${form.nome} | Email: ${form.email} | Tel: ${form.telefone} | NIF: ${fo
       })
       .catch((error) => {
         if (isDev) console.error('[EmailJS][DEBUG] Erro envio', error);
-        setMensagem("Ocorreu um erro ao enviar o pedido. Tente novamente.");
+  setMensagem(t('sim_home:messages.submitError'));
         setMensagemTipo("erro");
         console.error(error);
         setTimeout(() => { setMensagem(null); setMensagemTipo(null); }, 6000);
@@ -296,12 +331,12 @@ Cliente: ${form.nome} | Email: ${form.email} | Tel: ${form.telefone} | NIF: ${fo
     <div className="min-h-screen flex items-start justify-center bg-blue-50 relative pt-8 md:pt-12">
       <img
   src={`${import.meta.env.BASE_URL}imagens/insurance-background.jpg`}
-        alt="Seguro Habitação"
+        alt={t('sim_home:title')}
         className="absolute inset-0 w-full h-full object-cover opacity-25"
         onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/family-happy2.png'; }}
       />
       <div className="relative z-10 max-w-3xl w-full bg-white bg-opacity-90 rounded-xl shadow-xl p-6 md:p-8">
-        <h1 className="text-3xl font-bold text-blue-900 mb-6 text-center">Simulação Seguro Habitação</h1>
+        <h1 className="text-3xl font-bold text-blue-900 mb-6 text-center">{t('sim_home:title')}</h1>
 
         {/* Stepper */}
         <div className="mb-6">
@@ -313,74 +348,74 @@ Cliente: ${form.nome} | Email: ${form.email} | Tel: ${form.telefone} | NIF: ${fo
           <div className="w-full h-2 bg-blue-100 rounded-full overflow-hidden">
             <div className="h-2 bg-blue-700 transition-all duration-500" style={{ width: `${step * 33.33}%` }} />
           </div>
-          <div className="text-center text-blue-700 font-medium mt-2">Passo {step} de 3</div>
+          <div className="text-center text-blue-700 font-medium mt-2">{t('sim_home:stepProgress', { step })}</div>
         </div>
 
         <form onSubmit={step === 3 ? handleSubmit : handleNext} className="space-y-5">
           {step === 1 && (
             <>
-              <h3 className="text-xl font-semibold text-blue-700 mb-2 text-center">1. Dados do Imóvel</h3>
+              <h3 className="text-xl font-semibold text-blue-700 mb-2 text-center">{t('sim_home:step1Title')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold mb-1">Situação</label>
-                  <select name="situacao" value={form.situacao} onChange={handleChange} className="w-full p-3 border rounded" required onInvalid={e=>setCustomValidity(e,'Selecione a sua situação.')} onInput={e=>setCustomValidity(e,'')}>
-                    <option value="">Selecione</option>
-                    <option value="proprietario">Proprietário</option>
-                    <option value="inquilino">Inquilino</option>
+                  <label className="block text-sm font-semibold mb-1">{t('sim_home:labels.situacao')}</label>
+                  <select name="situacao" value={form.situacao} onChange={handleChange} className="w-full p-3 border rounded" required onInvalid={e=>setCustomValidity(e,t('sim_home:options.selecione'))} onInput={e=>setCustomValidity(e,'')}>
+                    <option value="">{t('sim_home:options.selecione')}</option>
+                    <option value="proprietario">{t('sim_home:options.situacao.proprietario')}</option>
+                    <option value="inquilino">{t('sim_home:options.situacao.inquilino')}</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-1">Tipo de imóvel</label>
-                  <select name="tipoImovel" value={form.tipoImovel} onChange={handleChange} className="w-full p-3 border rounded" required onInvalid={e=>setCustomValidity(e,'Selecione o tipo de imóvel.')} onInput={e=>setCustomValidity(e,'')}>
-                    <option value="">Selecione</option>
-                    <option value="apartamento">Apartamento</option>
-                    <option value="moradia">Moradia</option>
+                  <label className="block text-sm font-semibold mb-1">{t('sim_home:labels.tipoImovel')}</label>
+                  <select name="tipoImovel" value={form.tipoImovel} onChange={handleChange} className="w-full p-3 border rounded" required onInvalid={e=>setCustomValidity(e,t('sim_home:options.selecione'))} onInput={e=>setCustomValidity(e,'')}>
+                    <option value="">{t('sim_home:options.selecione')}</option>
+                    <option value="apartamento">{t('sim_home:options.tipoImovel.apartamento')}</option>
+                    <option value="moradia">{t('sim_home:options.tipoImovel.moradia')}</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-1">Utilização</label>
-                  <select name="utilizacao" value={form.utilizacao} onChange={handleChange} className="w-full p-3 border rounded" required onInvalid={e=>setCustomValidity(e,'Selecione a utilização.')} onInput={e=>setCustomValidity(e,'')}>
-                    <option value="">Selecione</option>
-                    <option value="permanente">Habitação Própria Permanente</option>
-                    <option value="secundaria">Habitação Secundária</option>
-                    <option value="arrendamento">Arrendamento</option>
+                  <label className="block text-sm font-semibold mb-1">{t('sim_home:labels.utilizacao')}</label>
+                  <select name="utilizacao" value={form.utilizacao} onChange={handleChange} className="w-full p-3 border rounded" required onInvalid={e=>setCustomValidity(e,t('sim_home:options.selecione'))} onInput={e=>setCustomValidity(e,'')}>
+                    <option value="">{t('sim_home:options.selecione')}</option>
+                    <option value="permanente">{t('sim_home:options.utilizacao.permanente')}</option>
+                    <option value="secundaria">{t('sim_home:options.utilizacao.secundaria')}</option>
+                    <option value="arrendamento">{t('sim_home:options.utilizacao.arrendamento')}</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-1">Ano de construção</label>
+                  <label className="block text-sm font-semibold mb-1">{t('sim_home:labels.anoConstrucao')}</label>
                   <input name="anoConstrucao" value={form.anoConstrucao} onChange={e=>{
                     const v = e.target.value.replace(/\D/g,'').slice(0,4);
                     setForm(prev=>({ ...prev, anoConstrucao: v }));
-                  }} placeholder="AAAA" className="w-full p-3 border rounded" required onInvalid={e=>setCustomValidity(e,'Indique o ano de construção.')} onInput={e=>setCustomValidity(e,'')} />
+                  }} placeholder={t('sim_home:placeholders.year')} className="w-full p-3 border rounded" required onInvalid={e=>setCustomValidity(e,t('sim_home:messages.yearInvalid'))} onInput={e=>setCustomValidity(e,'')} />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-1">Área (m²)</label>
+                  <label className="block text-sm font-semibold mb-1">{t('sim_home:labels.area')}</label>
                   <input name="area" value={form.area} onChange={e=>{
                     const v = e.target.value.replace(/[^\d.]/g,'').slice(0,6);
                     setForm(prev=>({ ...prev, area: v }));
-                  }} placeholder="Ex: 120" className="w-full p-3 border rounded" required onInvalid={e=>setCustomValidity(e,'Indique a área em m².')} onInput={e=>setCustomValidity(e,'')} />
+                  }} placeholder={t('sim_home:placeholders.area')} className="w-full p-3 border rounded" required onInvalid={e=>setCustomValidity(e,t('sim_home:labels.area'))} onInput={e=>setCustomValidity(e,'')} />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-1">Código Postal do risco</label>
+                  <label className="block text-sm font-semibold mb-1">{t('sim_home:labels.codigoPostal')}</label>
                   <input name="codigoPostal" value={form.codigoPostal} onChange={e=>{
                     let v = e.target.value.replace(/\D/g,"");
                     if (v.length > 4) v = v.slice(0,4)+'-'+v.slice(4,7);
                     if (v.length > 8) v = v.slice(0,8);
                     setForm(prev=>({ ...prev, codigoPostal: v }));
-                  }} placeholder="____-___" className="w-full p-3 border rounded" required maxLength={8} pattern="^[0-9]{4}-[0-9]{3}$" onInvalid={e=>setCustomValidity(e,'Formato XXXX-XXX.')} onInput={e=>setCustomValidity(e,'')} />
+                  }} placeholder={t('sim_home:placeholders.postal')} className="w-full p-3 border rounded" required maxLength={8} pattern="^[0-9]{4}-[0-9]{3}$" onInvalid={e=>setCustomValidity(e,t('sim_home:messages.postalInvalid'))} onInput={e=>setCustomValidity(e,'')} />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-1">Tipo de construção</label>
+                  <label className="block text-sm font-semibold mb-1">{t('sim_home:labels.construcao')}</label>
                   <select name="construcao" value={form.construcao} onChange={handleChange} className="w-full p-3 border rounded" required onInvalid={e=>setCustomValidity(e,'Selecione o tipo de construção.')} onInput={e=>setCustomValidity(e,'')}>
-                    <option value="">Selecione</option>
-                    <option value="betao">Betão armado</option>
-                    <option value="alvenaria">Alvenaria (tijolo/pedra)</option>
-                    <option value="madeira">Madeira</option>
+                    <option value="">{t('sim_home:options.selecione')}</option>
+                    <option value="betao">{t('sim_home:options.construcao.betao')}</option>
+                    <option value="alvenaria">{t('sim_home:options.construcao.alvenaria')}</option>
+                    <option value="madeira">{t('sim_home:options.construcao.madeira')}</option>
                   </select>
                 </div>
                 {form.situacao === 'proprietario' && (
                   <div>
-                    <label className="block text-sm font-semibold mb-1">Capital do Edifício (€)</label>
+                    <label className="block text-sm font-semibold mb-1">{t('sim_home:labels.capitalEdificio')}</label>
                     <input
                       name="capitalEdificio"
                       value={formatThousands(form.capitalEdificio)}
@@ -388,7 +423,7 @@ Cliente: ${form.nome} | Email: ${form.email} | Tel: ${form.telefone} | NIF: ${fo
                         const raw = e.target.value.replace(/[^0-9]/g,'').slice(0,9);
                         setForm(prev=>({ ...prev, capitalEdificio: raw }));
                       }}
-                      placeholder="Ex: 150000"
+                      placeholder={t('sim_home:placeholders.capEdificio')}
                       inputMode="numeric"
                       className="w-full p-3 border rounded"
                       onPaste={e=>{
@@ -401,7 +436,7 @@ Cliente: ${form.nome} | Email: ${form.email} | Tel: ${form.telefone} | NIF: ${fo
                   </div>
                 )}
                 <div>
-                  <label className="block text-sm font-semibold mb-1">Capital do Conteúdo (€)</label>
+                  <label className="block text-sm font-semibold mb-1">{t('sim_home:labels.capitalConteudo')}</label>
                   <input
                     name="capitalConteudo"
                     value={formatThousands(form.capitalConteudo)}
@@ -409,7 +444,7 @@ Cliente: ${form.nome} | Email: ${form.email} | Tel: ${form.telefone} | NIF: ${fo
                       const raw = e.target.value.replace(/[^0-9]/g,'').slice(0,9);
                       setForm(prev=>({ ...prev, capitalConteudo: raw }));
                     }}
-                    placeholder="Ex: 25 000"
+                    placeholder={t('sim_home:placeholders.capConteudo')}
                     inputMode="numeric"
                     className="w-full p-3 border rounded"
                     onPaste={e=>{
@@ -422,34 +457,34 @@ Cliente: ${form.nome} | Email: ${form.email} | Tel: ${form.telefone} | NIF: ${fo
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1">Sistemas de segurança</label>
+                <label className="block text-sm font-semibold mb-1">{t('sim_home:labels.seguranca')}</label>
                 <div className="flex flex-wrap gap-4 text-sm">
-                  <label className="inline-flex items-center gap-2"><input type="checkbox" name="seguranca" value="alarme" checked={form.seguranca.includes('alarme')} onChange={handleChange}/> Alarme</label>
-                  <label className="inline-flex items-center gap-2"><input type="checkbox" name="seguranca" value="porta-blindada" checked={form.seguranca.includes('porta-blindada')} onChange={handleChange}/> Porta blindada</label>
-                  <label className="inline-flex items-center gap-2"><input type="checkbox" name="seguranca" value="cctv" checked={form.seguranca.includes('cctv')} onChange={handleChange}/> Videovigilância</label>
+                  <label className="inline-flex items-center gap-2"><input type="checkbox" name="seguranca" value="alarme" checked={form.seguranca.includes('alarme')} onChange={handleChange}/> {t('sim_home:options.seguranca.alarme')}</label>
+                  <label className="inline-flex items-center gap-2"><input type="checkbox" name="seguranca" value="porta-blindada" checked={form.seguranca.includes('porta-blindada')} onChange={handleChange}/> {t('sim_home:options.seguranca.portaBlindada')}</label>
+                  <label className="inline-flex items-center gap-2"><input type="checkbox" name="seguranca" value="cctv" checked={form.seguranca.includes('cctv')} onChange={handleChange}/> {t('sim_home:options.seguranca.cctv')}</label>
                 </div>
               </div>
               <div className="flex justify-end gap-2">
-                <button type="button" className="px-6 py-2 bg-gray-200 rounded" disabled>Anterior</button>
-                <button type="submit" className="px-6 py-2 bg-blue-700 text-white rounded font-bold hover:bg-blue-900 transition">Próximo</button>
+                <button type="button" className="px-6 py-2 bg-gray-200 rounded" disabled>{t('sim_home:buttons.prev')}</button>
+                <button type="submit" className="px-6 py-2 bg-blue-700 text-white rounded font-bold hover:bg-blue-900 transition">{t('sim_home:buttons.next')}</button>
               </div>
             </>
           )}
 
           {step === 2 && (
             <>
-              <h3 className="text-xl font-semibold text-blue-700 mb-2 text-center">2. Dados Pessoais</h3>
+              <h3 className="text-xl font-semibold text-blue-700 mb-2 text-center">{t('sim_home:step2Title')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold mb-1">Nome completo</label>
-                  <input name="nome" value={form.nome} onChange={handleChange} placeholder="O seu nome" className="w-full p-3 border rounded" required onInvalid={e=>setCustomValidity(e,'Indique o nome.')} onInput={e=>setCustomValidity(e,'')} />
+                  <label className="block text-sm font-semibold mb-1">{t('sim_home:labels.nomeCompleto')}</label>
+                  <input name="nome" value={form.nome} onChange={handleChange} placeholder={t('sim_home:placeholders.yourName')} className="w-full p-3 border rounded" required onInvalid={e=>setCustomValidity(e,t('sim_home:messages.nameRequired'))} onInput={e=>setCustomValidity(e,'')} />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-1">Email</label>
-                  <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="nome@servidor.pt" className="w-full p-3 border rounded" required pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$" onInvalid={e=>setCustomValidity(e,'Insira um email válido.')} onInput={e=>setCustomValidity(e,'')} />
+                  <label className="block text-sm font-semibold mb-1">{t('sim_home:labels.email')}</label>
+                  <input name="email" type="email" value={form.email} onChange={handleChange} placeholder={t('sim_home:placeholders.email')} className="w-full p-3 border rounded" required pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$" onInvalid={e=>setCustomValidity(e,t('sim_home:messages.emailInvalid'))} onInput={e=>setCustomValidity(e,'')} />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-1">Telefone</label>
+                  <label className="block text-sm font-semibold mb-1">{t('sim_home:labels.telefone')}</label>
                   <input
                     name="telefone"
                     type="tel"
@@ -460,15 +495,15 @@ Cliente: ${form.nome} | Email: ${form.email} | Tel: ${form.telefone} | NIF: ${fo
                       const raw = e.target.value.replace(/\D/g,'').slice(0,9);
                       setForm(prev=>({ ...prev, telefone: raw }));
                     }}
-                    placeholder="__ _______"
+                    placeholder={t('sim_home:placeholders.phone')}
                     className="w-full p-3 border rounded"
                     required
-                    onInvalid={e=>setCustomValidity(e,'Telefone deve ter 9 dígitos.')}
+                    onInvalid={e=>setCustomValidity(e,t('sim_home:messages.phoneInvalid'))}
                     onInput={e=>setCustomValidity(e,'')}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-1">NIF (Contribuinte)</label>
+                  <label className="block text-sm font-semibold mb-1">{t('sim_home:labels.nif')}</label>
                   <input
                     name="contribuinte"
                     type="tel"
@@ -479,29 +514,29 @@ Cliente: ${form.nome} | Email: ${form.email} | Tel: ${form.telefone} | NIF: ${fo
                       const raw = e.target.value.replace(/\D/g,'').slice(0,9);
                       setForm(prev=>({ ...prev, contribuinte: raw }));
                     }}
-                    placeholder="___ ___ ___"
+                    placeholder={t('sim_home:placeholders.nif')}
                     className="w-full p-3 border rounded"
                     required
-                    onInvalid={e=>setCustomValidity(e,'NIF deve ter 9 dígitos.')}
+                    onInvalid={e=>setCustomValidity(e,t('sim_home:messages.nifInvalid'))}
                     onInput={e=>setCustomValidity(e,'')}
                   />
                 </div>
               </div>
               <div className="flex justify-between gap-2">
-                <button type="button" onClick={handlePrev} className="px-6 py-2 bg-gray-200 rounded">Anterior</button>
-                <button type="submit" className="px-6 py-2 bg-blue-700 text-white rounded font-bold hover:bg-blue-900 transition">Próximo</button>
+                <button type="button" onClick={handlePrev} className="px-6 py-2 bg-gray-200 rounded">{t('sim_home:buttons.prev')}</button>
+                <button type="submit" className="px-6 py-2 bg-blue-700 text-white rounded font-bold hover:bg-blue-900 transition">{t('sim_home:buttons.next')}</button>
               </div>
             </>
           )}
 
           {step === 3 && (
             <>
-              <h3 className="text-xl font-semibold text-blue-700 mb-2 text-center">3. Produto</h3>
+              <h3 className="text-xl font-semibold text-blue-700 mb-2 text-center">{t('sim_home:step3Title')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {([
-                  { key: 'base', title: 'Imóvel', desc: 'Proteção ao edifício com RC, incêndio/explosão, riscos elétricos e danos por água.' },
-                  { key: 'intermedio', title: 'Imóvel + Recheio', desc: 'Inclui proteção ao conteúdo (recheio), com RC, incêndio/explosão, riscos elétricos e danos por água.' },
-                  { key: 'completo', title: 'Imóvel + Recheio + Fenómenos Sísmicos', desc: 'Cobertura alargada incluindo fenómenos sísmicos, com RC e proteção ao edifício e recheio.' },
+                  { key: 'base', title: t('sim_home:product.cards.base.title'), desc: t('sim_home:product.cards.base.desc') },
+                  { key: 'intermedio', title: t('sim_home:product.cards.intermedio.title'), desc: t('sim_home:product.cards.intermedio.desc') },
+                  { key: 'completo', title: t('sim_home:product.cards.completo.title'), desc: t('sim_home:product.cards.completo.desc') },
                 ] as const).map(card => (
                   <label key={card.key} className={`border rounded-xl p-4 cursor-pointer shadow-sm flex flex-col gap-2 ${form.produto === card.key ? 'ring-2 ring-blue-600 bg-blue-50' : ''}`}>
                     <div className="flex items-center justify-between">
@@ -510,45 +545,27 @@ Cliente: ${form.nome} | Email: ${form.email} | Tel: ${form.telefone} | NIF: ${fo
                     </div>
                     <p className="text-sm text-blue-800">{card.desc}</p>
                     <ul className="text-xs text-blue-900 list-disc list-inside">
-                      {card.key === 'base' && (<>
-                        <li>Responsabilidade civil</li>
-                        <li>Incêndio e explosão</li>
-                        <li>Riscos elétricos</li>
-                        <li>Danos por água</li>
-                      </>)}
-                      {card.key === 'intermedio' && (<>
-                        <li>Responsabilidade civil</li>
-                        <li>Incêndio e explosão</li>
-                        <li>Riscos elétricos</li>
-                        <li>Danos por água</li>
-                        <li>Roubo (recheio)</li>
-                      </>)}
-                      {card.key === 'completo' && (<>
-                        <li>Responsabilidade civil</li>
-                        <li>Incêndio e explosão</li>
-                        <li>Riscos elétricos</li>
-                        <li>Danos por água</li>
-                        <li>Roubo (recheio)</li>
-                        <li>Fenómenos sísmicos</li>
-                      </>)}
+                      {card.key === 'base' && (t('sim_home:product.bullets', { returnObjects: true }) as unknown as string[]).slice(0,4).map((b: string, i: number) => (<li key={i}>{b}</li>))}
+                      {card.key === 'intermedio' && (t('sim_home:product.bullets', { returnObjects: true }) as unknown as string[]).slice(0,5).map((b: string, i: number) => (<li key={i}>{b}</li>))}
+                      {card.key === 'completo' && (t('sim_home:product.bullets', { returnObjects: true }) as unknown as string[]).map((b: string, i: number) => (<li key={i}>{b}</li>))}
                     </ul>
                     {/* Capitais selecionados */}
                     <div className="mt-2 text-xs text-blue-900 bg-white/70 border border-blue-100 rounded p-2">
-                      <div className="font-semibold mb-1">Capitais selecionados</div>
+                      <div className="font-semibold mb-1">{t('sim_home:labels.capitaisSelecionados')}</div>
                       {card.key === 'base' && (
                         <div className="flex items-center justify-between gap-2">
-                          <span>Capital Imóvel</span>
+                          <span>{t('sim_home:labels.capitalImovel')}</span>
                           <span className="font-bold">{formatCapital(form.capitalEdificio)}</span>
                         </div>
                       )}
                       {card.key !== 'base' && (
                         <div className="space-y-1">
                           <div className="flex items-center justify-between gap-2">
-                            <span>Capital Imóvel</span>
+                            <span>{t('sim_home:labels.capitalImovel')}</span>
                             <span className="font-bold">{formatCapital(form.capitalEdificio)}</span>
                           </div>
                           <div className="flex items-center justify-between gap-2">
-                            <span>Capital Conteúdo</span>
+                            <span>{t('sim_home:labels.capitalConteudoLabel')}</span>
                             <span className="font-bold">{formatCapital(form.capitalConteudo)}</span>
                           </div>
                         </div>
@@ -558,31 +575,33 @@ Cliente: ${form.nome} | Email: ${form.email} | Tel: ${form.telefone} | NIF: ${fo
                 ))}
               </div>
               <div className="mt-4">
-                <label className="block text-sm font-semibold mb-1">Coberturas adicionais</label>
+                <label className="block text-sm font-semibold mb-1">{t('sim_home:labels.adicionais')}</label>
                 <div className="flex flex-wrap gap-4 text-sm">
                   {form.produto !== 'completo' && (
-                    <label className="inline-flex items-center gap-2"><input type="checkbox" name="extras" value="sismo" checked={form.extras.includes('sismo')} onChange={handleChange}/> Fenómenos sísmico</label>
+                    <label className="inline-flex items-center gap-2"><input type="checkbox" name="extras" value="sismo" checked={form.extras.includes('sismo')} onChange={handleChange}/> {t('sim_home:extras.earthquake')}</label>
                   )}
-                  <label className="inline-flex items-center gap-2"><input type="checkbox" name="extras" value="veiculos-garagem" checked={form.extras.includes('veiculos-garagem')} onChange={handleChange}/> Veículos em garagem</label>
+                  <label className="inline-flex items-center gap-2"><input type="checkbox" name="extras" value="veiculos-garagem" checked={form.extras.includes('veiculos-garagem')} onChange={handleChange}/> {t('sim_home:extras.garageVehicles')}</label>
                 </div>
                 <div className="mt-4">
-                  <label className="block text-sm font-semibold mb-1">Detalhes adicionais</label>
+                  <label className="block text-sm font-semibold mb-1">{t('sim_home:labels.detalhesAdicionais')}</label>
                   <textarea
                     name="detalhes"
                     value={form.detalhes || ''}
                     onChange={handleChange}
-                    placeholder="Descreva aqui necessidades específicas ou coberturas desejadas..."
+                    placeholder={t('sim_home:placeholders.details')}
                     className="w-full p-3 border rounded min-h-[90px]"
                   />
                 </div>
               </div>
               <div className="flex justify-between gap-2 mt-2">
-                <button type="button" onClick={handlePrev} className="px-6 py-2 bg-gray-200 rounded">Anterior</button>
-                <button type="submit" className="px-6 py-2 bg-green-600 text-white rounded font-bold hover:bg-green-700 transition">Pedir Proposta</button>
+                <button type="button" onClick={handlePrev} className="px-6 py-2 bg-gray-200 rounded">{t('sim_home:buttons.prev')}</button>
+                <button type="submit" className="px-6 py-2 bg-green-600 text-white rounded font-bold hover:bg-green-700 transition">{t('sim_home:buttons.submit')}</button>
               </div>
               <div className="mt-4 flex items-center gap-2">
-                <input type="checkbox" id="aceitaRgpd" name="aceitaRgpd" checked={form.aceitaRgpd} onChange={handleChange} className="accent-blue-700 w-5 h-5" required onInvalid={e=>setCustomValidity(e as any,'Necessário aceitar a Política de Privacidade.')} onInput={e=>setCustomValidity(e as any,'')} />
-                <label htmlFor="aceitaRgpd" className="text-blue-900 text-sm select-none">Li e aceito a <a href={`${import.meta.env.BASE_URL}politica-rgpd`} target="_blank" rel="noopener noreferrer" className="underline text-blue-700 hover:text-blue-900">Política de Privacidade & RGPD</a>.</label>
+                <input type="checkbox" id="aceitaRgpd" name="aceitaRgpd" checked={form.aceitaRgpd} onChange={handleChange} className="accent-blue-700 w-5 h-5" required onInvalid={e=>setCustomValidity(e as any,t('sim_home:messages.rgpdRequired'))} onInput={e=>setCustomValidity(e as any,'')} />
+                <label htmlFor="aceitaRgpd" className="text-blue-900 text-sm select-none">
+                  <Trans i18nKey="contact:rgpdText" components={{ 0: <a href={`${import.meta.env.BASE_URL}${base}/politica-rgpd`} target="_blank" rel="noopener noreferrer" className="underline text-blue-700 hover:text-blue-900" /> }} />
+                </label>
               </div>
             </>
           )}

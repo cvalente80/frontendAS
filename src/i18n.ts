@@ -20,6 +20,278 @@ const resources = {
         switchToPT: 'Mudar para Português',
       }
     },
+    sim_saude: {
+      title: 'Simulação Seguro Saúde',
+      stepProgress: 'Passo {{step}} de 2',
+      step1Title: '1. Pessoas Seguras',
+      step2Title: '2. Escolha a opção',
+      placeholders: {
+        fullName: 'Nome completo',
+        birthDate: 'Data de nascimento (dd-mm-aaaa)',
+        nif: 'NIF',
+        yourName: 'O seu nome',
+        email: 'nome@servidor.pt',
+        phone: '9 dígitos'
+      },
+      buttons: {
+        addInsured: 'Adicionar pessoa segura',
+        remove: 'Remover',
+        maxReached5: 'Máximo de 5 pessoas atingido',
+        prev: 'Anterior',
+        next: 'Próximo',
+        submit: 'Pedir Proposta'
+      },
+      validations: {
+        insuredNameRequired: 'Por favor, preencha o nome completo.',
+        insuredBirthRequired: 'Por favor, preencha a data de nascimento.',
+        insuredNifRequired: 'Por favor, preencha o NIF com 9 dígitos.',
+        planRequired: 'Por favor, escolha uma das opções de plano.',
+        nameRequired: 'Por favor, preencha o nome.',
+        emailRequired: 'Por favor, preencha o email.',
+        emailInvalid: 'Por favor, insira um email válido no formato nome@servidor.pt',
+        phoneRequired: 'Por favor, preencha o telefone (9 dígitos).'
+      },
+      table: {
+        coverages: 'Coberturas',
+        option1: 'Opção 1',
+        option2: 'Opção 2',
+        option3: 'Opção 3',
+        included: 'Incluído',
+        notApplicable: '—',
+        optional: 'Opcional',
+        add: 'Aderir',
+        discounts: 'Descontos',
+        partial: 'Parcial',
+        telemedicine: 'Telemedicina'
+      },
+      benefits: {
+        consultas: 'Consultas (rede)',
+        exames: 'Exames e meios complementares',
+        ambulatoria: 'Assistência ambulatória',
+        internamento: 'Internamento hospitalar',
+        urgencias: 'Serviço de urgência',
+        parto: 'Parto e assistência na maternidade',
+        estomatologia: 'Estomatologia (dentista)',
+        medicamentos: 'Medicamentos com prescrição',
+        internacional: 'Assistência em viagem (internacional)',
+        domicilio: 'Consulta ao domicílio / Telemedicina'
+      },
+      messages: {
+        submitSuccess: 'Pedido efetuado com sucesso! Irá receber as próximas instruções por email.',
+        submitError: 'Erro ao enviar pedido. Tente novamente ou contacte-nos.'
+      },
+      emailSummary: { person: 'Pessoa', name: 'Nome:', birth: 'Nascimento:', nif: 'NIF:' },
+      backgroundAlt: 'Seguro Saúde'
+    },
+    sim_home: {
+      title: 'Simulação Seguro Habitação',
+      stepProgress: 'Passo {{step}} de 3',
+      step1Title: '1. Dados do Imóvel',
+      step2Title: '2. Dados Pessoais',
+      step3Title: '3. Produto',
+      labels: {
+        situacao: 'Situação',
+        tipoImovel: 'Tipo de imóvel',
+        utilizacao: 'Utilização',
+        anoConstrucao: 'Ano de construção',
+        area: 'Área (m²)',
+        codigoPostal: 'Código Postal do risco',
+        construcao: 'Tipo de construção',
+        capitalEdificio: 'Capital do Edifício (€)',
+        capitalConteudo: 'Capital do Conteúdo (€)',
+        seguranca: 'Sistemas de segurança',
+        nomeCompleto: 'Nome completo',
+        email: 'Email',
+        telefone: 'Telefone',
+        nif: 'NIF (Contribuinte)',
+        adicionais: 'Coberturas adicionais',
+        detalhesAdicionais: 'Detalhes adicionais',
+        capitaisSelecionados: 'Capitais selecionados',
+        capitalImovel: 'Capital Imóvel',
+        capitalConteudoLabel: 'Capital Conteúdo'
+      },
+      options: {
+        selecione: 'Selecione',
+        situacao: { proprietario: 'Proprietário', inquilino: 'Inquilino' },
+        tipoImovel: { apartamento: 'Apartamento', moradia: 'Moradia' },
+        utilizacao: { permanente: 'Habitação Própria Permanente', secundaria: 'Habitação Secundária', arrendamento: 'Arrendamento' },
+        construcao: { betao: 'Betão armado', alvenaria: 'Alvenaria (tijolo/pedra)', madeira: 'Madeira' },
+        seguranca: { alarme: 'Alarme', portaBlindada: 'Porta blindada', cctv: 'Videovigilância' }
+      },
+      placeholders: {
+        year: 'AAAA',
+        area: 'Ex: 120',
+        postal: '____-___',
+        capEdificio: 'Ex: 150000',
+        capConteudo: 'Ex: 25 000',
+        yourName: 'O seu nome',
+        email: 'nome@servidor.pt',
+        phone: '__ _______',
+        nif: '___ ___ ___',
+        details: 'Descreva aqui necessidades específicas ou coberturas desejadas...'
+      },
+      product: {
+        cards: {
+          base: { title: 'Imóvel', desc: 'Proteção ao edifício com RC, incêndio/explosão, riscos elétricos e danos por água.' },
+          intermedio: { title: 'Imóvel + Recheio', desc: 'Inclui proteção ao conteúdo (recheio), com RC, incêndio/explosão, riscos elétricos e danos por água.' },
+          completo: { title: 'Imóvel + Recheio + Fenómenos Sísmicos', desc: 'Cobertura alargada incluindo fenómenos sísmicos, com RC e proteção ao edifício e recheio.' }
+        },
+        bullets: ['Responsabilidade civil','Incêndio e explosão','Riscos elétricos','Danos por água','Roubo (recheio)','Fenómenos sísmicos']
+      },
+      extras: { earthquake: 'Fenómenos sísmico', garageVehicles: 'Veículos em garagem' },
+      buttons: { prev: 'Anterior', next: 'Próximo', submit: 'Pedir Proposta' },
+      messages: {
+        step1Missing: 'Por favor, preencha todos os campos obrigatórios do imóvel.',
+        atLeastOneCapital: 'Indique pelo menos um capital: edifício ou conteúdo.',
+        postalInvalid: 'Código Postal inválido. Formato XXXX-XXX.',
+        yearInvalid: 'Ano de construção inválido (AAAA).',
+        nameRequired: 'Preencha o nome.',
+        emailInvalid: 'Insira um email válido.',
+        phoneInvalid: 'Telefone deve ter 9 dígitos.',
+        nifInvalid: 'NIF deve ter 9 dígitos.',
+        productRequired: 'Selecione o produto.',
+        rgpdRequired: 'Necessário aceitar a Política de Privacidade & RGPD.',
+        submitSuccess: 'Pedido enviado com sucesso! Receberá instruções por email.',
+        submitError: 'Ocorreu um erro ao enviar o pedido. Tente novamente.'
+      }
+    },
+    sim_vida: {
+      title: 'Simulação Seguro Vida',
+      step1Title: '1. Pessoas Seguras',
+      step2Title: '2. Capitais a Segurar',
+      step3Title: '3. Tipo de Invalidez',
+      insuranceType: {
+        individual: 'Vida Individual',
+        mortgage: 'Vida Crédito Habitação'
+      },
+      placeholders: {
+        fullName: 'Nome completo',
+        birthDate: 'Data de nascimento (dd-mm-aaaa)',
+        nif: 'NIF',
+        capital: 'Capital seguro',
+        prazo: 'Prazo do seguro (anos)',
+        yourName: 'Nome',
+        email: 'Email',
+        phone: 'Telefone'
+      },
+      buttons: {
+        addInsured: 'Adicionar pessoa segura',
+        remove: 'Remover',
+        maxReached: 'Máximo de 2 pessoas atingido',
+        prev: 'Anterior',
+        next: 'Próximo',
+        simulate: 'Simular'
+      },
+      validations: {
+        insuredNameRequired: 'Por favor, preencha o nome completo.',
+        insuredBirthRequired: 'Por favor, preencha a data de nascimento.',
+        insuredNifRequired: 'Por favor, preencha o NIF com 9 dígitos.',
+        capitalRequired: 'Por favor, preencha o capital seguro.',
+        prazoRequired: 'Por favor, preencha o prazo do seguro.',
+        nameRequired: 'Por favor, preencha o nome completo.',
+        emailRequired: 'Por favor, preencha o email.',
+        emailInvalid: 'Por favor, insira um email válido no formato nome@servidor.pt',
+        phoneRequired: 'Por favor, preencha o telefone (9 dígitos).'
+      },
+      disability: {
+        label: 'Tipo de Invalidez',
+        explanationPrefix: 'Explicação:',
+        options: { IAD: 'IAD', ITP: 'ITP' },
+        emailLabels: {
+          IAD: 'Invalidez Absoluta e Definitiva (IAD)',
+          ITP: 'Invalidez Total e Permanente (ITP)'
+        },
+        explanations: {
+          IAD: 'Invalidez Absoluta e Definitiva (IAD): A indemnização é realizada quando o segurado fica totalmente dependente de terceiros para as atividades básicas do dia a dia.',
+          ITP: 'Invalidez Total e Permanente (ITP): A indemnização é realizada quando segurado fica impossibilitado de exercer qualquer atividade profissional, mas pode realizar tarefas básicas sozinho.'
+        }
+      },
+      messages: {
+        submitSuccess: 'Pedido efetuado com sucesso! Irá receber as próximas instruções por email.',
+        submitError: 'Erro ao enviar pedido. Tente novamente ou contacte-nos.'
+      },
+      emailSummary: {
+        person: 'Pessoa',
+        name: 'Nome:',
+        birth: 'Nascimento:',
+        nif: 'NIF:'
+      },
+      backgroundAlt: 'Plano de proteção familiar - Seguro de Vida'
+    },
+    sim_auto: {
+      title: 'Simulação de Seguro Auto',
+      stepProgress: 'Passo {{step}} de 3',
+      step1Title: 'Passo 1 - Identificação do condutor',
+      step2Title: 'Passo 2 - Identificação da viatura',
+      step3Title: 'Passo 3 - Produto e coberturas adicionais',
+      placeholders: {
+        name: 'Nome completo',
+        email: 'Email',
+        birthDate: 'Data de nascimento (dd-mm-aaaa)',
+        licenseDate: 'Data da Carta de condução (dd-mm-aaaa)',
+        postalCode: 'Código Postal (____-___)',
+        nif: 'NIF (Contribuinte)',
+        carBrand: 'Marca do carro',
+        carModel: 'Modelo do carro',
+        carYear: 'Ano',
+        plate: 'XX-XX-XX',
+        otherRequests: 'Ex.: limites, condutor jovem, franquias desejadas, observações...'
+      },
+      validations: {
+        under18: 'Apenas condutores com 18 anos ou mais podem prosseguir.',
+        nameFull: 'Por favor, indique o nome completo (pelo menos dois nomes).',
+        emailRequired: 'Por favor, preencha o email.',
+        emailInvalid: 'Por favor, insira um email válido.',
+        postalFormat: 'O código postal deve ter 7 dígitos numéricos (formato XXXX-XXX).',
+        postalHelp: 'Por favor, insira o código postal no formato XXXX-XXX com 7 dígitos numéricos.',
+        nifInvalid: 'NIF inválido.',
+        nifRequired: 'Por favor, preencha o NIF válido com 9 dígitos.',
+        plateFormat: 'Por favor, preencha a matrícula no formato XX-XX-XX.',
+        brandRequired: 'Por favor, preencha a marca do carro.',
+        modelRequired: 'Por favor, preencha o modelo do carro.',
+        yearRequired: 'Por favor, preencha o ano do carro.',
+        rgpdRequired: 'Por favor, aceite a Política de Privacidade & RGPD para prosseguir.'
+      },
+      typeLabel: 'Tipo de seguro:',
+      typeSelectPlaceholder: 'Selecione o tipo de seguro',
+      typeThirdParty: 'Terceiros',
+      typeOwnDamage: 'Danos Próprios',
+      typeThirdPartyInfo: 'Seguro de Terceiros: cobre danos causados a terceiros, pessoas e bens, mas não cobre danos ao seu próprio veículo.',
+      typeOwnDamageInfo: 'Seguro de Danos Próprios: cobre danos ao seu próprio veículo, além dos danos causados a terceiros.',
+      baseCoverLabel: 'Coberturas base:',
+      additionalCoverages: 'Coberturas adicionais:',
+      baseCoversThirdParty: ['Responsabilidade civil', 'Proteção jurídica'],
+      baseCoversOwnDamage: ['Choque, colisão e capotamento', 'Furto ou roubo', 'Incêndio'],
+      coverageLabels: {
+        occupants: 'Ocupantes',
+        glass: 'Vidros',
+        assistance: 'Assistência em viagem',
+        fire: 'Incêndio',
+        theft: 'Roubo',
+        naturalCatastrophes: 'Riscos catastróficos da natureza',
+        vandalism: 'Atos de vandalismo',
+        replacementVehicle: 'Veículo de Substituição'
+      },
+      buttons: { prev: 'Anterior', next: 'Próximo', simulate: 'Simular' },
+      messages: {
+        selectType: 'Por favor, selecione o tipo de seguro.',
+        submitSuccess: 'Simulação submetida com sucesso!\nEmail enviado.',
+        submitEmailError: 'Simulação submetida, mas houve erro ao enviar o email.'
+      },
+      summary: {
+        title: 'Simulação',
+        labels: {
+          vehicle: 'Viatura:',
+          nif: 'NIF:',
+          birthDate: 'Data Nascimento:',
+          licenseDate: 'Data Carta:',
+          postalCode: 'Código Postal:',
+          type: 'Tipo:',
+          coverages: 'Coberturas:',
+          otherRequests: 'Outros pedidos:'
+        }
+      }
+    },
     contact: {
       seoTitle: 'Contacto',
       seoDesc: 'Fale connosco para pedidos de informação, simulações ad hoc ou propostas personalizadas.',
@@ -490,6 +762,23 @@ const resources = {
       heroTitle: 'Seguros em Ansião (Leiria) — Auto, Vida, Saúde e Habitação',
       heroDesc: 'Ansião Seguros: simulações rápidas e propostas personalizadas para Auto, Vida, Saúde, Habitação e soluções para empresas.',
       featuredIndividuals: 'Produtos para pessoas particulares',
+      heroSlides: [
+        {
+          title: 'Simule o seu seguro auto em segundos',
+          text: 'Proteção completa para o seu veículo com atendimento personalizado.',
+          cta: 'Simule seu seguro auto'
+        },
+        {
+          title: 'Seguro Vida e Saúde',
+          text: 'Segurança para você e sua família, com planos flexíveis.',
+          cta: 'Simule seguro vida'
+        },
+        {
+          title: 'Seguro Multirriscos Habitação',
+          text: 'Proteja seu lar contra imprevistos e garanta tranquilidade.',
+          cta: 'Simule seguro multirriscos habitação'
+        }
+      ],
       productsIndividuals: {
         auto: { name: 'Seguro Auto', desc: 'Proteção completa para seu veículo.' },
         life: { name: 'Seguro Vida', desc: 'Segurança para você e sua família.' },
@@ -532,11 +821,283 @@ const resources = {
         switchToPT: 'Switch to Portuguese',
       }
     },
+    sim_saude: {
+      title: 'Health Insurance Quote',
+      stepProgress: 'Step {{step}} of 2',
+      step1Title: '1. Insured persons',
+      step2Title: '2. Choose an option',
+      placeholders: {
+        fullName: 'Full name',
+        birthDate: 'Date of birth (dd-mm-yyyy)',
+        nif: 'NIF (Tax ID)',
+        yourName: 'Your name',
+        email: 'Email',
+        phone: '9 digits'
+      },
+      buttons: {
+        addInsured: 'Add insured person',
+        remove: 'Remove',
+        maxReached5: 'Maximum of 5 people reached',
+        prev: 'Previous',
+        next: 'Next',
+  submit: 'Request quote'
+      },
+      validations: {
+        insuredNameRequired: 'Please enter the full name.',
+        insuredBirthRequired: 'Please fill in the date of birth.',
+        insuredNifRequired: 'Please fill in the 9‑digit NIF.',
+        planRequired: 'Please choose one of the plan options.',
+        nameRequired: 'Please enter your name.',
+        emailRequired: 'Please fill in your email.',
+        emailInvalid: 'Please enter a valid email (e.g., name@server.pt).',
+        phoneRequired: 'Please fill in the phone number (9 digits).'
+      },
+      table: {
+        coverages: 'Cover',
+        option1: 'Option 1',
+        option2: 'Option 2',
+        option3: 'Option 3',
+        included: 'Included',
+        notApplicable: '—',
+        optional: 'Optional',
+        add: 'Add',
+        discounts: 'Discounts',
+        partial: 'Partial',
+        telemedicine: 'Telemedicine'
+      },
+      benefits: {
+        consultas: 'Consultations (approved network)',
+        exames: 'Tests and diagnostics',
+        ambulatoria: 'Out‑patient care',
+        internamento: 'Hospitalisation',
+        urgencias: 'Emergency care',
+        parto: 'Childbirth and maternity care',
+        estomatologia: 'Dental care',
+        medicamentos: 'Prescription medicines',
+        internacional: 'Travel assistance (international)',
+        domicilio: 'Home visit / Telemedicine'
+      },
+      messages: {
+        submitSuccess: 'Request submitted successfully! You will receive further instructions by email.',
+        submitError: 'Error sending request. Please try again or contact us.'
+      },
+      emailSummary: { person: 'Person', name: 'Name:', birth: 'Date of birth:', nif: 'NIF:' },
+      backgroundAlt: 'Health Insurance'
+    },
+    sim_home: {
+      title: 'Home Insurance Quote',
+      stepProgress: 'Step {{step}} of 3',
+      step1Title: '1. Property details',
+      step2Title: '2. Personal details',
+      step3Title: '3. Product',
+      labels: {
+        situacao: 'Situation',
+        tipoImovel: 'Property type',
+        utilizacao: 'Use',
+        anoConstrucao: 'Year of construction',
+        area: 'Area (m²)',
+        codigoPostal: 'Risk postcode',
+        construcao: 'Construction type',
+        capitalEdificio: 'Buildings sum insured (€)',
+        capitalConteudo: 'Contents sum insured (€)',
+        seguranca: 'Security systems',
+        nomeCompleto: 'Full name',
+        email: 'Email',
+        telefone: 'Phone',
+        nif: 'Portuguese NIF (Tax ID)',
+  adicionais: 'Additional cover',
+        detalhesAdicionais: 'Additional details',
+        capitaisSelecionados: 'Selected sums insured',
+        capitalImovel: 'Buildings capital',
+        capitalConteudoLabel: 'Contents capital'
+      },
+      options: {
+        selecione: 'Select',
+        situacao: { proprietario: 'Owner', inquilino: 'Tenant' },
+        tipoImovel: { apartamento: 'Apartment', moradia: 'House' },
+        utilizacao: { permanente: 'Primary home', secundaria: 'Secondary home', arrendamento: 'Rental' },
+        construcao: { betao: 'Reinforced concrete', alvenaria: 'Masonry (brick/stone)', madeira: 'Wood' },
+        seguranca: { alarme: 'Alarm', portaBlindada: 'Security door', cctv: 'CCTV' }
+      },
+      placeholders: {
+        year: 'YYYY',
+        area: 'e.g., 120',
+        postal: '____-___',
+        capEdificio: 'e.g., 150000',
+        capConteudo: 'e.g., 25 000',
+        yourName: 'Your name',
+        email: 'name@server.pt',
+        phone: '__ _______',
+        nif: '___ ___ ___',
+        details: 'Describe any specific needs or desired cover...'
+      },
+      product: {
+        cards: {
+          base: { title: 'Buildings', desc: 'Buildings cover with liability, fire/explosion, electrical surge and water damage.' },
+          intermedio: { title: 'Buildings + Contents', desc: 'Includes contents cover with liability, fire/explosion, electrical surge and water damage.' },
+          completo: { title: 'Buildings + Contents + Seismic Events', desc: 'Extended cover including seismic events, with liability and cover for buildings and contents.' }
+        },
+        bullets: ['Liability','Fire and explosion','Electrical surge','Water damage','Theft (contents)','Seismic events']
+      },
+      extras: { earthquake: 'Seismic events', garageVehicles: 'Vehicles kept in a garage' },
+  buttons: { prev: 'Previous', next: 'Next', submit: 'Request quote' },
+      messages: {
+        step1Missing: 'Please fill in all required property fields.',
+        atLeastOneCapital: 'Provide at least one capital: building or contents.',
+        postalInvalid: 'Invalid postcode. Format XXXX-XXX.',
+        yearInvalid: 'Invalid construction year (YYYY).',
+        nameRequired: 'Enter your name.',
+        emailInvalid: 'Enter a valid email.',
+        phoneInvalid: 'Phone must have 9 digits.',
+        nifInvalid: 'NIF must have 9 digits.',
+        productRequired: 'Select a product.',
+        rgpdRequired: 'You must accept the Privacy Policy & GDPR.',
+        submitSuccess: 'Request sent successfully! You will receive instructions by email.',
+        submitError: 'An error occurred while sending the request. Please try again.'
+      }
+    },
+    sim_vida: {
+      title: 'Life Insurance Quote',
+      step1Title: '1. Insured persons',
+      step2Title: '2. Sums insured',
+      step3Title: '3. Disability type',
+      insuranceType: {
+        individual: 'Individual Life',
+        mortgage: 'Mortgage Life'
+      },
+      placeholders: {
+        fullName: 'Full name',
+        birthDate: 'Date of birth (dd-mm-yyyy)',
+        nif: 'NIF (Tax ID)',
+        capital: 'Sum insured',
+        prazo: 'Policy term (years)',
+        yourName: 'Name',
+        email: 'Email',
+        phone: 'Phone'
+      },
+      buttons: {
+        addInsured: 'Add insured person',
+        remove: 'Remove',
+        maxReached: 'Maximum of 2 people reached',
+        prev: 'Previous',
+        next: 'Next',
+        simulate: 'Get quote'
+      },
+      validations: {
+        insuredNameRequired: 'Please enter the full name.',
+        insuredBirthRequired: 'Please fill in the date of birth.',
+        insuredNifRequired: 'Please fill in the 9‑digit NIF.',
+        capitalRequired: 'Please fill in the sum insured.',
+        prazoRequired: 'Please fill in the policy term.',
+        nameRequired: 'Please enter your full name.',
+        emailRequired: 'Please fill in your email.',
+        emailInvalid: 'Please enter a valid email (e.g., name@server.pt).',
+        phoneRequired: 'Please fill in the phone number (9 digits).'
+      },
+      disability: {
+        label: 'Disability type',
+        explanationPrefix: 'Explanation:',
+        options: { IAD: 'IAD', ITP: 'ITP' },
+        emailLabels: {
+          IAD: 'Permanent and absolute disability (IAD)',
+          ITP: 'Total and permanent disability (ITP)'
+        },
+        explanations: {
+          IAD: 'Benefit is paid when the insured becomes totally dependent on others for basic daily activities (ADL‑based).',
+          ITP: 'Benefit is paid when the insured is unable to perform any gainful occupation, though can perform basic tasks.'
+        }
+      },
+      messages: {
+        submitSuccess: 'Request submitted successfully! You will receive further instructions by email.',
+        submitError: 'Error sending request. Please try again or contact us.'
+      },
+      emailSummary: {
+        person: 'Person',
+        name: 'Name:',
+        birth: 'Date of birth:',
+        nif: 'NIF:'
+      },
+      backgroundAlt: 'Family protection plan — Life Insurance'
+    },
+    sim_auto: {
+      title: 'Car Insurance Quote',
+      stepProgress: 'Step {{step}} of 3',
+      step1Title: 'Step 1 — Driver details',
+      step2Title: 'Step 2 — Vehicle details',
+      step3Title: 'Step 3 — Product and additional cover',
+      placeholders: {
+        name: 'Full name',
+        email: 'Email',
+        birthDate: 'Date of birth (dd-mm-yyyy)',
+        licenseDate: 'Driving licence issue date (dd-mm-yyyy)',
+        postalCode: 'Postcode (____-___)',
+        nif: 'NIF (Tax ID)',
+        carBrand: 'Car make',
+        carModel: 'Car model',
+        carYear: 'Year',
+        plate: 'Portuguese registration (XX-XX-XX)',
+        otherRequests: 'E.g.: limits, young driver, desired deductibles, notes...'
+      },
+      validations: {
+        under18: 'Only drivers aged 18 or older can proceed.',
+        nameFull: 'Please enter your full name (at least two names).',
+        emailRequired: 'Please fill in your email.',
+        emailInvalid: 'Enter a valid email.',
+        postalFormat: 'Postcode must have 7 numeric digits (format XXXX-XXX).',
+        postalHelp: 'Please enter the postcode in the format XXXX-XXX with 7 numeric digits.',
+        nifInvalid: 'Invalid NIF.',
+        nifRequired: 'Enter a valid 9‑digit NIF.',
+        plateFormat: 'Please enter the licence plate in the format XX-XX-XX.',
+        brandRequired: 'Please fill in the car make.',
+        modelRequired: 'Please fill in the car model.',
+        yearRequired: 'Please fill in the car year.',
+        rgpdRequired: 'You must accept the Privacy Policy & GDPR to proceed.'
+      },
+      typeLabel: 'Insurance type:',
+      typeSelectPlaceholder: 'Select the insurance type',
+      typeThirdParty: 'Third party',
+      typeOwnDamage: 'Comprehensive',
+      typeThirdPartyInfo: 'Third party insurance: covers liability to others (people and property); does not cover damage to your own vehicle.',
+      typeOwnDamageInfo: 'Comprehensive insurance: includes damage to your own vehicle, as well as third party liability.',
+      baseCoverLabel: 'Core cover:',
+      additionalCoverages: 'Additional cover:',
+      baseCoversThirdParty: ['Third party liability', 'Legal expenses'],
+      baseCoversOwnDamage: ['Accidental damage', 'Theft', 'Fire'],
+      coverageLabels: {
+        occupants: 'Personal accident (occupants)',
+        glass: 'Windscreen cover',
+        assistance: 'Roadside assistance',
+        fire: 'Fire',
+        theft: 'Theft',
+        naturalCatastrophes: 'Natural events',
+        vandalism: 'Vandalism',
+        replacementVehicle: 'Courtesy car'
+      },
+      buttons: { prev: 'Previous', next: 'Next', simulate: 'Get quote' },
+      messages: {
+        selectType: 'Please select the insurance type.',
+        submitSuccess: 'Quote submitted successfully!\nEmail sent.',
+        submitEmailError: 'Quote submitted, but there was an error sending the email.'
+      },
+      summary: {
+        title: 'Quote',
+        labels: {
+          vehicle: 'Vehicle:',
+          nif: 'NIF:',
+          birthDate: 'Date of Birth:',
+          licenseDate: 'Driving licence issue date:',
+          postalCode: 'Postcode:',
+          type: 'Type:',
+          coverages: 'Cover:',
+          otherRequests: 'Other requests:'
+        }
+      }
+    },
     contact: {
       seoTitle: 'Contact',
       seoDesc: 'Get in touch for information requests, ad‑hoc quotes or tailored proposals.',
       pageTitle: 'Get in touch',
-      pageSubtitle: 'Send us an information request or an ad‑hoc quote. We’ll reply shortly.',
+  pageSubtitle: 'Send us an information request or an ad‑hoc quote. We’ll reply shortly.',
       placeholders: {
         name: 'Full name',
         email: 'Email',
@@ -607,7 +1168,7 @@ const resources = {
       headerSubtitle: 'Efficient management and complete protection for all your company vehicles',
       badge: 'Fidelidade Product',
       ctaRequest: 'Request proposal',
-      ctaContact: 'Talk to an advisor',
+  ctaContact: 'Talk to an adviser',
       whyTitle: 'Why choose Fleet Insurance?',
       whyItems: [
         'Centralised management of all company vehicles',
@@ -617,10 +1178,10 @@ const resources = {
       ],
       coveragesTitle: 'Available coverages',
       coverages: [
-        { title: 'Own Damage', desc: 'Covers damage to fleet vehicles caused by accident, collision, fire, theft or robbery.' },
-        { title: 'Third‑party Liability', desc: 'Protection against damage caused to third parties, people and property.' },
-        { title: 'Roadside Assistance', desc: 'Towing, transport, accommodation and support in case of breakdown or accident.' },
-        { title: 'Legal Protection', desc: 'Legal support in dispute situations related to company vehicles.' }
+        { title: 'Accidental damage', desc: 'Covers damage to fleet vehicles caused by accident, collision, fire, theft or robbery.' },
+        { title: 'Third party liability', desc: 'Protection against damage caused to third parties (people and property).' },
+        { title: 'Roadside assistance', desc: 'Towing, transport, accommodation and support in case of breakdown or accident.' },
+        { title: 'Legal expenses', desc: 'Legal expenses cover in dispute situations related to company vehicles.' }
       ],
       advantagesTitle: 'Exclusive advantages',
       advantages: [
@@ -633,7 +1194,7 @@ const resources = {
       howSteps: [
         'Request a tailored proposal for your company.',
         'Choose the cover and sums insured that best suit your fleet.',
-        'Send the required documents and complete the purchase with support from an advisor.'
+        'Send the required documents and complete the purchase with support from an adviser.'
       ],
       formTitle: 'Request Proposal — Fleet',
       stepProgress: 'Step {{step}} of 3',
@@ -646,7 +1207,7 @@ const resources = {
         nif: 'NIF (Tax ID)',
         postalCode: 'Postcode (____-___)',
         birthDate: 'Date of birth (dd-mm-yyyy)',
-        licenseDate: 'Driving licence date (dd-mm-yyyy)',
+  licenseDate: 'Driving licence issue date (dd-mm-yyyy)',
         carBrand: 'Make',
         carModel: 'Model',
         carYear: 'Year',
@@ -656,23 +1217,23 @@ const resources = {
       vehicles: { titlePrefix: 'Vehicle #', add: '+ Add vehicle', remove: 'Remove' },
       typeLabel: 'Insurance type:',
       typeSelectPlaceholder: 'Select the insurance type',
-      typeThirdParty: 'Third‑party',
-      typeOwnDamage: 'Own Damage',
-      typeThirdPartyInfo: 'Third‑party insurance: covers damage to third parties, people and property.',
-      typeOwnDamageInfo: 'Own Damage insurance: covers damage to your vehicles, in addition to third‑party liability.',
-      additionalCoverages: 'Additional coverages:',
+  typeThirdParty: 'Third party',
+  typeOwnDamage: 'Comprehensive',
+  typeThirdPartyInfo: 'Third party insurance: covers liability to others (people and property).',
+  typeOwnDamageInfo: 'Comprehensive insurance: includes damage to your vehicles, as well as third party liability.',
+  additionalCoverages: 'Additional cover:',
       coverageLabels: {
-        occupants: 'Occupants',
-        glass: 'Glass',
+        occupants: 'Personal accident (occupants)',
+        glass: 'Windscreen cover',
         assistance: 'Roadside assistance',
         fire: 'Fire',
         theft: 'Theft',
-        naturalCatastrophes: 'Natural catastrophes',
+        naturalCatastrophes: 'Natural events',
         vandalism: 'Vandalism',
-        replacementVehicle: 'Replacement vehicle'
+        replacementVehicle: 'Courtesy car'
       },
       otherRequestsLabel: 'Other requests / details',
-      buttons: { prev: 'Previous', next: 'Next', submit: 'Request Proposal' },
+  buttons: { prev: 'Previous', next: 'Next', submit: 'Request quote' },
       rgpdText: 'I have read and accept the <0>Privacy Policy & GDPR</0>.',
       messages: {
         selectType: 'Please select the insurance type.',
@@ -700,7 +1261,7 @@ const resources = {
       headerTitle: 'Health Insurance',
       headerSubtitle: 'Take care of your well-being with flexible plans and broad coverage',
       ctaSimulate: 'Get Health Quote',
-      ctaContact: 'Talk to an advisor',
+  ctaContact: 'Talk to an adviser',
       whyTitle: 'Why choose Health Insurance?',
       whyItems: [
         'Access to a wide network of hospitals and clinics',
@@ -712,7 +1273,7 @@ const resources = {
       coverages: [
         { title: 'Appointments and Exams', desc: 'Coverage for medical appointments, lab tests and imaging.' },
         { title: 'Hospitalisation', desc: 'Coverage for hospital stay expenses and surgeries.' },
-        { title: 'Medication', desc: 'Discounts and partial coverage for prescribed medicines.' },
+        { title: 'Medication', desc: 'Discounts and partial cover for prescribed medicines.' },
         { title: 'Clinics and Hospitals Network', desc: 'Easy access to an accredited health network.' }
       ],
       benefitsTitle: 'Exclusive advantages',
@@ -730,13 +1291,13 @@ const resources = {
       ]
     },
     product_home: {
-      seoTitle: 'Home Multi‑risk Insurance',
+      seoTitle: 'Home Insurance (Buildings & Contents)',
       seoDesc: 'Protect your home against unforeseen events with flexible cover.',
-      headerTitle: 'Home Multi‑risk Insurance',
+      headerTitle: 'Home Insurance (Buildings & Contents)',
       headerSubtitle: 'Protect your home against unforeseen events and ensure peace of mind for your family',
-      ctaSimulate: 'Get Home Quote',
-      ctaContact: 'Talk to an advisor',
-      whyTitle: 'Why choose Home Multi‑risk?',
+      ctaSimulate: 'Get home insurance quote',
+      ctaContact: 'Talk to an adviser',
+      whyTitle: 'Why choose Home Insurance?',
       whyItems: [
         'Protection against fire, flood, theft and other risks',
         '24/7 assistance for household emergencies',
@@ -745,10 +1306,10 @@ const resources = {
       ],
       coveragesTitle: 'Available coverages',
       coverages: [
-        { title: 'Fire, Flood and Natural Events', desc: 'Protection against damage caused by fire, water and natural events.' },
-        { title: 'Theft and Burglary', desc: 'Coverage for goods stolen or taken from the residence.' },
+        { title: 'Fire, flood and natural events', desc: 'Protection against damage caused by fire, water and natural events.' },
+        { title: 'Theft and burglary', desc: 'Cover for goods stolen or taken from the residence.' },
         { title: 'Liability', desc: 'Protection against damage caused to third parties.' },
-        { title: '24/7 Assistance', desc: 'Emergency services such as locksmith, electrician and plumber.' }
+        { title: '24/7 assistance', desc: 'Emergency services such as locksmith, electrician and plumber.' }
       ],
       benefitsTitle: 'Exclusive advantages',
       benefits: [
@@ -759,17 +1320,17 @@ const resources = {
       ],
       howTitle: 'How to get it?',
       howSteps: [
-        'Get your home insurance quote online or talk to an advisor.',
+        'Get your home insurance quote online or talk to an adviser.',
         'Choose the plan and cover that best fit your profile.',
         'Send the required documents and complete the purchase.'
       ]
     },
     product_mreb: {
-      seoTitle: 'Business Multi‑risk Insurance',
+      seoTitle: 'Commercial Multi‑risk Insurance',
       seoDesc: 'Protect your company’s buildings, equipment and goods with flexible cover.',
-      headerTitle: 'Business Multi‑risk Insurance',
+      headerTitle: 'Commercial Multi‑risk Insurance',
       headerSubtitle: 'Protect your company assets against unforeseen events and ensure business continuity',
-      ctaContact: 'Talk to an advisor',
+      ctaContact: 'Talk to an adviser',
       whatTitle: 'What is Business Multi‑risk Insurance?',
       whatDesc: 'Business Multi‑risk Insurance is designed to protect buildings, equipment, goods and other assets essential to your company’s operations, providing support in the event of a claim and minimising losses.',
       whoTitle: 'Who is it for?',
@@ -780,12 +1341,12 @@ const resources = {
       ],
       coveragesTitle: 'Main coverages',
       coverages: [
-        { title: 'Fire, Flood and Natural Events', desc: 'Protection against damage caused by fire, water, storms and other natural events.' },
-        { title: 'Theft and Burglary', desc: 'Coverage for goods and merchandise in case of theft or burglary at the premises.' },
+        { title: 'Fire, flood and natural events', desc: 'Protection against damage caused by fire, water, storms and other natural events.' },
+        { title: 'Theft and burglary', desc: 'Cover for goods and merchandise in case of theft or burglary at the premises.' },
         { title: 'Liability', desc: 'Protection against damage caused to third parties in the course of business activities.' },
-        { title: '24/7 Assistance', desc: 'Emergency services such as locksmith, electrician and plumber for unforeseen situations.' }
+        { title: '24/7 assistance', desc: 'Emergency services such as locksmith, electrician and plumber for unforeseen situations.' }
       ],
-      advantagesTitle: 'Insurance advantages',
+  advantagesTitle: 'Insurance advantages',
       advantages: [
         'Peace of mind to run your business',
         'Fast assistance in emergencies',
@@ -796,18 +1357,18 @@ const resources = {
       howSteps: [
         'Request a tailored proposal for your company.',
         'Choose the cover and sums insured that best suit your business.',
-        'Complete the purchase with support from a specialist advisor.'
+        'Complete the purchase with support from a specialist adviser.'
       ]
     },
     product_rcp: {
-      seoTitle: 'Professional Liability Insurance',
+      seoTitle: 'Professional Indemnity Insurance',
       seoDesc: 'Financial protection against claims for errors and omissions in professional practice. Get a quote now.',
-      headerTitle: 'Professional Liability Insurance',
+      headerTitle: 'Professional Indemnity Insurance',
       headerSubtitle: 'Protect your professional activity against claims and unforeseen events.',
-      ctaSimulate: 'Get professional liability quote',
-      ctaContact: 'Talk to an advisor',
+      ctaSimulate: 'Get professional indemnity quote',
+      ctaContact: 'Talk to an adviser',
       whatTitle: 'What is this insurance?',
-      whatDesc: 'Professional Liability Insurance protects professionals and companies against financial losses caused to third parties as a result of errors, omissions or negligence in the course of their activity.',
+      whatDesc: 'Professional indemnity insurance protects professionals and companies against financial losses caused to third parties as a result of errors, omissions or negligence in the course of their activity.',
       whoTitle: 'Who is it for?',
       whoItems: [
         'Liberal professionals (lawyers, engineers, architects, doctors, etc.)',
@@ -816,10 +1377,10 @@ const resources = {
       ],
       coveragesTitle: 'Main coverages',
       coverages: [
-        { title: 'Errors and Omissions', desc: 'Protection in case of damage caused to third parties due to professional failures.' },
-        { title: 'Defence Costs', desc: 'Includes legal costs and attorneys’ fees in court proceedings.' },
-        { title: 'Indemnities', desc: 'Covers indemnities owed to third parties for material or financial loss.' },
-        { title: 'Reputation Protection', desc: 'Support in situations that may affect professional reputation.' }
+        { title: 'Errors and omissions', desc: 'Protection in case of damage caused to third parties due to professional failures.' },
+        { title: 'Defence costs', desc: 'Includes legal costs and solicitors’ fees in court proceedings.' },
+        { title: 'Indemnities', desc: 'Cover for indemnities owed to third parties for material or financial loss.' },
+        { title: 'Reputation protection', desc: 'Support in situations that may affect professional reputation.' }
       ],
       advantagesTitle: 'Insurance advantages',
       advantages: [
@@ -832,7 +1393,7 @@ const resources = {
       howSteps: [
         'Request a tailored proposal for your activity.',
         'Review the cover and choose the options that best suit your profile.',
-        'Complete the purchase with support from a specialist advisor.'
+        'Complete the purchase with support from a specialist adviser.'
       ]
     },
     product_condo: {
@@ -841,7 +1402,7 @@ const resources = {
       headerTitle: 'Condominium Insurance',
       headerSubtitle: 'Complete protection for your building and common areas',
       ctaSimulate: 'Get condo quote',
-      ctaContact: 'Talk to an advisor',
+  ctaContact: 'Talk to an adviser',
       whatTitle: 'What is Condominium Insurance?',
       whatDesc: 'Condominium Insurance is designed to protect the building and its common parts, covering damage from fire, natural events, flooding, liability and other situations that can affect residents’ peace of mind.',
       whoTitle: 'Who is it for?',
@@ -852,10 +1413,10 @@ const resources = {
       ],
       coveragesTitle: 'Main coverages',
       coverages: [
-        { title: 'Fire, Flood and Natural Events', desc: 'Protection against damage caused by fire, water, storms and other natural events.' },
-        { title: 'Condominium Liability', desc: 'Coverage for damage caused to third parties in the building’s common areas.' },
-        { title: 'Water Damage and Glass Breakage', desc: 'Protection for frequent incidents affecting common areas and facades.' },
-        { title: '24/7 Assistance', desc: 'Immediate support from specialised technicians for emergencies.' }
+        { title: 'Fire, flood and natural events', desc: 'Protection against damage caused by fire, water, storms and other natural events.' },
+        { title: 'Condominium liability', desc: 'Cover for damage caused to third parties in the building’s common areas.' },
+        { title: 'Water damage and glass breakage', desc: 'Protection for frequent incidents affecting common areas and facades.' },
+        { title: '24/7 assistance', desc: 'Immediate support from specialised technicians for emergencies.' }
       ],
       advantagesTitle: 'Insurance advantages',
       advantages: [
@@ -868,17 +1429,17 @@ const resources = {
       howSteps: [
         'Request a proposal for your condominium.',
         'Choose the cover and sums insured according to the building’s needs.',
-        'Complete with the support of a specialist advisor.'
+        'Complete with the support of a specialist adviser.'
       ]
     },
     product_work: {
-      seoTitle: 'Workers’ Compensation Insurance (Companies)',
+      seoTitle: 'Occupational Accidents Insurance (Companies)',
       seoDesc: 'Mandatory protection and comprehensive assistance for employees. Request your proposal.',
-      headerTitle: 'Workers’ Compensation Insurance (Companies)',
+      headerTitle: 'Occupational Accidents Insurance (Companies)',
       headerSubtitle: 'Protect your employees with mandatory coverage and comprehensive assistance',
       ctaRequest: 'Request proposal',
-      ctaContact: 'Talk to an advisor',
-      whyTitle: 'Why choose Workers’ Compensation?',
+      ctaContact: 'Talk to an adviser',
+      whyTitle: 'Why choose Occupational Accidents insurance?',
       whyItems: [
         'Complies with mandatory legislation for companies',
         'Protection for employees in case of accidents at work',
@@ -887,10 +1448,10 @@ const resources = {
       ],
       coveragesTitle: 'Available coverages',
       coverages: [
-        { title: 'Medical and Hospital Expenses', desc: 'Coverage for treatments, appointments, hospitalisation and medication after a workplace accident.' },
-        { title: 'Disability Compensation', desc: 'Indemnity in case of temporary or permanent disability of the employee.' },
-        { title: 'Pharmaceutical Assistance', desc: 'Coverage for expenses with prescribed medicines after an accident.' },
-        { title: 'Claims Management', desc: 'Support in managing and following up claims processes.' }
+        { title: 'Medical and hospital expenses', desc: 'Cover for treatments, appointments, hospitalisation and medication after a workplace accident.' },
+        { title: 'Disability compensation', desc: 'Indemnity in case of temporary or permanent disability of the employee.' },
+        { title: 'Pharmaceutical assistance', desc: 'Cover for expenses with prescribed medicines after an accident.' },
+        { title: 'Claims management', desc: 'Support in managing and following up claims processes.' }
       ],
       advantagesTitle: 'Exclusive advantages',
       advantages: [
@@ -903,7 +1464,7 @@ const resources = {
       howSteps: [
         'Request a tailored proposal for your company.',
         'Choose the cover and sums insured that best suit your business.',
-        'Complete the purchase with the support of a specialist advisor.'
+        'Complete the purchase with the support of a specialist adviser.'
       ],
       formTitle: 'Request Proposal — Workers’ Compensation'
     },
@@ -918,13 +1479,13 @@ const resources = {
         auto: { name: 'Car Insurance', desc: 'Comprehensive protection for your vehicle.', to: 'produto-auto' },
         life: { name: 'Life Insurance', desc: 'Security for you and your family.', to: 'produto-vida' },
         health: { name: 'Health Insurance', desc: 'Take care of your well-being with flexible plans.', to: 'produto-saude' },
-        home: { name: 'Home Multi-risk', desc: 'Protect your home against unforeseen events.', to: 'produto-habitacao' },
+        home: { name: 'Home Insurance (Buildings & Contents)', desc: 'Protect your home against unforeseen events.', to: 'produto-habitacao' },
       },
       businessCards: {
         fleet: { name: 'Fleet Insurance', desc: 'Protection for all company vehicles.', to: 'produto-frota' },
-        work: { name: 'Workers’ Compensation', desc: 'Coverage for employees in case of accidents.', to: 'produto-acidentes-trabalho' },
-        rcp: { name: 'Professional Liability', desc: 'Protect your activity against third‑party damage.', to: 'produto-responsabilidade-civil-profissional' },
-        mreb: { name: 'Business Multi-risk', desc: 'Coverage for facilities and business assets.', to: 'produto-multirriscos-empresarial' },
+        work: { name: 'Occupational Accidents', desc: 'Cover for employees in case of accidents.', to: 'produto-acidentes-trabalho' },
+        rcp: { name: 'Professional Indemnity', desc: 'Protect your activity against third‑party damage.', to: 'produto-responsabilidade-civil-profissional' },
+        mreb: { name: 'Commercial Multi‑risk', desc: 'Cover for facilities and business assets.', to: 'produto-multirriscos-empresarial' },
         condo: { name: 'Condominium Insurance', desc: 'Complete protection for buildings and common areas.', to: 'produto-condominio' },
       },
     },
@@ -934,7 +1495,7 @@ const resources = {
       headerTitle: 'Car Insurance',
       headerSubtitle: 'Protect your vehicle with the best coverages on the market',
       ctaSimulate: 'Get Auto Quote',
-      ctaContact: 'Talk to an advisor',
+  ctaContact: 'Talk to an adviser',
       whyTitle: 'Why choose Car Insurance?',
       whyItems: [
         'Comprehensive protection against own damage and third‑party liability',
@@ -945,10 +1506,10 @@ const resources = {
       ],
       coveragesTitle: 'Available coverages',
       coverages: [
-        { title: 'Mandatory Third‑Party Liability', desc: 'Covers damage caused to third parties, people and property.' },
-        { title: 'Own Damage', desc: 'Covers damage to your own vehicle in case of accident, impact, collision, rollover, fire, theft or robbery.' },
-        { title: 'Legal Protection', desc: 'Legal assistance in case of disputes related to the vehicle.' },
-        { title: 'Roadside Assistance', desc: 'Towing, transport, accommodation and other services in case of breakdown or accident.' }
+        { title: 'Mandatory third party liability', desc: 'Covers damage caused to third parties (people and property).'},
+        { title: 'Accidental damage (Comprehensive)', desc: 'Includes damage to your vehicle in case of accident, impact, collision, rollover, fire, theft or robbery.' },
+        { title: 'Legal expenses', desc: 'Legal expenses cover in case of disputes related to the vehicle.' },
+        { title: 'Roadside assistance', desc: 'Towing, transport, accommodation and other services in case of breakdown or accident.' }
       ],
       benefitsTitle: 'Exclusive advantages',
       benefits: [
@@ -959,7 +1520,7 @@ const resources = {
       ],
       howTitle: 'How to get it?',
       howSteps: [
-        'Get your auto quote online or talk to an advisor.',
+        'Get your auto quote online or talk to an adviser.',
         'Choose the cover and deductibles that best fit your profile.',
         'Send the required documents and complete the purchase.'
       ]
@@ -970,7 +1531,7 @@ const resources = {
       headerTitle: 'Life Insurance',
       headerSubtitle: 'Financial protection and peace of mind for you and your family',
       ctaSimulate: 'Get Life Quote',
-      ctaContact: 'Talk to an advisor',
+  ctaContact: 'Talk to an adviser',
       typesTitle: 'Types of Life Insurance',
       types: [
         { title: 'Term Life', desc: 'Protection in case of death or disability, ensuring financial security for beneficiaries.' },
@@ -1002,6 +1563,23 @@ const resources = {
       heroTitle: 'Insurance in Ansião (Leiria) — Auto, Life, Health and Home',
       heroDesc: 'Ansião Seguros: fast quotes and tailored proposals for Auto, Life, Health, Home and business solutions.',
       featuredIndividuals: 'Products for individuals',
+      heroSlides: [
+        {
+          title: 'Get your car insurance quote in seconds',
+          text: 'Comprehensive protection for your vehicle with personalised service.',
+          cta: 'Get car insurance quote'
+        },
+        {
+          title: 'Life and Health Insurance',
+          text: 'Security for you and your family, with flexible plans.',
+          cta: 'Get life insurance quote'
+        },
+        {
+          title: 'Home Insurance (Buildings & Contents)',
+          text: 'Protect your home against unforeseen events and ensure peace of mind.',
+          cta: 'Get home insurance quote'
+        }
+      ],
       productsIndividuals: {
         auto: { name: 'Car Insurance', desc: 'Comprehensive protection for your vehicle.' },
         life: { name: 'Life Insurance', desc: 'Security for you and your family.' },
@@ -1036,7 +1614,7 @@ i18n
     resources,
     fallbackLng: 'pt',
     supportedLngs: ['pt', 'en'],
-  ns: ['common', 'home', 'products', 'product_auto', 'product_life', 'product_health', 'product_home', 'product_mreb', 'product_rcp', 'product_condo', 'product_work', 'product_fleet', 'contact'],
+  ns: ['common', 'home', 'products', 'product_auto', 'product_life', 'product_health', 'product_home', 'product_mreb', 'product_rcp', 'product_condo', 'product_work', 'product_fleet', 'contact', 'sim_auto', 'sim_vida', 'sim_saude', 'sim_home'],
     defaultNS: 'common',
     interpolation: { escapeValue: false },
     detection: {
