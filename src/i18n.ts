@@ -38,7 +38,7 @@ const resources = {
         agent: 'Agente',
         empty: 'Comece por nos dizer em que o podemos ajudar.',
         whatsappNow: 'WhatsApp',
-        whatsPrefill: 'Olá! Gostaria de falar com a Ansião Seguros.'
+        whatsPrefill: 'Olá! Gostaria de falar com Ansião Seguros'
       }
     },
     sim_saude: {
