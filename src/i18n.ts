@@ -18,6 +18,27 @@ const resources = {
       a11y: {
         switchToEN: 'Mudar para Inglês',
         switchToPT: 'Mudar para Português',
+      },
+      chat: {
+        title: 'Converse agora',
+        subtitle: 'Responda com o seu pedido e os nossos consultores entram em contacto.',
+        talkNow: 'Conversar agora',
+        callNow: 'Ligar agora',
+        callShort: 'Ligar',
+        close: 'Fechar',
+        namePlaceholder: 'O seu nome (opcional)',
+        emailPlaceholder: 'Email (opcional)',
+        phonePlaceholder: 'Telefone (opcional)',
+        messagePlaceholder: 'Escreva a sua mensagem... (Ctrl/⌘+Enter para enviar)',
+        send: 'Enviar',
+        sending: 'A enviar…',
+        sent: 'Mensagem enviada. Obrigado!',
+        error: 'Falha ao enviar. Tente novamente.',
+        you: 'Você',
+        agent: 'Agente',
+        empty: 'Comece por nos dizer em que o podemos ajudar.',
+        whatsappNow: 'WhatsApp',
+        whatsPrefill: 'Olá! Gostaria de falar com a Ansião Seguros.'
       }
     },
     sim_saude: {
@@ -819,6 +840,27 @@ const resources = {
       a11y: {
         switchToEN: 'Switch to English',
         switchToPT: 'Switch to Portuguese',
+      },
+      chat: {
+        title: 'Chat with us',
+        subtitle: 'Tell us your request and our consultants will reach out.',
+        talkNow: 'Chat now',
+        callNow: 'Call now',
+        callShort: 'Call',
+        close: 'Close',
+        namePlaceholder: 'Your name (optional)',
+        emailPlaceholder: 'Email (optional)',
+        phonePlaceholder: 'Phone (optional)',
+        messagePlaceholder: 'Type your message... (Ctrl/⌘+Enter to send)',
+        send: 'Send',
+        sending: 'Sending…',
+        sent: 'Message sent. Thank you!',
+        error: 'Failed to send. Please try again.',
+        you: 'You',
+        agent: 'Agent',
+        empty: 'Start by telling us how we can help.',
+        whatsappNow: 'WhatsApp',
+        whatsPrefill: 'Hello! I would like to chat with Ansião Seguros.'
       }
     },
     sim_saude: {

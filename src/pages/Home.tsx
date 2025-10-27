@@ -7,6 +7,7 @@ import HeroDesktop from "../components/HeroDesktop";
 import HeroMobile from "../components/HeroMobile";
 import { ResponsiveGate } from "../components/ResponsiveGate";
 import { useTranslation } from "react-i18next";
+import ChatWidget from "../components/ChatWidget";
 
 function useHomeProducts() {
 	const { t } = useTranslation('home');
@@ -82,7 +83,7 @@ export default function Home() {
   const produtos = useHomeProducts();
   const produtosEmp = useBusinessProducts();
 	return (
-		<div className="min-h-screen bg-white flex flex-col">
+		<div className="min-h-screen bg-white flex flex-col relative">
 			<Seo
 				title={t('heroTitle')}
 				description={t('heroDesc')}
@@ -161,6 +162,8 @@ export default function Home() {
 					</ul>
 				</div>
 			</section>
+			{/* Chat Widget flutuante */}
+			<ChatWidget phoneNumber={"+351 962 116 764"} whatsappNumber={"351962116764"} />
 		</div>
 	);
 }
