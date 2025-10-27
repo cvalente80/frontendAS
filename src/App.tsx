@@ -1,4 +1,4 @@
-import { Routes, Route, NavLink } from "react-router-dom";
+import { Routes, Route, NavLink, Navigate, useParams } from "react-router-dom";
 import { ResponsiveGate } from "./components/ResponsiveGate";
 import DesktopNav from "./components/DesktopNav";
 import MobileNav from "./components/MobileNav";
@@ -27,52 +27,73 @@ import './App.css';
 
 function App(): React.ReactElement {
 
+  function LangScopedRoutes() {
+    const { lang } = useParams();
+    const base = lang === 'en' ? 'en' : (lang === 'pt' ? 'pt' : 'pt');
+    // if invalid lang in URL, normalize to /pt
+    if (lang !== 'pt' && lang !== 'en') {
+      return <Navigate to="/pt" replace />;
+    }
+    return (
+      <>
+        {/* Marca de água da vila de Ansião no body */}
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 0,
+          pointerEvents: 'none',
+          opacity: 0.12,
+          background: `url('${import.meta.env.BASE_URL}imagens/image.png') center center / cover no-repeat`
+        }} />
+        {/* Navbar responsiva: Mobile (md-) e Desktop (md+) */}
+        <ResponsiveGate mobile={<MobileNav />} desktop={<DesktopNav />} />
+        <Routes>
+          <Route index element={<Home />} />
+          <Route path="inicio" element={<Home />} />
+          <Route path="simulacao-auto" element={<SimulacaoAuto />} />
+          <Route path="simulacao-vida" element={<SimulacaoVida />} />
+          <Route path="simulacao-saude" element={<SimulacaoSaude />} />
+          <Route path="simulacao-habitacao" element={<SimulacaoHabitacao />} />
+          <Route path="produtos" element={<Produtos />} />
+          <Route path="contato" element={<Contato />} />
+          <Route path="produto-auto" element={<ProdutoAuto />} />
+          <Route path="produto-vida" element={<ProdutoVida />} />
+          <Route path="produto-saude" element={<ProdutoSaude />} />
+          <Route path="produto-habitacao" element={<ProdutoHabitacao />} />
+          <Route path="produto-frota" element={<ProdutoFrota />} />
+          <Route path="produto-acidentes-trabalho" element={<ProdutoAcidentesTrabalho />} />
+          <Route path="produto-responsabilidade-civil-profissional" element={<ProdutoResponsabilidadeCivilProfissional />} />
+          <Route path="simulacao-rc-profissional" element={<SimulacaoResponsabilidadeCivilProfissional />} />
+          <Route path="produto-multirriscos-empresarial" element={<ProdutoMultirriscosEmpresarial />} />
+          <Route path="produto-condominio" element={<ProdutoCondominio />} />
+          <Route path="simulacao-condominio" element={<SimulacaoCondominio />} />
+          <Route path="politica-rgpd" element={<PoliticaRGPD />} />
+          {/* Not found inside lang: redirect to index within the same lang */}
+          <Route path="*" element={<Navigate to={`/${base}`} replace />} />
+        </Routes>
+        {/* Footer com link para RGPD */}
+        <footer className="bg-blue-900 text-blue-100 py-6 mt-12 text-center w-full">
+          <div className="container mx-auto flex flex-col md:flex-row justify-between items-center px-4 gap-2">
+            <span className="text-sm">© {new Date().getFullYear()} Ansião Seguros. Todos os direitos reservados.</span>
+            <div className="flex gap-4 items-center">
+              <NavLink to={`/${base}/contato`} className="text-blue-200 underline hover:text-white text-sm">Contato</NavLink>
+              <span className="hidden md:inline-block">|</span>
+              <NavLink to={`/${base}/politica-rgpd`} className="text-blue-200 underline hover:text-white text-sm">Política de Privacidade &amp; RGPD</NavLink>
+            </div>
+          </div>
+        </footer>
+      </>
+    );
+  }
+
   return (
     <>
-      {/* Marca de água da vila de Ansião no body */}
-      <div style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 0,
-        pointerEvents: 'none',
-        opacity: 0.12,
-        background: `url('${import.meta.env.BASE_URL}imagens/image.png') center center / cover no-repeat`
-      }} />
-      {/* Navbar responsiva: Mobile (md-) e Desktop (md+) */}
-      <ResponsiveGate mobile={<MobileNav />} desktop={<DesktopNav />} />
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/inicio" element={<Home />} />
-        <Route path="/simulacao-auto" element={<SimulacaoAuto />} />
-        <Route path="/simulacao-vida" element={<SimulacaoVida />} />
-        <Route path="/simulacao-saude" element={<SimulacaoSaude />} />
-        <Route path="/simulacao-habitacao" element={<SimulacaoHabitacao />} />
-        <Route path="/produtos" element={<Produtos />} />
-        <Route path="/contato" element={<Contato />} />
-        <Route path="/produto-auto" element={<ProdutoAuto />} />
-        <Route path="/produto-vida" element={<ProdutoVida />} />
-        <Route path="/produto-saude" element={<ProdutoSaude />} />
-        <Route path="/produto-habitacao" element={<ProdutoHabitacao />} />
-        <Route path="/produto-frota" element={<ProdutoFrota />} />
-        <Route path="/produto-acidentes-trabalho" element={<ProdutoAcidentesTrabalho />} />
-        <Route path="/produto-responsabilidade-civil-profissional" element={<ProdutoResponsabilidadeCivilProfissional />} />
-  <Route path="/simulacao-rc-profissional" element={<SimulacaoResponsabilidadeCivilProfissional />} />
-        <Route path="/produto-multirriscos-empresarial" element={<ProdutoMultirriscosEmpresarial />} />
-  <Route path="/produto-condominio" element={<ProdutoCondominio />} />
-  <Route path="/simulacao-condominio" element={<SimulacaoCondominio />} />
-        <Route path="/politica-rgpd" element={<PoliticaRGPD />} />
+        <Route path="/" element={<Navigate to="/pt" replace />} />
+        <Route path=":lang/*" element={<LangScopedRoutes />} />
+        {/* Fallback: qualquer outra rota vai para /pt */}
+        <Route path="*" element={<Navigate to="/pt" replace />} />
       </Routes>
-      {/* Footer com link para RGPD */}
-      <footer className="bg-blue-900 text-blue-100 py-6 mt-12 text-center w-full">
-        <div className="container mx-auto flex flex-col md:flex-row justify-between items-center px-4 gap-2">
-          <span className="text-sm">© {new Date().getFullYear()} Ansião Seguros. Todos os direitos reservados.</span>
-          <div className="flex gap-4 items-center">
-            <NavLink to="/contato" className="text-blue-200 underline hover:text-white text-sm">Contato</NavLink>
-            <span className="hidden md:inline-block">|</span>
-            <NavLink to="/politica-rgpd" className="text-blue-200 underline hover:text-white text-sm">Política de Privacidade &amp; RGPD</NavLink>
-          </div>
-        </div>
-      </footer>
     </>
   );
 }

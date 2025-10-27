@@ -44,3 +44,10 @@
 .react-datepicker-wrapper {
   display: block !important;
 }
+
+/* Ensure Swiper nav arrows are above overlays and remain clickable */
+.swiper-button-prev,
+.swiper-button-next {
+  z-index: 20;
+  pointer-events: auto;
+}

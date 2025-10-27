@@ -2,7 +2,8 @@ import React, { useState, ChangeEvent, FormEvent, useEffect, useRef } from "reac
 import emailjs from "@emailjs/browser";
 import { EMAILJS_SERVICE_ID_GENERIC, EMAILJS_TEMPLATE_ID_GENERIC, EMAILJS_USER_ID_GENERIC } from "../emailjs.config";
 import Seo from "../components/Seo";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 type Colaborador = {
   nome: string;
@@ -25,6 +26,9 @@ type FormState = {
 };
 
 export default function ProdutoAcidentesTrabalho() {
+  const { t } = useTranslation('product_work');
+  const { lang } = useParams();
+  const base = lang === 'en' ? 'en' : 'pt';
   const [step, setStep] = useState<number>(1);
   const [showForm, setShowForm] = useState<boolean>(false);
   const formRef = useRef<HTMLDivElement | null>(null);
@@ -58,10 +62,6 @@ export default function ProdutoAcidentesTrabalho() {
     });
   }
 
-  function setCustomValidity(e: React.FormEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>, message: string) {
-    (e.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement).setCustomValidity(message);
-  }
-
   function validarNIF(nif: string) {
     if (!/^[0-9]{9}$/.test(nif)) return false;
     const n = nif.split('').map(Number);
@@ -69,51 +69,51 @@ export default function ProdutoAcidentesTrabalho() {
     let soma = 0; for (let i=0;i<8;i++) soma += n[i]*(9-i);
     let controlo = 11 - (soma % 11); if (controlo >= 10) controlo = 0; return controlo === n[8];
   }
-
   function handleChange(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
     const target = e.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
-    const { name, value, type } = target;
-    if (type === 'checkbox') {
-      const checked = (target as HTMLInputElement).checked;
-      if (name === 'aceitaRgpd') setForm(prev => ({ ...prev, aceitaRgpd: checked }));
-    } else {
-      setForm(prev => ({ ...prev, [name]: value } as any));
-    }
+    const { name } = target;
+    const type = (target as HTMLInputElement).type;
+    const value = type === 'checkbox' ? (target as HTMLInputElement).checked : target.value;
+    setForm(prev => ({ ...prev, [name]: value as any }));
   }
 
-  function handleColabChange(idx: number, field: keyof Colaborador, raw: string) {
-    setForm(prev => {
-      const colaboradores = prev.colaboradores.map((c,i) => {
-        if (i !== idx) return c;
-        let v = raw;
-        if (field === 'nif') v = raw.replace(/\D/g,'').slice(0,9);
-        if (field === 'vencimentoMensal') {
-          // Apenas dígitos e formatar com separador de milhar por espaços
-          const digits = raw.replace(/\D/g, '');
-          const withThousands = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-          v = withThousands;
-        }
-        if (field === 'subsidioAlimentacaoMensal') {
-          // Permitir vírgula como separador decimal e manter no display; máximo 2 casas decimais
-          let cleaned = raw.replace(/[^0-9.,]/g, '').replace(/\./g, ',');
-          const [eurosPartRaw, restRaw] = cleaned.split(',');
-          const eurosPart = (eurosPartRaw || '').replace(/,/g, '');
-          const centsPart = restRaw !== undefined ? restRaw.replace(/,/g, '').slice(0, 2) : undefined;
-          v = (restRaw !== undefined) ? `${eurosPart},${centsPart ?? ''}` : eurosPart;
-        }
-        return { ...c, [field]: v } as Colaborador;
-      });
-      return { ...prev, colaboradores };
-    });
+  // Ajuda para mensagens de validade customizadas nos inputs
+  function setCustomValidity(e: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, message: string) {
+    e.currentTarget.setCustomValidity(message);
+  }
+
+  // Handlers para a lista de colaboradores
+  function handleColabChange(index: number, field: keyof Colaborador, rawValue: string) {
+    let value = rawValue;
+    if (field === 'vencimentoMensal') {
+      const digits = rawValue.replace(/\D/g, '');
+      value = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    } else if (field === 'subsidioAlimentacaoMensal') {
+      let cleaned = rawValue.replace(/[^0-9.,]/g, '').replace(/\./g, ',');
+      const parts = cleaned.split(',');
+      if (parts.length > 2) cleaned = parts[0] + ',' + parts.slice(1).join('').replace(/,/g, '');
+      value = cleaned;
+    } else if (field === 'nif') {
+      value = rawValue.replace(/\D/g, '').slice(0, 9);
+    }
+    const colaboradores = [...form.colaboradores];
+    colaboradores[index] = { ...colaboradores[index], [field]: value } as Colaborador;
+    setForm(prev => ({ ...prev, colaboradores }));
   }
 
   function addColaborador() {
-    setForm(prev => ({ ...prev, colaboradores: [...prev.colaboradores, { nome: "", nif: "", funcao: "", vencimentoMensal: "", subsidioAlimentacaoMensal: "" }] }));
-  }
-  function removeColaborador(idx: number) {
-    setForm(prev => ({ ...prev, colaboradores: prev.colaboradores.length>1 ? prev.colaboradores.filter((_,i)=>i!==idx) : prev.colaboradores }));
+    setForm(prev => ({
+      ...prev,
+      colaboradores: [...prev.colaboradores, { nome: '', nif: '', funcao: '', vencimentoMensal: '', subsidioAlimentacaoMensal: '' }]
+    }));
   }
 
+  function removeColaborador(index: number) {
+    setForm(prev => ({
+      ...prev,
+      colaboradores: prev.colaboradores.length > 1 ? prev.colaboradores.filter((_, i) => i !== index) : prev.colaboradores
+    }));
+  }
   function handleNext(e: FormEvent) {
     e.preventDefault();
     if (step === 1) {
@@ -231,20 +231,20 @@ export default function ProdutoAcidentesTrabalho() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex flex-col items-center py-12 px-4">
       <Seo
-        title="Seguro Acidentes de Trabalho Empresas"
-        description="Proteção obrigatória e assistência completa para colaboradores. Peça a sua proposta."
-        canonicalPath="/produto-acidentes-trabalho"
+        title={t('seoTitle')}
+        description={t('seoDesc')}
+        canonicalPath={`/${base}/produto-acidentes-trabalho`}
       />
       <div className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl p-0 overflow-hidden">
         {/* Header visual com imagem e título */}
-  <div className="relative h-56 md:h-80 w-full flex items-center justify-center bg-blue-900">
-          <img src="https://images.pexels.com/photos/3183197/pexels-photo-3183197.jpeg?auto=compress&w=800&q=60" alt="Seguro Acidentes de Trabalho" className="absolute inset-0 w-full h-full object-cover opacity-30" />
+        <div className="relative h-56 md:h-80 w-full flex items-center justify-center bg-blue-900">
+          <img src="https://images.pexels.com/photos/3183197/pexels-photo-3183197.jpeg?auto=compress&w=800&q=60" alt={t('headerTitle')} className="absolute inset-0 w-full h-full object-cover opacity-30" />
           <div className="relative z-10 text-center w-full">
-  <h1 className="text-2xl md:text-5xl leading-tight font-extrabold text-white drop-shadow mb-2">Seguro Acidentes de Trabalho Empresas</h1>
-  <p className="text-sm md:text-lg text-blue-100 font-medium mb-4">Proteja os colaboradores da sua empresa com cobertura obrigatória e assistência completa</p>
+            <h1 className="text-2xl md:text-5xl leading-tight font-extrabold text-white drop-shadow mb-2">{t('headerTitle')}</h1>
+            <p className="text-sm md:text-lg text-blue-100 font-medium mb-4">{t('headerSubtitle')}</p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <button type="button" onClick={handleAbrirFormulario} className="inline-block px-8 py-3 bg-yellow-400 text-blue-900 font-bold rounded-full shadow-lg hover:bg-yellow-300 transition">Solicitar proposta</button>
-              <Link to="/contato" className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition">Fale com um consultor</Link>
+              <button type="button" onClick={handleAbrirFormulario} className="inline-block px-8 py-3 bg-yellow-400 text-blue-900 font-bold rounded-full shadow-lg hover:bg-yellow-300 transition">{t('ctaRequest')}</button>
+              <Link to={`/${base}/contato`} className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition">{t('ctaContact')}</Link>
             </div>
           </div>
         </div>
@@ -254,87 +254,67 @@ export default function ProdutoAcidentesTrabalho() {
           <section>
             <h2 className="text-2xl font-bold text-blue-800 mb-4 flex items-center gap-2">
               <svg width="28" height="28" fill="none" stroke="#2563eb" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#2563eb" strokeWidth="2"/><path d="M8 12l2 2 4-4" stroke="#2563eb" strokeWidth="2" strokeLinecap="round"/></svg>
-              Por que escolher o Seguro Acidentes de Trabalho?
+              {t('whyTitle')}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-blue-50 rounded-xl p-5 shadow flex gap-3 items-start">
-                <span className="text-blue-700 text-2xl">🦺</span>
-                <span>Cumpre a legislação obrigatória para empresas</span>
-              </div>
-              <div className="bg-blue-50 rounded-xl p-5 shadow flex gap-3 items-start">
-                <span className="text-blue-700 text-2xl">👷‍♂️</span>
-                <span>Proteção para colaboradores em caso de acidente durante o trabalho</span>
-              </div>
-              <div className="bg-blue-50 rounded-xl p-5 shadow flex gap-3 items-start">
-                <span className="text-blue-700 text-2xl">🏥</span>
-                <span>Assistência médica, hospitalar e farmacêutica</span>
-              </div>
-              <div className="bg-blue-50 rounded-xl p-5 shadow flex gap-3 items-start">
-                <span className="text-blue-700 text-2xl">💼</span>
-                <span>Gestão digital de apólice e sinistros</span>
-              </div>
+              {[
+                { icon: '🦺' },
+                { icon: '👷‍♂️' },
+                { icon: '🏥' },
+                { icon: '�' },
+              ].map((item, idx) => (
+                <div key={idx} className="bg-blue-50 rounded-xl p-5 shadow flex gap-3 items-start">
+                  <span className="text-blue-700 text-2xl">{item.icon}</span>
+                  <span>{t(`whyItems.${idx}`)}</span>
+                </div>
+              ))}
             </div>
           </section>
           {/* Seção: Coberturas */}
           <section>
             <h2 className="text-2xl font-bold text-blue-800 mb-4 flex items-center gap-2">
               <svg width="28" height="28" fill="none" stroke="#2563eb" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="14" rx="2" stroke="#2563eb" strokeWidth="2"/><path d="M16 3v4M8 3v4" stroke="#2563eb" strokeWidth="2" strokeLinecap="round"/><circle cx="12" cy="14" r="3" stroke="#2563eb" strokeWidth="2"/></svg>
-              Coberturas disponíveis
+              {t('coveragesTitle')}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white rounded-xl border border-blue-100 shadow p-5">
-                <h3 className="font-bold text-blue-700 mb-1">Despesas Médicas e Hospitalares</h3>
-                <p className="text-gray-700">Cobertura para tratamentos, consultas, internamentos e medicamentos necessários após acidente de trabalho.</p>
-              </div>
-              <div className="bg-white rounded-xl border border-blue-100 shadow p-5">
-                <h3 className="font-bold text-blue-700 mb-1">Indemnizações por Incapacidade</h3>
-                <p className="text-gray-700">Garantia de indemnização em caso de incapacidade temporária ou permanente do colaborador.</p>
-              </div>
-              <div className="bg-white rounded-xl border border-blue-100 shadow p-5">
-                <h3 className="font-bold text-blue-700 mb-1">Assistência Farmacêutica</h3>
-                <p className="text-gray-700">Cobertura para despesas com medicamentos prescritos após acidente.</p>
-              </div>
-              <div className="bg-white rounded-xl border border-blue-100 shadow p-5">
-                <h3 className="font-bold text-blue-700 mb-1">Gestão de Sinistros</h3>
-                <p className="text-gray-700">Apoio na gestão e acompanhamento dos processos de sinistro.</p>
-              </div>
+              {Array.from({ length: 4 }).map((_, idx) => (
+                <div key={idx} className="bg-white rounded-xl border border-blue-100 shadow p-5">
+                  <h3 className="font-bold text-blue-700 mb-1">{t(`coverages.${idx}.title`)}</h3>
+                  <p className="text-gray-700">{t(`coverages.${idx}.desc`)}</p>
+                </div>
+              ))}
             </div>
           </section>
           {/* Seção: Vantagens */}
           <section>
             <h2 className="text-2xl font-bold text-blue-800 mb-4 flex items-center gap-2">
               <svg width="28" height="28" fill="none" stroke="#2563eb" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20" stroke="#2563eb" strokeWidth="2" strokeLinecap="round"/></svg>
-              Vantagens exclusivas
+              {t('advantagesTitle')}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-blue-50 rounded-xl p-5 shadow flex gap-3 items-start">
-                <span className="text-blue-700 text-2xl">📱</span>
-                <span>Gestão digital da apólice e sinistros</span>
-              </div>
-              <div className="bg-blue-50 rounded-xl p-5 shadow flex gap-3 items-start">
-                <span className="text-blue-700 text-2xl">🕒</span>
-                <span>Atendimento especializado para empresas</span>
-              </div>
-              <div className="bg-blue-50 rounded-xl p-5 shadow flex gap-3 items-start">
-                <span className="text-blue-700 text-2xl">💡</span>
-                <span>Planos ajustáveis conforme o perfil da empresa</span>
-              </div>
-              <div className="bg-blue-50 rounded-xl p-5 shadow flex gap-3 items-start">
-                <span className="text-blue-700 text-2xl">👨‍👩‍👧‍👦</span>
-                <span>Cobertura para todos os colaboradores</span>
-              </div>
+              {[
+                { icon: '📱' },
+                { icon: '🕒' },
+                { icon: '💡' },
+                { icon: '👨‍👩‍👧‍�' },
+              ].map((item, idx) => (
+                <div key={idx} className="bg-blue-50 rounded-xl p-5 shadow flex gap-3 items-start">
+                  <span className="text-blue-700 text-2xl">{item.icon}</span>
+                  <span>{t(`advantages.${idx}`)}</span>
+                </div>
+              ))}
             </div>
           </section>
           {/* Seção: Como contratar */}
           <section>
             <h2 className="text-2xl font-bold text-blue-800 mb-4 flex items-center gap-2">
               <svg width="28" height="28" fill="none" stroke="#2563eb" strokeWidth="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" stroke="#2563eb" strokeWidth="2" strokeLinecap="round"/></svg>
-              Como contratar?
+              {t('howTitle')}
             </h2>
             <ol className="list-decimal pl-6 text-blue-900 text-lg space-y-2">
-              <li>Solicite uma proposta personalizada para a sua empresa.</li>
-              <li>Escolha as coberturas que melhor se adaptam à sua atividade.</li>
-              <li>Envie os documentos necessários e finalize a contratação com o apoio de um consultor especializado.</li>
+              {Array.from({ length: 3 }).map((_, idx) => (
+                <li key={idx}>{t(`howSteps.${idx}`)}</li>
+              ))}
             </ol>
           </section>
         </div>
@@ -342,7 +322,7 @@ export default function ProdutoAcidentesTrabalho() {
       {/* Formulário Proposta - Acidentes de Trabalho */}
       {showForm && (
       <div id="form-at" ref={formRef} className="max-w-lg w-full mt-12 p-8 bg-white bg-opacity-90 rounded-2xl shadow-xl relative z-10">
-        <h2 className="text-3xl font-bold mb-6 text-blue-900 text-center">Solicitar Proposta - Acidentes de Trabalho</h2>
+        <h2 className="text-3xl font-bold mb-6 text-blue-900 text-center">{t('formTitle')}</h2>
         {/* Stepper */}
         <div className="mb-6">
           <div className="flex items-center justify-center gap-2 mb-2">
@@ -406,7 +386,7 @@ export default function ProdutoAcidentesTrabalho() {
               </div>
               <div className="mb-4 mt-4 flex items-center gap-2">
                 <input type="checkbox" id="aceitaRgpd" name="aceitaRgpd" checked={!!form.aceitaRgpd} onChange={handleChange} className="accent-blue-700 w-5 h-5" required onInvalid={e => (e.target as HTMLInputElement).setCustomValidity('Necessário aceitar a Política de Privacidade & RGPD.')} onInput={e => (e.target as HTMLInputElement).setCustomValidity('')} />
-                <label htmlFor="aceitaRgpd" className="text-blue-900 text-sm select-none">Li e aceito a <a href={`${import.meta.env.BASE_URL}politica-rgpd`} target="_blank" rel="noopener noreferrer" className="underline text-blue-700 hover:text-blue-900">Política de Privacidade & RGPD</a>.</label>
+                <label htmlFor="aceitaRgpd" className="text-blue-900 text-sm select-none">Li e aceito a <a href={`/${base}/politica-rgpd`} target="_blank" rel="noopener noreferrer" className="underline text-blue-700 hover:text-blue-900">Política de Privacidade & RGPD</a>.</label>
               </div>
               <div className="flex justify-between gap-2 mt-2"><button type="button" onClick={handlePrev} className="px-6 py-2 bg-gray-200 rounded">Anterior</button><button type="submit" className="px-6 py-2 bg-green-600 text-white rounded font-bold hover:bg-green-700 transition">Pedir Proposta</button></div>
             </>

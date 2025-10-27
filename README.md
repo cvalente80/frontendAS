@@ -14,6 +14,9 @@ Este projeto pode ser facilmente adaptado para outras empresas e produtos de seg
 ## Instalação
 1. Instale as dependências: `npm install`
 2. Inicie o servidor: `npm run dev`
+3. Pré-visualização de build: `npm run build && npm run preview`
+	- Importante: como o build usa `base: '/frontendAS/'`, abra a app em `http://localhost:<porta>/frontendAS/pt` (e não apenas `/pt`).
+	- Em desenvolvimento (`npm run dev`), o endereço é `http://localhost:5173/pt`.
 
 ## Personalização
 Adicione ou edite componentes em `src/` para adaptar o site a outros clientes ou produtos.
@@ -50,3 +53,10 @@ If you are developing a production application, we recommend using TypeScript wi
 - Testar acessibilidade (contraste, navegação por teclado)
 - Adicionar favicon personalizado
 - Revisar SEO (títulos, meta tags, descrição)
+
+## Internacionalização (PT/EN)
+
+- Rotas sob `/:lang(pt|en)/*`; `/` redireciona para `/pt`.
+- Switcher de idioma no topo preserva o caminho atual ao alternar PT/EN.
+- i18n com i18next + react-i18next configurado em `src/i18n.ts`.
+- SEO ajusta `html[lang]` e `og:locale` dinamicamente.

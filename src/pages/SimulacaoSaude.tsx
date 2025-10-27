@@ -3,13 +3,20 @@ import emailjs from "@emailjs/browser";
 import { EMAILJS_SERVICE_ID_SAUDE, EMAILJS_TEMPLATE_ID_SAUDE, EMAILJS_USER_ID_SAUDE } from "../emailjs.config";
 import DatePicker, { registerLocale } from "react-datepicker";
 import { pt } from "date-fns/locale/pt";
+import { enGB } from "date-fns/locale/en-GB";
 import "react-datepicker/dist/react-datepicker.css";
+import { useTranslation } from "react-i18next";
+import { useParams } from "react-router-dom";
 
 registerLocale("pt", pt);
+registerLocale("en", enGB);
 
 type Segurado = { nome: string; nascimento: string; nascimentoManual: string; contribuinte: string };
 
 export default function SimulacaoSaude() {
+	const { t } = useTranslation('sim_saude');
+	const { lang } = useParams();
+	const base = lang === 'en' ? 'en' : 'pt';
 	const [step, setStep] = useState<1 | 2>(1);
 	const [segurados, setSegurados] = useState<Segurado[]>([
 		{ nome: "", nascimento: "", nascimentoManual: "", contribuinte: "" }
@@ -51,9 +58,9 @@ export default function SimulacaoSaude() {
 
 	function validarPasso1(): boolean {
 		const novosErros = segurados.map(seg => ({
-			nome: !seg.nome ? 'Por favor, preencha o nome completo.' : undefined,
-			nascimento: !seg.nascimento ? 'Por favor, preencha a data de nascimento.' : undefined,
-			contribuinte: !seg.contribuinte ? 'Por favor, preencha o NIF.' : undefined,
+			nome: !seg.nome ? t('validations.insuredNameRequired') : undefined,
+			nascimento: !seg.nascimento ? t('validations.insuredBirthRequired') : undefined,
+			contribuinte: !seg.contribuinte ? t('validations.insuredNifRequired') : undefined,
 		}));
 		setErrosSegurados(novosErros);
 		return !novosErros.some(e => e.nome || e.nascimento || e.contribuinte);
@@ -62,19 +69,19 @@ export default function SimulacaoSaude() {
 	function validarPasso2(): boolean {
 		const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 		if (!plano) {
-			alert("Por favor, escolha uma das opções de plano.");
+			alert(t('validations.planRequired'));
 			return false;
 		}
 		if (!nome) {
-			alert("Por favor, preencha o seu nome.");
+			alert(t('validations.nameRequired'));
 			return false;
 		}
 		if (!email || !emailRegex.test(email)) {
-			alert("Por favor, insira um email válido no formato nome@servidor.pt");
+			alert(t('validations.emailInvalid'));
 			return false;
 		}
 		if (!telefone || !/^[0-9]{9}$/.test(telefone)) {
-			alert("Por favor, preencha o telefone (9 dígitos).");
+			alert(t('validations.phoneRequired'));
 			return false;
 		}
 		return true;
@@ -92,16 +99,36 @@ export default function SimulacaoSaude() {
 		if (!validarPasso2()) return;
 		// Mapeamento conforme o template fornecido: {{nome}}, {{time}}, {{opcao}}, {{pessoasSeguras}}
 		const now = new Date();
-		const time = now.toLocaleString('pt-PT', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
-		const opcao = plano === 'opcao1' ? 'Opção 1' : plano === 'opcao2' ? 'Opção 2' : 'Opção 3';
+		const localeStr = base === 'pt' ? 'pt-PT' : 'en-GB';
+		const time = now.toLocaleString(localeStr, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+		const opcao = plano === 'opcao1' ? t('table.option1') : plano === 'opcao2' ? t('table.option2') : t('table.option3');
 		const pessoasSeguras = segurados
-			.map((s, i) => `Pessoa ${i + 1}: Nome: ${s.nome}, Nascimento: ${s.nascimentoManual}, NIF: ${s.contribuinte}`)
+			.map((s, i) => `${t('emailSummary.person')} ${i + 1}: ${t('emailSummary.name')} ${s.nome}, ${t('emailSummary.birth')} ${s.nascimentoManual}, ${t('emailSummary.nif')} ${s.contribuinte}`)
 			.join(' | ');
 		const templateParams = { nome, time, opcao, pessoasSeguras };
+
+		// Dry-run in dev or when explicitly requested via env
+		const dryRun = (import.meta as any)?.env?.DEV || (import.meta as any)?.env?.VITE_EMAIL_DRY_RUN === 'true';
+		if (dryRun) {
+			try {
+				console.log('[EmailJS][DRY_RUN][Saude] Would send with params:', templateParams);
+				setMensagemSucesso(t('messages.submitSuccess'));
+				setSegurados([{ nome: "", nascimento: "", nascimentoManual: "", contribuinte: "" }]);
+				setPlano("");
+				setAddEstomatologia2(false);
+				setAddEstomatologia3(false);
+				setNome("");
+				setEmail("");
+				setTelefone("");
+				setStep(1);
+				setTimeout(() => setMensagemSucesso(null), 7000);
+				return;
+			} catch {}
+		}
 		emailjs
 			.send(EMAILJS_SERVICE_ID_SAUDE, EMAILJS_TEMPLATE_ID_SAUDE, templateParams, EMAILJS_USER_ID_SAUDE)
 			.then(() => {
-				setMensagemSucesso("Pedido efetuado com sucesso! Irá receber as próximas instruções por email.");
+				setMensagemSucesso(t('messages.submitSuccess'));
 				setSegurados([{ nome: "", nascimento: "", nascimentoManual: "", contribuinte: "" }]);
 				setPlano("");
 				setAddEstomatologia2(false);
@@ -113,47 +140,54 @@ export default function SimulacaoSaude() {
 				setTimeout(() => setMensagemSucesso(null), 7000);
 			})
 			.catch(() => {
-				setMensagemSucesso("Erro ao enviar pedido. Tente novamente ou contacte-nos.");
+				setMensagemSucesso(t('messages.submitError'));
 				setTimeout(() => setMensagemSucesso(null), 7000);
 			});
 	}
 
 	// Dados da grelha comparativa de planos (texto genérico, sem preços)
-	const beneficios: { chave: string; label: string; op1: string | boolean; op2: string | boolean; op3: string | boolean }[] = [
-		{ chave: "consultas", label: "Consultas (rede)", op1: true, op2: true, op3: true },
-		{ chave: "exames", label: "Exames e meios complementares", op1: true, op2: true, op3: true },
-		{ chave: "ambulatoria", label: "Assistência ambulatória", op1: "Opcional", op2: "2.500 €", op3: "5.000 €" },
-		{ chave: "internamento", label: "Internamento hospitalar", op1: "15.000 €", op2: "50.000 €", op3: "1.000.000 €" },
-		{ chave: "urgencias", label: "Serviço de urgência", op1: true, op2: true, op3: true },
-		{ chave: "parto", label: "Parto e assistência na maternidade", op1: false, op2: "Opcional", op3: true },
-		{ chave: "estomatologia", label: "Estomatologia (dentista)", op1: "Descontos", op2: "Parcial", op3: "Ampla" },
-		{ chave: "medicamentos", label: "Medicamentos com prescrição", op1: false, op2: "Parcial", op3: "Parcial" },
-		{ chave: "internacional", label: "Assistência em viagem (internacional)", op1: false, op2: true, op3: true },
-		{ chave: "domicilio", label: "Consulta ao domicílio / Telemedicina", op1: "Telemedicina", op2: true, op3: true },
+	const beneficios: { chave: keyof Record<string, string>; label: string; op1: string | boolean; op2: string | boolean; op3: string | boolean }[] = [
+		{ chave: "consultas", label: t('benefits.consultas'), op1: true, op2: true, op3: true },
+		{ chave: "exames", label: t('benefits.exames'), op1: true, op2: true, op3: true },
+		{ chave: "ambulatoria", label: t('benefits.ambulatoria'), op1: "Opcional", op2: "2.500 €", op3: "5.000 €" },
+		{ chave: "internamento", label: t('benefits.internamento'), op1: "15.000 €", op2: "50.000 €", op3: "1.000.000 €" },
+		{ chave: "urgencias", label: t('benefits.urgencias'), op1: true, op2: true, op3: true },
+		{ chave: "parto", label: t('benefits.parto'), op1: false, op2: "Opcional", op3: true },
+		{ chave: "estomatologia", label: t('benefits.estomatologia'), op1: "Descontos", op2: "Parcial", op3: "Ampla" },
+		{ chave: "medicamentos", label: t('benefits.medicamentos'), op1: false, op2: "Parcial", op3: "Parcial" },
+		{ chave: "internacional", label: t('benefits.internacional'), op1: false, op2: true, op3: true },
+		{ chave: "domicilio", label: t('benefits.domicilio'), op1: "Telemedicina", op2: true, op3: true },
 	];
+
+	const traduzValor = (val: string | boolean) => {
+		if (typeof val === 'boolean') return val ? t('table.included') : t('table.notApplicable');
+		if (val === 'Opcional') return t('table.optional');
+		if (val === 'Descontos') return t('table.discounts');
+		if (val === 'Parcial') return t('table.partial');
+		if (val === 'Telemedicina') return t('table.telemedicine');
+		if (val === 'Ampla') return t('table.included');
+		return val;
+	};
 
 	const valorCelula = (b: typeof beneficios[number], col: 1 | 2 | 3) => {
 		const val = col === 1 ? b.op1 : col === 2 ? b.op2 : b.op3;
-		if (typeof val === 'boolean') return val ? 'Incluído' : '—';
-		return val;
+		return traduzValor(val);
 	};
 
 	return (
 		<div className="min-h-screen flex items-start justify-center bg-blue-50 relative pt-8 md:pt-12">
 			<img
 				src={`${import.meta.env.BASE_URL}imagens/insurance-background.jpg`}
-				alt="Seguro Saúde"
+				alt={t('backgroundAlt')}
 				className="absolute inset-0 w-full h-full object-cover opacity-25"
 				onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/family-happy2.png'; }}
 			/>
 			<div className="relative z-10 max-w-5xl w-full bg-white bg-opacity-90 rounded-xl shadow-xl p-6 md:p-8">
-				<h1 className="text-3xl font-bold text-blue-900 mb-6 text-center">
-					Simulação Seguro Saúde
-				</h1>
+				<h1 className="text-3xl font-bold text-blue-900 mb-6 text-center">{t('title')}</h1>
 				<form className="space-y-4" onSubmit={handleSubmit}>
 					{step === 1 && (
 						<div>
-							<h2 className="text-xl font-bold text-blue-800 mb-4">1. Pessoas Seguras</h2>
+							<h2 className="text-xl font-bold text-blue-800 mb-4">{t('step1Title')}</h2>
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 								{segurados.map((seg, idx) => (
 									<div key={idx} className="p-4 rounded-xl bg-blue-50 flex flex-col gap-4">
@@ -166,10 +200,10 @@ export default function SimulacaoSaude() {
 												name="nome"
 												value={seg.nome}
 												onChange={e => { handleChangeSegurado(e as any, idx); setErrosSegurados(errs => { const copy = [...errs]; if (copy[idx]) copy[idx].nome = ''; return copy; }); }}
-												placeholder="Nome completo"
+												placeholder={t('placeholders.fullName')}
 												className={`w-full rounded border h-11 pl-10 ${errosSegurados[idx]?.nome ? 'border-red-500' : ''}`}
 												required
-												onInvalid={e => (e.target as HTMLInputElement).setCustomValidity('Por favor, preencha o nome completo.')}
+												onInvalid={e => (e.target as HTMLInputElement).setCustomValidity(t('validations.insuredNameRequired'))}
 												onInput={e => (e.target as HTMLInputElement).setCustomValidity('')}
 											/>
 										</div>
@@ -190,9 +224,9 @@ export default function SimulacaoSaude() {
 														handleChangeSegurado({ target: { name: 'nascimentoManual', value: '' } } as any, idx);
 													}
 												}}
-												locale="pt"
+												locale={base}
 												dateFormat="dd-MM-yyyy"
-												placeholderText="Data de nascimento (dd-mm-aaaa)"
+												placeholderText={t('placeholders.birthDate')}
 												className="w-full rounded pr-10"
 												required
 												showMonthDropdown
@@ -211,8 +245,8 @@ export default function SimulacaoSaude() {
 															value={seg.nascimentoManual || ''}
 															required
 															readOnly
-															placeholder="Data de nascimento (dd-mm-aaaa)"
-															onInvalid={e => (e.target as HTMLInputElement).setCustomValidity('Por favor, preencha a data de nascimento.')}
+															placeholder={t('placeholders.birthDate')}
+															onInvalid={e => (e.target as HTMLInputElement).setCustomValidity(t('validations.insuredBirthRequired'))}
 															onInput={e => (e.target as HTMLInputElement).setCustomValidity('')}
 														/>
 														<button type="button" onClick={() => setOpenNascimento(idx)} className="absolute right-2 top-1/2 -translate-y-1/2" tabIndex={-1}>
@@ -234,58 +268,58 @@ export default function SimulacaoSaude() {
 												name="contribuinte"
 												value={seg.contribuinte}
 												onChange={e => { handleChangeSegurado(e as any, idx); setErrosSegurados(errs => { const copy = [...errs]; if (copy[idx]) copy[idx].contribuinte = ''; return copy; }); }}
-												placeholder="NIF"
+												placeholder={t('placeholders.nif')}
 												className={`w-full rounded border h-11 pl-10 ${errosSegurados[idx]?.contribuinte ? 'border-red-500' : ''}`}
 												required
 												pattern="^[0-9]{9}$"
 												maxLength={9}
-												onInvalid={e => (e.target as HTMLInputElement).setCustomValidity('Por favor, preencha o NIF com 9 dígitos.')}
+												onInvalid={e => (e.target as HTMLInputElement).setCustomValidity(t('validations.insuredNifRequired'))}
 												onInput={e => (e.target as HTMLInputElement).setCustomValidity('')}
 											/>
 										</div>
 										{errosSegurados[idx]?.contribuinte && <div className="text-red-600 text-sm -mt-2">{errosSegurados[idx].contribuinte}</div>}
 										{segurados.length > 1 && (
-											<button type="button" onClick={() => removeSegurado(idx)} className="text-red-500 text-sm self-end">Remover</button>
+											<button type="button" onClick={() => removeSegurado(idx)} className="text-red-500 text-sm self-end">{t('buttons.remove')}</button>
 										)}
 									</div>
 								))}
 							</div>
 							<div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
 								{segurados.length < 5 ? (
-									<button type="button" onClick={addSegurado} className="px-4 py-2 bg-blue-200 text-blue-900 font-bold rounded hover:bg-blue-300 transition">Adicionar pessoa segura</button>
+									<button type="button" onClick={addSegurado} className="px-4 py-2 bg-blue-200 text-blue-900 font-bold rounded hover:bg-blue-300 transition">{t('buttons.addInsured')}</button>
 								) : (
-									<p className="text-xs text-blue-700 font-medium">Máximo de 5 pessoas atingido</p>
+									<p className="text-xs text-blue-700 font-medium">{t('buttons.maxReached5')}</p>
 								)}
 								<div className="flex-1" />
-								<button type="button" onClick={handleNext} className="px-6 py-2 bg-blue-700 text-white rounded font-bold hover:bg-blue-900 transition self-end">Próximo</button>
+								<button type="button" onClick={handleNext} className="px-6 py-2 bg-blue-700 text-white rounded font-bold hover:bg-blue-900 transition self-end">{t('buttons.next')}</button>
 							</div>
 						</div>
 					)}
 
 					{step === 2 && (
 						<div>
-							<h2 className="text-xl font-bold text-blue-800 mb-4">2. Escolha a opção</h2>
+							<h2 className="text-xl font-bold text-blue-800 mb-4">{t('step2Title')}</h2>
 							<div className="overflow-auto rounded-xl border bg-white shadow">
 								<table className="min-w-full text-sm">
 									<thead>
 										<tr className="bg-blue-50 text-blue-900">
-											<th className="text-left p-3 font-semibold">Coberturas</th>
+											<th className="text-left p-3 font-semibold">{t('table.coverages')}</th>
 											<th className="p-3 font-bold">
 												<label className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full ${plano === 'opcao1' ? 'bg-green-100 text-green-800' : 'bg-white text-blue-900 border'}`}>
 													<input type="radio" name="plano" value="opcao1" checked={plano === 'opcao1'} onChange={e => setPlano(e.target.value as any)} />
-													Opção 1
+													{t('table.option1')}
 												</label>
 											</th>
 											<th className="p-3 font-bold">
 												<label className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full ${plano === 'opcao2' ? 'bg-green-100 text-green-800' : 'bg-white text-blue-900 border'}`}>
 													<input type="radio" name="plano" value="opcao2" checked={plano === 'opcao2'} onChange={e => setPlano(e.target.value as any)} />
-													Opção 2
+													{t('table.option2')}
 												</label>
 											</th>
 											<th className="p-3 font-bold">
 												<label className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full ${plano === 'opcao3' ? 'bg-green-100 text-green-800' : 'bg-white text-blue-900 border'}`}>
 													<input type="radio" name="plano" value="opcao3" checked={plano === 'opcao3'} onChange={e => setPlano(e.target.value as any)} />
-													Opção 3
+													{t('table.option3')}
 												</label>
 											</th>
 										</tr>
@@ -297,7 +331,7 @@ export default function SimulacaoSaude() {
 												{/* Coluna Opção 1 */}
 												<td className="p-3 text-center font-medium">
 													{b.chave === 'estomatologia' ? (
-														<span>Descontos</span>
+														<span>{t('table.discounts')}</span>
 													) : (
 														<span>{valorCelula(b, 1)}</span>
 													)}
@@ -311,7 +345,7 @@ export default function SimulacaoSaude() {
 																checked={addEstomatologia2}
 																onChange={(e) => setAddEstomatologia2(e.target.checked)}
 															/>
-															<span>Aderir</span>
+															<span>{t('table.add')}</span>
 														</label>
 													) : (
 														<span>{valorCelula(b, 2)}</span>
@@ -326,7 +360,7 @@ export default function SimulacaoSaude() {
 																checked={addEstomatologia3}
 																onChange={(e) => setAddEstomatologia3(e.target.checked)}
 															/>
-															<span>Aderir</span>
+															<span>{t('table.add')}</span>
 														</label>
 													) : (
 														<span>{valorCelula(b, 3)}</span>
@@ -339,38 +373,38 @@ export default function SimulacaoSaude() {
 							</div>
 							<div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
 								<div className="md:col-span-1">
-									<label className="block text-sm font-semibold text-blue-900 mb-1">Nome</label>
+									<label className="block text-sm font-semibold text-blue-900 mb-1">{t('contact:labels.name')}</label>
 									<input
 										type="text"
 										value={nome}
 										onChange={e => setNome(e.target.value)}
 										className="w-full rounded border h-11 px-3"
-										placeholder="O seu nome"
+										placeholder={t('placeholders.yourName')}
 										required
-										onInvalid={e => (e.target as HTMLInputElement).setCustomValidity('Por favor, preencha o nome.')}
+										onInvalid={e => (e.target as HTMLInputElement).setCustomValidity(t('validations.nameRequired'))}
 										onInput={e => (e.target as HTMLInputElement).setCustomValidity('')}
 									/>
 								</div>
 								<div className="md:col-span-1">
-									<label className="block text-sm font-semibold text-blue-900 mb-1">Email</label>
+									<label className="block text-sm font-semibold text-blue-900 mb-1">{t('contact:labels.email')}</label>
 									<input
 										type="email"
 										value={email}
 										onChange={e => setEmail(e.target.value)}
 										className="w-full rounded border h-11 px-3"
-										placeholder="nome@servidor.pt"
+										placeholder={t('placeholders.email')}
 										required
 										pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
 										onInvalid={e => {
 											const input = e.target as HTMLInputElement;
-											if (input.validity.valueMissing) input.setCustomValidity('Por favor, preencha o email.');
-											else input.setCustomValidity('Por favor, insira um email válido no formato nome@servidor.pt');
+											if (input.validity.valueMissing) input.setCustomValidity(t('validations.emailRequired'));
+											else input.setCustomValidity(t('validations.emailInvalid'));
 										}}
 										onInput={e => (e.target as HTMLInputElement).setCustomValidity('')}
 									/>
 								</div>
 								<div className="md:col-span-1">
-									<label className="block text-sm font-semibold text-blue-900 mb-1">Telefone</label>
+									<label className="block text-sm font-semibold text-blue-900 mb-1">{t('contact:labels.phone')}</label>
 									<input
 										type="tel"
 										value={telefone}
@@ -379,20 +413,20 @@ export default function SimulacaoSaude() {
 											setTelefone(onlyDigits);
 										}}
 										className="w-full rounded border h-11 px-3"
-										placeholder="9 dígitos"
+										placeholder={t('placeholders.phone')}
 										required
 										inputMode="numeric"
 										pattern="[0-9]{9}"
 										maxLength={9}
-										onInvalid={e => (e.target as HTMLInputElement).setCustomValidity('Por favor, preencha o telefone (9 dígitos).')}
+										onInvalid={e => (e.target as HTMLInputElement).setCustomValidity(t('validations.phoneRequired'))}
 										onInput={e => (e.target as HTMLInputElement).setCustomValidity('')}
 									/>
 								</div>
 							</div>
 
 							<div className="flex justify-between mt-6">
-								<button type="button" onClick={() => setStep(1)} className="px-6 py-2 bg-gray-200 rounded">Anterior</button>
-								<button type="submit" className="px-6 py-2 bg-green-600 text-white rounded font-bold hover:bg-green-700 transition">Pedir Proposta</button>
+								<button type="button" onClick={() => setStep(1)} className="px-6 py-2 bg-gray-200 rounded">{t('buttons.prev')}</button>
+								<button type="submit" className="px-6 py-2 bg-green-600 text-white rounded font-bold hover:bg-green-700 transition">{t('buttons.submit')}</button>
 							</div>
 						</div>
 					)}

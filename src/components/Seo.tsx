@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import i18n from '../i18n';
 
 type SeoProps = {
   title?: string;
@@ -59,6 +60,10 @@ function upsertLink(rel: string, href: string | undefined) {
 
 export default function Seo({ title, description, image, canonicalPath, noIndex, structuredData }: SeoProps) {
   useEffect(() => {
+    // language
+    const lang = i18n.language === 'en' ? 'en' : 'pt';
+    document.documentElement.lang = lang;
+
     const base = siteBase();
     const resolvedTitle = title ? `${DEFAULT_TITLE} | ${title}` : DEFAULT_TITLE;
     const desc = description || DEFAULT_DESC;
@@ -82,7 +87,7 @@ export default function Seo({ title, description, image, canonicalPath, noIndex,
     if (url) upsertMetaByProp('og:url', url);
     upsertMetaByProp('og:type', 'website');
     upsertMetaByProp('og:site_name', 'Ansião Seguros');
-    upsertMetaByProp('og:locale', 'pt_PT');
+  upsertMetaByProp('og:locale', lang === 'en' ? 'en_GB' : 'pt_PT');
     upsertMetaByProp('og:title', resolvedTitle);
     upsertMetaByProp('og:description', desc);
     upsertMetaByProp('og:image', img);
@@ -107,7 +112,7 @@ export default function Seo({ title, description, image, canonicalPath, noIndex,
       s.text = JSON.stringify(obj);
       document.head.appendChild(s);
     }
-  }, [title, description, image, canonicalPath, noIndex, structuredData]);
+  }, [title, description, image, canonicalPath, noIndex, structuredData, i18n.language]);
 
   return null;
 }

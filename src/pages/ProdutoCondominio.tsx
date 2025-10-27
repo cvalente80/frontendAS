@@ -1,25 +1,29 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import Seo from "../components/Seo";
+import { useTranslation } from "react-i18next";
 
 export default function ProdutoCondominio() {
+  const { t } = useTranslation('product_condo');
+  const { lang } = useParams();
+  const base = lang === 'en' ? 'en' : 'pt';
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex flex-col items-center py-12 px-4">
       <Seo
-        title="Seguro Condomínio"
-        description="Proteção completa para edifícios e áreas comuns do seu condomínio. Saiba mais."
-        canonicalPath="/produto-condominio"
+        title={t('seoTitle')}
+        description={t('seoDesc')}
+        canonicalPath={`/${base}/produto-condominio`}
       />
       <div className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl p-0 overflow-hidden">
         {/* Header visual com imagem e título */}
   <div className="relative h-56 md:h-80 w-full flex items-center justify-center bg-blue-900">
-          <img src="https://images.pexels.com/photos/439391/pexels-photo-439391.jpeg?auto=compress&w=1000&q=60" alt="Seguro Condomínio" className="absolute inset-0 w-full h-full object-cover opacity-30" />
+          <img src="https://images.pexels.com/photos/439391/pexels-photo-439391.jpeg?auto=compress&w=1000&q=60" alt={t('headerTitle')} className="absolute inset-0 w-full h-full object-cover opacity-30" />
           <div className="relative z-10 text-center w-full">
-            <h1 className="text-2xl md:text-5xl leading-tight font-extrabold text-white drop-shadow mb-2">Seguro Condomínio</h1>
-            <p className="text-sm md:text-lg text-blue-100 font-medium mb-4">Proteção completa para edifícios e áreas comuns do seu condomínio</p>
+            <h1 className="text-2xl md:text-5xl leading-tight font-extrabold text-white drop-shadow mb-2">{t('headerTitle')}</h1>
+            <p className="text-sm md:text-lg text-blue-100 font-medium mb-4">{t('headerSubtitle')}</p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link to="/simulacao-condominio" className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition">Simular seguro Condomínio</Link>
-              <Link to="/contato" className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition">Fale com um consultor</Link>
+              <Link to={`/${base}/simulacao-condominio`} className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition">{t('ctaSimulate')}</Link>
+              <Link to={`/${base}/contato`} className="inline-block px-8 py-3 bg-blue-400 text-white font-bold rounded-full shadow-lg hover:bg-blue-300 transition">{t('ctaContact')}</Link>
             </div>
           </div>
         </div>
@@ -29,72 +33,64 @@ export default function ProdutoCondominio() {
           <section>
             <h2 className="text-2xl font-bold text-blue-800 mb-4 flex items-center gap-2">
               <svg width="28" height="28" fill="none" stroke="#2563eb" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="14" rx="2" stroke="#2563eb" strokeWidth="2"/><path d="M16 3v4M8 3v4" stroke="#2563eb" strokeWidth="2" strokeLinecap="round"/></svg>
-              O que é o Seguro de Condomínio?
+              {t('whatTitle')}
             </h2>
-            <p className="text-gray-700 mb-4">
-              O Seguro de Condomínio foi pensado para proteger o edifício e as suas partes comuns, cobrindo danos por incêndio, fenómenos naturais, inundações, responsabilidade civil e outras situações que podem afetar a tranquilidade dos condóminos.
-            </p>
+            <p className="text-gray-700 mb-4">{t('whatDesc')}</p>
           </section>
           {/* Para quem é indicado */}
           <section>
             <h2 className="text-2xl font-bold text-blue-800 mb-4 flex items-center gap-2">
               <svg width="28" height="28" fill="none" stroke="#2563eb" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20" stroke="#2563eb" strokeWidth="2" strokeLinecap="round"/></svg>
-              Para quem é indicado?
+              {t('whoTitle')}
             </h2>
             <ul className="list-disc pl-6 text-blue-900 text-lg space-y-2">
-              <li>Condomínios residenciais e mistos</li>
-              <li>Prédios com garagens, arrecadações e espaços comuns</li>
-              <li>Administrações de condomínio e comissões de condóminos</li>
+              {Array.from({ length: 3 }).map((_, idx) => (
+                <li key={idx}>{t(`whoItems.${idx}`)}</li>
+              ))}
             </ul>
           </section>
           {/* Coberturas principais */}
           <section>
             <h2 className="text-2xl font-bold text-blue-800 mb-4 flex items-center gap-2">
               <svg width="28" height="28" fill="none" stroke="#2563eb" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#2563eb" strokeWidth="2"/><path d="M8 12l2 2 4-4" stroke="#2563eb" strokeWidth="2" strokeLinecap="round"/></svg>
-              Coberturas principais
+              {t('coveragesTitle')}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white rounded-xl border border-blue-100 shadow p-5">
-                <h3 className="font-bold text-blue-700 mb-1">Incêndio, Inundação e Fenómenos Naturais</h3>
-                <p className="text-gray-700">Proteção contra danos causados por fogo, água, tempestades e outros eventos naturais.</p>
-              </div>
-              <div className="bg-white rounded-xl border border-blue-100 shadow p-5">
-                <h3 className="font-bold text-blue-700 mb-1">Responsabilidade Civil do Condomínio</h3>
-                <p className="text-gray-700">Cobertura por danos causados a terceiros nas áreas comuns do edifício.</p>
-              </div>
-              <div className="bg-white rounded-xl border border-blue-100 shadow p-5">
-                <h3 className="font-bold text-blue-700 mb-1">Danos por Água e Quebra de Vidros</h3>
-                <p className="text-gray-700">Proteção para sinistros frequentes que afetam as zonas comuns e fachadas.</p>
-              </div>
-              <div className="bg-white rounded-xl border border-blue-100 shadow p-5">
-                <h3 className="font-bold text-blue-700 mb-1">Assistência 24h</h3>
-                <p className="text-gray-700">Apoio imediato com técnicos especializados para emergências.</p>
-              </div>
+              {Array.from({ length: 4 }).map((_, idx) => (
+                <div key={idx} className="bg-white rounded-xl border border-blue-100 shadow p-5">
+                  <h3 className="font-bold text-blue-700 mb-1">{t(`coverages.${idx}.title`)}</h3>
+                  <p className="text-gray-700">{t(`coverages.${idx}.desc`)}</p>
+                </div>
+              ))}
             </div>
           </section>
           {/* Vantagens */}
           <section>
             <h2 className="text-2xl font-bold text-blue-800 mb-4 flex items-center gap-2">
               <svg width="28" height="28" fill="none" stroke="#2563eb" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20" stroke="#2563eb" strokeWidth="2" strokeLinecap="round"/></svg>
-              Vantagens do seguro
+              {t('advantagesTitle')}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-blue-50 rounded-xl p-5 shadow flex gap-3 items-start"><span className="text-blue-700 text-2xl">🏢</span><span>Proteção abrangente das partes comuns do edifício</span></div>
-              <div className="bg-blue-50 rounded-xl p-5 shadow flex gap-3 items-start"><span className="text-blue-700 text-2xl">👥</span><span>Segurança para condóminos e visitantes</span></div>
-              <div className="bg-blue-50 rounded-xl p-5 shadow flex gap-3 items-start"><span className="text-blue-700 text-2xl">⚖️</span><span>Coberturas de responsabilidade civil ajustáveis</span></div>
-              <div className="bg-blue-50 rounded-xl p-5 shadow flex gap-3 items-start"><span className="text-blue-700 text-2xl">🔧</span><span>Assistência técnica 24 horas por dia</span></div>
+              {[
+                { icon: '🏢', key: 0 },
+                { icon: '👥', key: 1 },
+                { icon: '⚖️', key: 2 },
+                { icon: '🔧', key: 3 },
+              ].map(({ icon, key }) => (
+                <div key={key} className="bg-blue-50 rounded-xl p-5 shadow flex gap-3 items-start"><span className="text-blue-700 text-2xl">{icon}</span><span>{t(`advantages.${key}`)}</span></div>
+              ))}
             </div>
           </section>
           {/* Como contratar */}
           <section>
             <h2 className="text-2xl font-bold text-blue-800 mb-4 flex items-center gap-2">
               <svg width="28" height="28" fill="none" stroke="#2563eb" strokeWidth="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" stroke="#2563eb" strokeWidth="2" strokeLinecap="round"/></svg>
-              Como contratar?
+              {t('howTitle')}
             </h2>
             <ol className="list-decimal pl-6 text-blue-900 text-lg space-y-2">
-              <li>Solicite uma proposta para o seu condomínio.</li>
-              <li>Escolha as coberturas e capitais de acordo com as necessidades do edifício.</li>
-              <li>Finalize com o apoio de um consultor especializado.</li>
+              {Array.from({ length: 3 }).map((_, idx) => (
+                <li key={idx}>{t(`howSteps.${idx}`)}</li>
+              ))}
             </ol>
           </section>
         </div>
