@@ -1,4 +1,6 @@
 import { Routes, Route, NavLink, Navigate, useParams } from "react-router-dom";
+import { useEffect } from "react";
+import i18n from "./i18n";
 import { ResponsiveGate } from "./components/ResponsiveGate";
 import DesktopNav from "./components/DesktopNav";
 import MobileNav from "./components/MobileNav";
@@ -30,6 +32,13 @@ function App(): React.ReactElement {
   function LangScopedRoutes() {
     const { lang } = useParams();
     const base = lang === 'en' ? 'en' : (lang === 'pt' ? 'pt' : 'pt');
+    // Force i18n language to follow URL param (robust on first load / GH Pages)
+    useEffect(() => {
+      if (lang === 'pt' || lang === 'en') {
+        i18n.changeLanguage(lang);
+        document.documentElement.lang = lang;
+      }
+    }, [lang]);
     // if invalid lang in URL, normalize to /pt
     if (lang !== 'pt' && lang !== 'en') {
       return <Navigate to="/pt" replace />;
