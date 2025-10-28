@@ -127,7 +127,7 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
               className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-[#25D366] text-white shadow-lg hover:bg-[#1fb256] transition"
               aria-label={t('chat.whatsappNow')}
             >
-              <span>🟢</span>
+              <WhatsAppIcon className="w-5 h-5 text-white" />
               <span className="font-semibold text-sm">WhatsApp</span>
             </a>
           )}
@@ -136,18 +136,18 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
             className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-green-500 text-white shadow-lg hover:bg-green-600 transition"
             aria-label={t('chat.callNow')}
           >
-            <span>📞</span>
+            <PhoneIcon className="w-5 h-5 text-white" />
             <span className="font-semibold text-sm">{t('chat.callNow')}</span>
           </a>
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-3 rounded-full bg-blue-600 text-white shadow-xl hover:bg-blue-500 transition"
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-500 transition"
             aria-expanded={open}
             aria-controls="chat-panel"
           >
-            <span>💬</span>
-            <span className="font-semibold">{t('chat.talkNow')}</span>
+            <ChatIcon className="w-5 h-5 text-white" />
+            <span className="font-semibold text-sm">{t('chat.talkNow')}</span>
           </button>
         </div>
       )}
@@ -175,9 +175,11 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
                   href={whatsHref}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-2 py-1 text-[11px] rounded bg-[#25D366] hover:brightness-95 text-white"
+                  className="px-2 py-1 text-[11px] rounded bg-[#25D366] hover:brightness-95 text-white inline-flex items-center"
+                  aria-label={t('chat.whatsappNow')}
+                  title="WhatsApp"
                 >
-                  WA
+                  <WhatsAppIcon className="w-4 h-4 text-white" />
                 </a>
               )}
               <a
@@ -273,5 +275,52 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
         </div>
       )}
     </div>
+  );
+}
+
+function WhatsAppIcon({ className = '' }: { className?: string }) {
+  // WhatsApp logo (simplified) using currentColor for fill
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 32 32"
+      className={className}
+      fill="currentColor"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M19.11 17.23c-.27-.14-1.6-.79-1.84-.88-.25-.09-.43-.14-.61.14-.18.27-.7.87-.86 1.05-.16.18-.32.2-.59.07-.27-.14-1.13-.42-2.16-1.34-.8-.71-1.34-1.6-1.5-1.87-.16-.27-.02-.41.12-.55.12-.12.27-.32.41-.48.14-.16.18-.27.27-.45.09-.18.05-.34-.02-.48-.07-.14-.61-1.46-.84-2-.22-.53-.44-.46-.61-.46-.16 0-.34-.02-.52-.02-.18 0-.48.07-.73.34-.25.27-.96.93-.96 2.26 0 1.33.98 2.62 1.12 2.8.14.18 1.93 2.95 4.68 4.13.65.28 1.16.45 1.56.57.65.21 1.25.18 1.72.11.53-.08 1.6-.65 1.83-1.27.23-.62.23-1.14.16-1.25-.07-.11-.25-.18-.52-.32z"/>
+      <path d="M26.75 5.25A13.93 13.93 0 0 0 16 1a14 14 0 0 0-12.2 20.9L1 31l9.3-2.76A14 14 0 1 0 26.75 5.25zM16 27a11 11 0 0 1-5.6-1.5l-.4-.23-5.4 1.6 1.6-5.3-.26-.43A11 11 0 1 1 27 16 11 11 0 0 1 16 27z"/>
+    </svg>
+  );
+}
+
+function PhoneIcon({ className = '' }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      className={className}
+      fill="currentColor"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.86 19.86 0 0 1 2.08 4.2 2 2 0 0 1 4.06 2h3a2 2 0 0 1 2 1.72c.12.89.32 1.76.59 2.6a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.48-1.11a2 2 0 0 1 2.11-.45c.84.27 1.71.47 2.6.59A2 2 0 0 1 22 16.92z"/>
+    </svg>
+  );
+}
+
+function ChatIcon({ className = '' }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      className={className}
+      fill="currentColor"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zM6 9h8v2H6V9zm0-3h12v2H6V6z"/>
+    </svg>
   );
 }

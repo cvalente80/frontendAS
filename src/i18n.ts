@@ -12,6 +12,7 @@ const resources = {
         life: 'Simulação Vida',
         health: 'Simulação Saúde',
         homeInsurance: 'Simulação Habitação',
+        simulator: 'Simulador',
         products: 'Produtos',
         contact: 'Contato'
       },
@@ -834,6 +835,7 @@ const resources = {
         life: 'Life Quote',
         health: 'Health Quote',
         homeInsurance: 'Home Insurance Quote',
+        simulator: 'Quotes',
         products: 'Products',
         contact: 'Contact'
       },
