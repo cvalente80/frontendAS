@@ -8,6 +8,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import './SimulacaoVida.css';
 import { useTranslation, Trans } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { saveSimulation } from '../utils/simulations';
 registerLocale("pt", pt);
 registerLocale("en", enGB);
 
@@ -17,6 +19,7 @@ export default function SimulacaoVida() {
 	const { t } = useTranslation('sim_vida');
 	const { lang } = useParams();
 	const base = lang === 'en' ? 'en' : 'pt';
+	const { user } = useAuth();
 	const [form, setForm] = useState({
 		tipoSeguro: "Vida Individual",
 		capital: "",
@@ -77,7 +80,7 @@ export default function SimulacaoVida() {
 		setForm(f => ({ ...f, segurados: f.segurados.filter((_, i) => i !== idx) }));
 	}
 
-	function handleSubmit(e: React.FormEvent) {
+	async function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
 		// Validação final extra (proteção caso avance por DevTools)
 		const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -97,12 +100,30 @@ export default function SimulacaoVida() {
 			telefone: form.telefone,
 			pessoasSeguras: form.segurados.map((s, i) => `${t('emailSummary.person')} ${i+1}: ${t('emailSummary.name')} ${s.nome}, ${t('emailSummary.birth')} ${s.nascimentoManual}, ${t('emailSummary.nif')} ${s.contribuinte}`).join(" | ")
 		};
-		emailjs.send(
+		try {
+			// Persistir no Firestore (se autenticado) — não bloquear envio de email se falhar
+			if (user?.uid) {
+				try {
+					const resumo = `Vida - ${form.tipoSeguro} | Capital: ${form.capital} | Prazo: ${form.prazo} | Pessoas seguras: ${form.segurados.length}`;
+					await saveSimulation(user.uid, {
+						type: 'vida',
+						title: `Vida (${form.tipoSeguro})`,
+						summary: resumo,
+						status: 'submitted',
+						payload: { ...form },
+					});
+				} catch (err) {
+					console.warn('[SimulacaoVida] Falha a guardar simulação (ignorado):', err);
+				}
+			}
+			console.log('[EmailJS][Vida] Sending', { service: EMAILJS_SERVICE_ID, template: 'template_95ayhir' });
+			await emailjs.send(
 			EMAILJS_SERVICE_ID,
 			"template_95ayhir",
 			templateParams,
 			EMAILJS_USER_ID
-		).then(() => {
+		);
+			console.log('[EmailJS][Vida] Success');
 			setMensagemSucesso(t('messages.submitSuccess'));
 			// Reset mantendo o tipoSeguro atual
 			setForm(f => ({
@@ -117,10 +138,11 @@ export default function SimulacaoVida() {
 			}));
 			setStep(1);
 			setTimeout(() => setMensagemSucesso(null), 7000);
-		}).catch(() => {
+		} catch (err) {
+			console.error('[EmailJS][Vida] Error', err);
 			setMensagemSucesso(t('messages.submitError'));
 			setTimeout(() => setMensagemSucesso(null), 7000);
-		});
+		}
 	}
 
 	function handleNext(e: React.FormEvent) {

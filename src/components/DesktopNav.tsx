@@ -2,11 +2,13 @@ import React from 'react';
 import { NavLink, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
+import { useAuth } from '../context/AuthContext';
 
 export function DesktopNav() {
   const { t } = useTranslation('common');
   const { lang } = useParams();
   const base = lang === 'en' ? 'en' : 'pt';
+  const { user } = useAuth();
   return (
     <nav className="bg-white py-4 px-8 flex justify-between items-center sticky top-0 z-50 shadow-sm">
       <NavLink to={`/${base}`} className="flex items-center gap-2 shrink-0">
@@ -34,6 +36,11 @@ export function DesktopNav() {
         </div>
         <NavLink to={`/${base}/produtos`} className={({ isActive }) => (isActive ? "border-b-2 border-blue-900 text-blue-900 font-bold" : "hover:text-blue-900") + " whitespace-nowrap"}>{t('nav.products')}</NavLink>
         <NavLink to={`/${base}/contato`} className={({ isActive }) => (isActive ? "border-b-2 border-blue-900 text-blue-900 font-bold" : "hover:text-blue-900") + " whitespace-nowrap"}>{t('nav.contact')}</NavLink>
+        {user && (
+          <NavLink to={`/${base}/minhas-simulacoes`} className={({ isActive }) => (isActive ? "border-b-2 border-blue-900 text-blue-900 font-bold" : "hover:text-blue-900") + " whitespace-nowrap"}>
+            {t('nav.mySimulations')}
+          </NavLink>
+        )}
         <LanguageSwitcher />
       </div>
     </nav>

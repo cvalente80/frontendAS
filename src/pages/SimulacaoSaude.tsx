@@ -7,6 +7,8 @@ import { enGB } from "date-fns/locale/en-GB";
 import "react-datepicker/dist/react-datepicker.css";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
+import { useAuth } from '../context/AuthContext';
+import { saveSimulation } from '../utils/simulations';
 
 registerLocale("pt", pt);
 registerLocale("en", enGB);
@@ -17,6 +19,7 @@ export default function SimulacaoSaude() {
 	const { t } = useTranslation('sim_saude');
 	const { lang } = useParams();
 	const base = lang === 'en' ? 'en' : 'pt';
+	const { user } = useAuth();
 	const [step, setStep] = useState<1 | 2>(1);
 	const [segurados, setSegurados] = useState<Segurado[]>([
 		{ nome: "", nascimento: "", nascimentoManual: "", contribuinte: "" }
@@ -94,7 +97,7 @@ export default function SimulacaoSaude() {
 		}
 	}
 
-	function handleSubmit(e: React.FormEvent) {
+	async function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
 		if (!validarPasso2()) return;
 		// Mapeamento conforme o template fornecido: {{nome}}, {{time}}, {{opcao}}, {{pessoasSeguras}}
@@ -112,6 +115,19 @@ export default function SimulacaoSaude() {
 		if (dryRun) {
 			try {
 				console.log('[EmailJS][DRY_RUN][Saude] Would send with params:', templateParams);
+				if (user?.uid) {
+					try {
+						await saveSimulation(user.uid, {
+						type: 'saude',
+						title: `Saúde - ${opcao}`,
+						summary: `Plano: ${opcao} | Pessoas seguras: ${segurados.length}`,
+						status: 'submitted',
+						payload: { segurados, plano, addEstomatologia2, addEstomatologia3, nome, email, telefone },
+					});
+					} catch (err) {
+						console.warn('[SimulacaoSaude][DRY] Falha a guardar simulação (ignorado):', err);
+					}
+				}
 				setMensagemSucesso(t('messages.submitSuccess'));
 				setSegurados([{ nome: "", nascimento: "", nascimentoManual: "", contribuinte: "" }]);
 				setPlano("");
@@ -125,9 +141,25 @@ export default function SimulacaoSaude() {
 				return;
 			} catch {}
 		}
-		emailjs
+		try {
+			console.log('[EmailJS][Saude] Sending', { service: EMAILJS_SERVICE_ID_SAUDE, template: EMAILJS_TEMPLATE_ID_SAUDE });
+			if (user?.uid) {
+				try {
+					await saveSimulation(user.uid, {
+					type: 'saude',
+					title: `Saúde - ${opcao}`,
+					summary: `Plano: ${opcao} | Pessoas seguras: ${segurados.length}`,
+					status: 'submitted',
+					payload: { segurados, plano, addEstomatologia2, addEstomatologia3, nome, email, telefone },
+					});
+				} catch (err) {
+					console.warn('[SimulacaoSaude] Falha a guardar simulação (ignorado):', err);
+				}
+			}
+			await emailjs
 			.send(EMAILJS_SERVICE_ID_SAUDE, EMAILJS_TEMPLATE_ID_SAUDE, templateParams, EMAILJS_USER_ID_SAUDE)
-			.then(() => {
+			;
+			console.log('[EmailJS][Saude] Success');
 				setMensagemSucesso(t('messages.submitSuccess'));
 				setSegurados([{ nome: "", nascimento: "", nascimentoManual: "", contribuinte: "" }]);
 				setPlano("");
@@ -138,11 +170,11 @@ export default function SimulacaoSaude() {
 				setTelefone("");
 				setStep(1);
 				setTimeout(() => setMensagemSucesso(null), 7000);
-			})
-			.catch(() => {
+		} catch (err) {
+			console.error('[EmailJS][Saude] Error', err);
 				setMensagemSucesso(t('messages.submitError'));
 				setTimeout(() => setMensagemSucesso(null), 7000);
-			});
+		}
 	}
 
 	// Dados da grelha comparativa de planos (texto genérico, sem preços)

@@ -3,6 +3,8 @@ import emailjs from "@emailjs/browser";
 import { EMAILJS_SERVICE_ID_SAUDE, EMAILJS_TEMPLATE_ID_HABITACAO, EMAILJS_USER_ID_SAUDE } from "../emailjs.config";
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { saveSimulation } from '../utils/simulations';
 
 type FormState = {
   // Passo 1 - Imóvel
@@ -34,6 +36,7 @@ export default function SimulacaoHabitacao() {
   const { t } = useTranslation(['sim_home','contact']);
   const { lang } = useParams();
   const base = lang === 'en' ? 'en' : 'pt';
+  const { user } = useAuth();
   const [step, setStep] = useState<number>(1);
   const [form, setForm] = useState<FormState>({
     situacao: "",
@@ -193,7 +196,7 @@ export default function SimulacaoHabitacao() {
     setStep(s => Math.max(1, s - 1));
   }
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!form.produto) {
       setMensagem(t('sim_home:messages.productRequired'));
@@ -261,6 +264,21 @@ Cliente: ${form.nome} | Email: ${form.email} | Tel: ${form.telefone} | NIF: ${fo
 
     if (dryRun) {
       console.log('[EmailJS][DRY_RUN][Habitacao] Would send with params:', templateParams);
+      try {
+        if (user?.uid) {
+          try {
+            await saveSimulation(user.uid, {
+            type: 'habitacao',
+            title: `Casa - ${produtoLabel}`,
+            summary: `CP ${form.codigoPostal} | ${form.tipoImovel} | Capitais: Edi ${form.capitalEdificio || 'n/a'} / Cont ${form.capitalConteudo || 'n/a'}`,
+            status: 'submitted',
+            payload: { ...form },
+            });
+          } catch (err) {
+            console.warn('[SimulacaoHabitacao][DRY] Falha a guardar simulação (ignorado):', err);
+          }
+        }
+      } catch {}
       setMensagem(t('sim_home:messages.submitSuccess'));
       setMensagemTipo("sucesso");
       setForm({
@@ -288,10 +306,25 @@ Cliente: ${form.nome} | Email: ${form.email} | Tel: ${form.telefone} | NIF: ${fo
       return;
     }
 
-    emailjs
-      .send(EMAILJS_SERVICE_ID_SAUDE, EMAILJS_TEMPLATE_ID_HABITACAO, templateParams, EMAILJS_USER_ID_SAUDE)
-      .then((resp) => {
+    try {
+      if (user?.uid) {
+        try {
+          await saveSimulation(user.uid, {
+          type: 'habitacao',
+          title: `Casa - ${produtoLabel}`,
+          summary: `CP ${form.codigoPostal} | ${form.tipoImovel} | Capitais: Edi ${form.capitalEdificio || 'n/a'} / Cont ${form.capitalConteudo || 'n/a'}`,
+          status: 'submitted',
+          payload: { ...form },
+          });
+        } catch (err) {
+          console.warn('[SimulacaoHabitacao] Falha a guardar simulação (ignorado):', err);
+        }
+      }
+      console.log('[EmailJS][Habitacao] Sending', { service: EMAILJS_SERVICE_ID_SAUDE, template: EMAILJS_TEMPLATE_ID_HABITACAO });
+      const resp = await emailjs
+        .send(EMAILJS_SERVICE_ID_SAUDE, EMAILJS_TEMPLATE_ID_HABITACAO, templateParams, EMAILJS_USER_ID_SAUDE);
         if (isDev) console.log('[EmailJS][DEBUG] Sucesso', resp.status, resp.text);
+      console.log('[EmailJS][Habitacao] Success', resp.status, resp.text);
   setMensagem(t('sim_home:messages.submitSuccess'));
         setMensagemTipo("sucesso");
         // reset parcial
@@ -317,14 +350,14 @@ Cliente: ${form.nome} | Email: ${form.email} | Tel: ${form.telefone} | NIF: ${fo
         });
         setStep(1);
         setTimeout(() => { setMensagem(null); setMensagemTipo(null); }, 6000);
-      })
-      .catch((error) => {
-        if (isDev) console.error('[EmailJS][DEBUG] Erro envio', error);
+    } catch (error) {
+      if (isDev) console.error('[EmailJS][DEBUG] Erro envio', error);
+      console.error('[EmailJS][Habitacao] Error', error);
   setMensagem(t('sim_home:messages.submitError'));
         setMensagemTipo("erro");
         console.error(error);
         setTimeout(() => { setMensagem(null); setMensagemTipo(null); }, 6000);
-      });
+    }
   }
 
   return (

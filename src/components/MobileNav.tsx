@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { NavLink, useLocation, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
+import { useAuth } from '../context/AuthContext';
 
 export default function MobileNav() {
   const [open, setOpen] = useState(false);
@@ -9,6 +10,7 @@ export default function MobileNav() {
   const { t } = useTranslation('common');
   const { lang } = useParams();
   const base = lang === 'en' ? 'en' : 'pt';
+  const { user } = useAuth();
 
   // Close menu on route change
   useEffect(() => {
@@ -55,6 +57,13 @@ export default function MobileNav() {
             </li>
             <li><NavLink to={`/${base}/produtos`} onClick={() => setOpen(false)} className={({ isActive }) => isActive ? "font-bold text-blue-900" : "hover:text-blue-900"}>{t('nav.products')}</NavLink></li>
             <li><NavLink to={`/${base}/contato`} onClick={() => setOpen(false)} className={({ isActive }) => isActive ? "font-bold text-blue-900" : "hover:text-blue-900"}>{t('nav.contact')}</NavLink></li>
+            {user && (
+              <li>
+                <NavLink to={`/${base}/minhas-simulacoes`} onClick={() => setOpen(false)} className={({ isActive }) => isActive ? "font-bold text-blue-900" : "hover:text-blue-900"}>
+                  {t('nav.mySimulations')}
+                </NavLink>
+              </li>
+            )}
           </ul>
         </nav>
       )}

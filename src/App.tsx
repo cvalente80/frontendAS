@@ -30,6 +30,8 @@ const ForgotPassword = lazy(() => import('./pages/auth/ForgotPassword'));
 const VerifyEmail = lazy(() => import('./pages/auth/VerifyEmail'));
 import React from "react";
 import Header from "./components/Header";
+import { ProtectedRoute } from './context/AuthContext';
+import MinhasSimulacoes from './pages/MinhasSimulacoes';
 
 
 function App(): React.ReactElement {
@@ -70,6 +72,8 @@ function App(): React.ReactElement {
           <Route path="auth/register" element={<Register />} />
           <Route path="auth/forgot" element={<ForgotPassword />} />
           <Route path="auth/verify-email" element={<VerifyEmail />} />
+          {/* Área autenticada */}
+          <Route path="minhas-simulacoes" element={<ProtectedRoute><MinhasSimulacoes /></ProtectedRoute>} />
           <Route path="simulacao-auto" element={<SimulacaoAuto />} />
           <Route path="simulacao-vida" element={<SimulacaoVida />} />
           <Route path="simulacao-saude" element={<SimulacaoSaude />} />
@@ -109,26 +113,37 @@ function App(): React.ReactElement {
     );
   }
 
-  function ErrorBoundary({ children }: { children: React.ReactNode }) {
-    const [error, setError] = React.useState<Error | null>(null);
-    if (error) {
+  class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { error: Error | null }> {
+    constructor(props: { children: React.ReactNode }) {
+      super(props);
+      this.state = { error: null };
+    }
+
+    static getDerivedStateFromError(error: Error) {
+      return { error };
+    }
+
+    componentDidCatch(error: Error, info: React.ErrorInfo) {
+      // You can log the error to an error reporting service here
+      // console.error(error, info);
+    }
+
+    render() {
+      if (this.state.error) {
+        return (
+          <div className="p-6">
+            <h1 className="font-bold text-red-600">Ocorreu um erro</h1>
+            <pre className="mt-2 whitespace-pre-wrap text-sm">{this.state.error.message}</pre>
+          </div>
+        );
+      }
+
       return (
-        <div className="p-6">
-          <h1 className="font-bold text-red-600">Ocorreu um erro</h1>
-          <pre className="mt-2 whitespace-pre-wrap text-sm">{error.message}</pre>
-        </div>
+        <React.Suspense fallback={<div className="p-6">A carregar...</div>}>
+          {this.props.children}
+        </React.Suspense>
       );
     }
-    return (
-      <React.Suspense fallback={<div className="p-6">A carregar...</div>}>
-        <React.ErrorBoundary fallbackRender={({ error }) => {
-          setError(error as Error);
-          return null;
-        }}>
-          {children}
-        </React.ErrorBoundary>
-      </React.Suspense>
-    );
   }
 
   return (

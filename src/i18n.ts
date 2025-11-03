@@ -14,7 +14,8 @@ const resources = {
         homeInsurance: 'Simulação Habitação',
         simulator: 'Simulador',
         products: 'Produtos',
-        contact: 'Contato'
+        contact: 'Contato',
+        mySimulations: 'As minhas simulações'
       },
       a11y: {
         switchToEN: 'Mudar para Inglês',
@@ -837,7 +838,8 @@ const resources = {
         homeInsurance: 'Home Insurance Quote',
         simulator: 'Quotes',
         products: 'Products',
-        contact: 'Contact'
+        contact: 'Contact',
+        mySimulations: 'My quotes'
       },
       a11y: {
         switchToEN: 'Switch to English',

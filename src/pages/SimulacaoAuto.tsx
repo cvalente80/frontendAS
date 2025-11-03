@@ -7,6 +7,8 @@ import { EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, EMAILJS_USER_ID } from "../ema
 import emailjs from "@emailjs/browser";
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { saveSimulation } from '../utils/simulations';
 registerLocale("pt", pt);
 registerLocale("en", enGB);
 
@@ -33,6 +35,7 @@ export default function SimulacaoAuto() {
   const { t } = useTranslation('sim_auto');
   const { lang } = useParams();
   const base = lang === 'en' ? 'en' : 'pt';
+  const { user } = useAuth();
   const [step, setStep] = useState<number>(1);
   const [form, setForm] = useState<FormState>({
     nome: "",
@@ -122,7 +125,7 @@ export default function SimulacaoAuto() {
   }
 
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!form.tipoSeguro) {
       setMensagem(t('messages.selectType'));
@@ -153,12 +156,42 @@ export default function SimulacaoAuto() {
       outrosPedidos: form.outrosPedidos?.trim() ? form.outrosPedidos.trim() : '-',
       resultado: resumo,
     };
-    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams, EMAILJS_USER_ID)
-      .then(() => {
-        setMensagem(t('messages.submitSuccess'));
-        setMensagemTipo('sucesso');
-      })
-      .catch((error) => {
+    try {
+      // Firestore persistence if authenticated (non-blocking)
+      if (user?.uid) {
+        try {
+          await saveSimulation(user.uid, {
+            type: 'auto',
+            title: `${form.marca || ''} ${form.modelo || ''}`.trim() || 'Auto',
+            summary: resumo,
+            status: 'submitted',
+            payload: {
+              email: form.email,
+              nome: form.nome,
+              contribuinte: form.contribuinte,
+              dataNascimento: form.dataNascimento,
+              dataCartaConducao: form.dataCartaConducao,
+              codigoPostal: form.codigoPostal,
+              marca: form.marca,
+              modelo: form.modelo,
+              ano: form.ano,
+              matricula: form.matricula,
+              tipoSeguro: form.tipoSeguro,
+              coberturas: form.coberturas,
+              outrosPedidos: form.outrosPedidos,
+            }
+          });
+        } catch (e) {
+          console.warn('[SimulacaoAuto] Falha a guardar simulação (ignorado):', e);
+        }
+      }
+  console.log('[EmailJS][Auto] Sending', { service: EMAILJS_SERVICE_ID, template: EMAILJS_TEMPLATE_ID });
+  const resp = await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams, EMAILJS_USER_ID);
+  console.log('[EmailJS][Auto] Success', resp?.status, resp?.text);
+      setMensagem(t('messages.submitSuccess'));
+      setMensagemTipo('sucesso');
+    } catch (error: any) {
+      console.error('[EmailJS][Auto] Error', error);
         setMensagem(t('messages.submitEmailError'));
         setMensagemTipo('erro');
         // Exibe o erro no canto inferior esquerdo, incluindo o user_id
@@ -178,7 +211,7 @@ export default function SimulacaoAuto() {
         setTimeout(() => {
           if (errorDiv.parentNode) errorDiv.parentNode.removeChild(errorDiv);
         }, 8000);
-      });
+    }
 
     setTimeout(() => {
       setMensagem(null);
