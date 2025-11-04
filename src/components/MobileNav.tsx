@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { NavLink, useLocation, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
+import { useAuth } from '../context/AuthContext';
 
 export default function MobileNav() {
   const [open, setOpen] = useState(false);
@@ -9,6 +10,7 @@ export default function MobileNav() {
   const { t } = useTranslation('common');
   const { lang } = useParams();
   const base = lang === 'en' ? 'en' : 'pt';
+  const { user, loading, displayName, loginWithGoogle, logout } = useAuth();
 
   // Close menu on route change
   useEffect(() => {
@@ -23,6 +25,28 @@ export default function MobileNav() {
         </NavLink>
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
+
+          {/* Perfil / Autenticação (mobile) */}
+          {loading ? (
+            <div className="h-9 w-9 animate-pulse rounded-full bg-gray-200" />
+          ) : user ? (
+            <div className="relative">
+              <button aria-label="Conta" className="p-2 rounded-full border border-blue-200 bg-blue-50" onClick={() => setOpen((v) => v)}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1e3a8a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </button>
+            </div>
+          ) : (
+            <button aria-label={t('auth.signIn')} className="p-2 rounded-full border border-blue-200" onClick={loginWithGoogle}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1e3a8a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </button>
+          )}
+
           <button aria-label="Abrir menu" className="p-2 rounded-md border border-blue-200" onClick={() => setOpen((v) => !v)}>
           <svg width="24" height="24" fill="none" stroke="#1e3a8a" strokeWidth="2" viewBox="0 0 24 24">
             <path d="M3 6h18M3 12h18M3 18h18" />
@@ -55,6 +79,18 @@ export default function MobileNav() {
             </li>
             <li><NavLink to={`/${base}/produtos`} onClick={() => setOpen(false)} className={({ isActive }) => isActive ? "font-bold text-blue-900" : "hover:text-blue-900"}>{t('nav.products')}</NavLink></li>
             <li><NavLink to={`/${base}/contato`} onClick={() => setOpen(false)} className={({ isActive }) => isActive ? "font-bold text-blue-900" : "hover:text-blue-900"}>{t('nav.contact')}</NavLink></li>
+            {user && (
+              <li>
+                <NavLink to={`/${base}/minhas-simulacoes`} onClick={() => setOpen(false)} className={({ isActive }) => isActive ? "font-bold text-blue-900" : "hover:text-blue-900"}>
+                  {t('nav.mySimulations')}
+                </NavLink>
+              </li>
+            )}
+            {user && (
+              <li>
+                <button onClick={() => { setOpen(false); logout(); }} className="text-left text-blue-800 hover:text-blue-900">{t('auth.signOut')}</button>
+              </li>
+            )}
           </ul>
         </nav>
       )}

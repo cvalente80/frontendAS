@@ -14,7 +14,14 @@ const resources = {
         homeInsurance: 'Simulação Habitação',
         simulator: 'Simulador',
         products: 'Produtos',
-        contact: 'Contato'
+        contact: 'Contato',
+        mySimulations: 'As minhas simulações'
+      },
+      auth: {
+        hello: 'Olá',
+        loginCta: 'Olá! Iniciar Sessão',
+        signIn: 'Iniciar Sessão',
+        signOut: 'Sair'
       },
       a11y: {
         switchToEN: 'Mudar para Inglês',
@@ -837,7 +844,14 @@ const resources = {
         homeInsurance: 'Home Insurance Quote',
         simulator: 'Quotes',
         products: 'Products',
-        contact: 'Contact'
+        contact: 'Contact',
+        mySimulations: 'My quotes'
+      },
+      auth: {
+        hello: 'Hello',
+        loginCta: 'Hello! Sign in',
+        signIn: 'Sign in',
+        signOut: 'Sign out'
       },
       a11y: {
         switchToEN: 'Switch to English',

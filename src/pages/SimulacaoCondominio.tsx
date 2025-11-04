@@ -1,6 +1,8 @@
 import React, { useMemo, useState } from "react";
 import emailjs from "@emailjs/browser";
 import { EMAILJS_SERVICE_ID_GENERIC, EMAILJS_TEMPLATE_ID_GENERIC, EMAILJS_USER_ID_GENERIC } from "../emailjs.config";
+import { useAuth } from '../context/AuthContext';
+import { saveSimulation } from '../utils/simulations';
 
 type FormState = {
   // Passo 1 - Contacto e identificação
@@ -43,6 +45,7 @@ export default function SimulacaoCondominio(): React.ReactElement {
   const [enviando, setEnviando] = useState(false);
   const [mensagem, setMensagem] = useState('');
   const [mensagemTipo, setMensagemTipo] = useState<'sucesso'|'erro'|''>('');
+  const { user } = useAuth();
   const [form, setForm] = useState<FormState>({
     administradorNome: '',
     administradorEmail: '',
@@ -112,7 +115,7 @@ export default function SimulacaoCondominio(): React.ReactElement {
     else if (step === 2) setStep(3);
   };
 
-  const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
+  const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     if (!canSubmit) return;
     setEnviando(true); setMensagem(''); setMensagemTipo('');
@@ -176,9 +179,24 @@ export default function SimulacaoCondominio(): React.ReactElement {
       console.debug('[EmailJS][Condominio] detalhes_html length:', templateParams.detalhes_html?.length);
     }
 
-    emailjs
-      .send(EMAILJS_SERVICE_ID_GENERIC, EMAILJS_TEMPLATE_ID_GENERIC, templateParams, EMAILJS_USER_ID_GENERIC)
-      .then(() => {
+    try {
+      if (user?.uid) {
+        try {
+          await saveSimulation(user.uid, {
+          type: 'condominio',
+          title: `Condomínio - ${form.localidade || form.morada.split(',')[0] || ''}`,
+          summary: `Fracoes: ${form.numeroFracoes || '-'} | Edifício: € ${form.capitalEdificio}`,
+          status: 'submitted',
+          payload: { ...form },
+          });
+        } catch (err) {
+          console.warn('[Condominio] Falha a guardar simulação (ignorado):', err);
+        }
+      }
+      console.log('[EmailJS][Condominio] Sending', { service: EMAILJS_SERVICE_ID_GENERIC, template: EMAILJS_TEMPLATE_ID_GENERIC });
+      await emailjs
+        .send(EMAILJS_SERVICE_ID_GENERIC, EMAILJS_TEMPLATE_ID_GENERIC, templateParams, EMAILJS_USER_ID_GENERIC);
+      console.log('[EmailJS][Condominio] Success');
         setMensagem('Obrigado! Recebemos o seu pedido e entraremos em contacto.');
         setMensagemTipo('sucesso');
         setStep(1);
@@ -187,13 +205,13 @@ export default function SimulacaoCondominio(): React.ReactElement {
           numeroFracoes: '', numeroPisos: '', anoConstrucao: '', temElevadores: 'Não', numeroElevadores: '', temGaragem: 'Não',
           capitalEdificio: '', sinistros5Anos: 'Não', detalhesSinistros: '', outrosPedidos: '', aceitaRgpd: false,
         });
-      })
-      .catch((err) => {
+    } catch (err) {
         console.error('[EmailJS][Condominio] send error:', err);
         setMensagem('Ocorreu um erro ao enviar. Tente novamente.');
         setMensagemTipo('erro');
-      })
-      .finally(() => { setEnviando(false); setTimeout(()=>{ setMensagem(''); setMensagemTipo(''); }, 6000); });
+    } finally {
+      setEnviando(false); setTimeout(()=>{ setMensagem(''); setMensagemTipo(''); }, 6000);
+    }
   };
 
   return (

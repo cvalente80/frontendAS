@@ -7,4 +7,9 @@ export default defineConfig(({ command, mode }) => ({
   // For GitHub Pages build, run with --mode gh to set base '/frontendAS/'
   base: command === 'build' ? (mode === 'gh' ? '/frontendAS/' : '/') : '/',
   plugins: [react()],
+  server: {
+    port: 5175,        // prefer 5175
+    strictPort: false, // if busy, pick the next available
+    open: true         // auto-open the correct URL to avoid confusion
+  }
 }))

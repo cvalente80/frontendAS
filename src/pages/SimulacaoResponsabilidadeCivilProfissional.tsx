@@ -1,6 +1,8 @@
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import emailjs from "@emailjs/browser";
 import { EMAILJS_SERVICE_ID_GENERIC, EMAILJS_TEMPLATE_ID_GENERIC, EMAILJS_USER_ID_GENERIC } from "../emailjs.config";
+import { useAuth } from '../context/AuthContext';
+import { saveSimulation } from '../utils/simulations';
 
 type FormState = {
   // Passo 1 - Empresa
@@ -28,6 +30,7 @@ function validarNIF(nif: string): boolean { if (!/^[0-9]{9}$/.test(nif)) return 
 
 export default function SimulacaoResponsabilidadeCivilProfissional() {
   const [step, setStep] = useState<number>(1);
+  const { user } = useAuth();
   const [form, setForm] = useState<FormState>({
     empresaNome: "",
     empresaNif: "",
@@ -90,7 +93,7 @@ export default function SimulacaoResponsabilidadeCivilProfissional() {
   function formatEUR(n: number) { return n.toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
   function sanitizeTemplateParams(obj: Record<string, any>) { const out: Record<string, string> = {}; for (const [k,v] of Object.entries(obj)) { if (v==null) out[k] = ""; else if (v instanceof Date) out[k]=v.toISOString(); else if (Array.isArray(v)) out[k]=v.map(x=>x==null?'':String(x)).join(', '); else if (typeof v==='object') out[k]=JSON.stringify(v); else out[k]=String(v); } return out; }
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!form.aceitaRgpd) { setMensagem('Necessário aceitar a Política de Privacidade & RGPD.'); setMensagemTipo('erro'); return; }
 
@@ -147,10 +150,30 @@ export default function SimulacaoResponsabilidadeCivilProfissional() {
       console.debug('[EmailJS][RCProf] Params keys:', Object.keys(templateParams));
     }
 
-    emailjs.send(EMAILJS_SERVICE_ID_GENERIC, EMAILJS_TEMPLATE_ID_GENERIC, templateParams, EMAILJS_USER_ID_GENERIC)
-      .then(() => { setMensagem('Pedido enviado com sucesso!'); setMensagemTipo('sucesso'); setStep(1); })
-      .catch(err => { console.error('[EmailJS][RCProf] send error:', err); setMensagem('Ocorreu um erro ao enviar. Tente novamente.'); setMensagemTipo('erro'); })
-      .finally(() => { setTimeout(()=>{ setMensagem(null); setMensagemTipo(null); }, 6000); });
+    try {
+      if (user?.uid) {
+        try {
+          await saveSimulation(user.uid, {
+          type: 'rc_prof',
+          title: `RC Profissional - ${form.atividade || form.empresaNome}`,
+          summary: `Empresa: ${form.empresaNome} | Capitais: ${form.capitais} | Franquia: ${form.franquia}`,
+          status: 'submitted',
+          payload: { ...form },
+          });
+        } catch (err) {
+          console.warn('[RCProf] Falha a guardar simulação (ignorado):', err);
+        }
+      }
+  console.log('[EmailJS][RCProf] Sending', { service: EMAILJS_SERVICE_ID_GENERIC, template: EMAILJS_TEMPLATE_ID_GENERIC });
+  await emailjs.send(EMAILJS_SERVICE_ID_GENERIC, EMAILJS_TEMPLATE_ID_GENERIC, templateParams, EMAILJS_USER_ID_GENERIC);
+  console.log('[EmailJS][RCProf] Success');
+      setMensagem('Pedido enviado com sucesso!'); setMensagemTipo('sucesso'); setStep(1);
+    } catch (err) {
+      console.error('[EmailJS][RCProf] send error:', err);
+      setMensagem('Ocorreu um erro ao enviar. Tente novamente.'); setMensagemTipo('erro');
+    } finally {
+      setTimeout(()=>{ setMensagem(null); setMensagemTipo(null); }, 6000);
+    }
   }
 
   return (

@@ -1,5 +1,5 @@
 import { Routes, Route, NavLink, Navigate, useParams } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import i18n from "./i18n";
 import { ResponsiveGate } from "./components/ResponsiveGate";
 import DesktopNav from "./components/DesktopNav";
@@ -24,7 +24,14 @@ import ProdutoCondominio from "./pages/ProdutoCondominio";
 import SimulacaoCondominio from "./pages/SimulacaoCondominio";
 import PoliticaRGPD from "./pages/PoliticaRGPD";
 import './App.css';
-// Removed invalid import: ./pages/inicio (file does not exist). Use Home for "/inicio" route.
+const Login = lazy(() => import('./pages/auth/Login'));
+const Register = lazy(() => import('./pages/auth/Register'));
+const ForgotPassword = lazy(() => import('./pages/auth/ForgotPassword'));
+const VerifyEmail = lazy(() => import('./pages/auth/VerifyEmail'));
+import React from "react";
+import Header from "./components/Header";
+import { ProtectedRoute } from './context/AuthContext';
+import MinhasSimulacoes from './pages/MinhasSimulacoes';
 
 
 function App(): React.ReactElement {
@@ -56,9 +63,17 @@ function App(): React.ReactElement {
         }} />
         {/* Navbar responsiva: Mobile (md-) e Desktop (md+) */}
         <ResponsiveGate mobile={<MobileNav />} desktop={<DesktopNav />} />
+        <Suspense fallback={<div className="p-6 text-center">Carregando…</div>}>
         <Routes>
           <Route index element={<Home />} />
           <Route path="inicio" element={<Home />} />
+          {/* Auth */}
+          <Route path="auth/login" element={<Login />} />
+          <Route path="auth/register" element={<Register />} />
+          <Route path="auth/forgot" element={<ForgotPassword />} />
+          <Route path="auth/verify-email" element={<VerifyEmail />} />
+          {/* Área autenticada */}
+          <Route path="minhas-simulacoes" element={<ProtectedRoute><MinhasSimulacoes /></ProtectedRoute>} />
           <Route path="simulacao-auto" element={<SimulacaoAuto />} />
           <Route path="simulacao-vida" element={<SimulacaoVida />} />
           <Route path="simulacao-saude" element={<SimulacaoSaude />} />
@@ -79,7 +94,8 @@ function App(): React.ReactElement {
           <Route path="politica-rgpd" element={<PoliticaRGPD />} />
           {/* Not found inside lang: redirect to index within the same lang */}
           <Route path="*" element={<Navigate to={`/${base}`} replace />} />
-        </Routes>
+  </Routes>
+  </Suspense>
         {/* Footer com link para RGPD */}
         <footer className="bg-blue-900 text-blue-100 py-6 mt-12 text-center w-full">
           <div className="container mx-auto flex flex-col md:flex-row justify-between items-center px-4 gap-2">
@@ -88,11 +104,46 @@ function App(): React.ReactElement {
               <NavLink to={`/${base}/contato`} className="text-blue-200 underline hover:text-white text-sm">Contato</NavLink>
               <span className="hidden md:inline-block">|</span>
               <NavLink to={`/${base}/politica-rgpd`} className="text-blue-200 underline hover:text-white text-sm">Política de Privacidade &amp; RGPD</NavLink>
+              <span className="hidden md:inline-block">|</span>
+              <NavLink to={`/${base}/auth/login`} className="text-blue-200 underline hover:text-white text-sm">Entrar</NavLink>
             </div>
           </div>
         </footer>
       </>
     );
+  }
+
+  class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { error: Error | null }> {
+    constructor(props: { children: React.ReactNode }) {
+      super(props);
+      this.state = { error: null };
+    }
+
+    static getDerivedStateFromError(error: Error) {
+      return { error };
+    }
+
+    componentDidCatch(error: Error, info: React.ErrorInfo) {
+      // You can log the error to an error reporting service here
+      // console.error(error, info);
+    }
+
+    render() {
+      if (this.state.error) {
+        return (
+          <div className="p-6">
+            <h1 className="font-bold text-red-600">Ocorreu um erro</h1>
+            <pre className="mt-2 whitespace-pre-wrap text-sm">{this.state.error.message}</pre>
+          </div>
+        );
+      }
+
+      return (
+        <React.Suspense fallback={<div className="p-6">A carregar...</div>}>
+          {this.props.children}
+        </React.Suspense>
+      );
+    }
   }
 
   return (
