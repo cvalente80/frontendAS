@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { NavLink, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
@@ -8,7 +8,32 @@ export function DesktopNav() {
   const { t } = useTranslation('common');
   const { lang } = useParams();
   const base = lang === 'en' ? 'en' : 'pt';
-  const { user } = useAuth();
+  const { user, loading, displayName, loginWithGoogle, logout } = useAuth();
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement | null>(null);
+
+  // Close profile menu on outside click or Escape
+  useEffect(() => {
+    function onDocPointer(e: MouseEvent | TouchEvent) {
+      if (!profileOpen) return;
+      const el = profileRef.current;
+      if (el && e.target instanceof Node && !el.contains(e.target)) {
+        setProfileOpen(false);
+      }
+    }
+    function onKey(e: KeyboardEvent) {
+      if (!profileOpen) return;
+      if (e.key === 'Escape') setProfileOpen(false);
+    }
+    document.addEventListener('mousedown', onDocPointer, true);
+    document.addEventListener('touchstart', onDocPointer, true);
+    document.addEventListener('keydown', onKey, true);
+    return () => {
+      document.removeEventListener('mousedown', onDocPointer, true);
+      document.removeEventListener('touchstart', onDocPointer, true);
+      document.removeEventListener('keydown', onKey, true);
+    };
+  }, [profileOpen]);
   return (
     <nav className="bg-white py-4 px-8 flex justify-between items-center sticky top-0 z-50 shadow-sm">
       <NavLink to={`/${base}`} className="flex items-center gap-2 shrink-0">
@@ -42,6 +67,58 @@ export function DesktopNav() {
           </NavLink>
         )}
         <LanguageSwitcher />
+
+        {/* Perfil / Autenticação */}
+        {loading ? (
+          <div className="h-9 w-28 animate-pulse rounded-full bg-gray-200" />
+        ) : user ? (
+          <div className="relative" ref={profileRef}>
+            <button
+              type="button"
+              aria-label="Conta"
+              aria-haspopup="menu"
+              aria-expanded={profileOpen}
+              className="flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-blue-900 hover:bg-blue-100 focus:outline-none"
+              onClick={() => setProfileOpen((v) => !v)}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              <span className="hidden xl:inline">{t('auth.hello')}, {displayName?.split(' ')[0] || 'Utilizador'}</span>
+            </button>
+            <div
+              role="menu"
+              aria-hidden={!profileOpen}
+              className={
+                `absolute right-0 top-full mt-2 w-56 rounded-lg border border-gray-200 bg-white shadow-lg transition duration-150 ease-out p-2 z-50 ` +
+                (profileOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-1 pointer-events-none')
+              }
+            >
+              <div className="flex flex-col text-blue-800">
+                <NavLink
+                  to={`/${base}/minhas-simulacoes`}
+                  onClick={() => setProfileOpen(false)}
+                  className={({ isActive }) => (isActive ? "bg-blue-50 text-blue-900 font-semibold" : "hover:bg-gray-50 hover:text-blue-900") + " rounded px-3 py-2"}
+                >
+                  As minhas simulações
+                </NavLink>
+                <button onClick={() => { setProfileOpen(false); logout(); }} className="text-left rounded px-3 py-2 hover:bg-gray-50 hover:text-blue-900">{t('auth.signOut')}</button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={loginWithGoogle}
+            className="flex items-center gap-2 rounded-full border border-blue-200 bg-white px-3 py-1.5 text-blue-900 hover:bg-blue-50 focus:outline-none"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            <span className="hidden xl:inline">{t('auth.loginCta')}</span>
+          </button>
+        )}
       </div>
     </nav>
   );
