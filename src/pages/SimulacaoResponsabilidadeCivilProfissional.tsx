@@ -1,4 +1,5 @@
 import React, { useState, ChangeEvent, FormEvent } from "react";
+import Seo from "../components/Seo";
 import emailjs from "@emailjs/browser";
 import { EMAILJS_SERVICE_ID_GENERIC, EMAILJS_TEMPLATE_ID_GENERIC, EMAILJS_USER_ID_GENERIC } from "../emailjs.config";
 import { useAuth } from '../context/AuthContext';
@@ -178,6 +179,11 @@ export default function SimulacaoResponsabilidadeCivilProfissional() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex flex-col items-center py-12 px-4">
+      <Seo
+        title={"Simulação Responsabilidade Civil Profissional"}
+        description={"Simule o seguro de responsabilidade civil profissional e receba proposta personalizada."}
+        canonicalPath={(typeof window !== 'undefined' ? window.location.pathname : '/pt/simulacao-rc-profissional')}
+      />
       <div className="max-w-3xl w-full bg-white rounded-2xl shadow-xl p-8">
         <h2 className="text-3xl font-bold mb-6 text-blue-900 text-center">Simulação - RC Profissional</h2>
         {/* Stepper */}

@@ -78,13 +78,15 @@ export function DesktopNav() {
               aria-label="Conta"
               aria-haspopup="menu"
               aria-expanded={profileOpen}
-              className="flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-blue-900 hover:bg-blue-100 focus:outline-none"
+              className="relative flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-blue-900 hover:bg-blue-100 focus:outline-none"
               onClick={() => setProfileOpen((v) => !v)}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                 <circle cx="12" cy="7" r="4"/>
               </svg>
+              {/* Online/active dot */}
+              <span className="absolute -top-0.5 -right-0.5 block h-2.5 w-2.5 rounded-full bg-green-500 ring-2 ring-white" aria-hidden="true" />
               <span className="hidden xl:inline">{t('auth.hello')}, {displayName?.split(' ')[0] || 'Utilizador'}</span>
             </button>
             <div

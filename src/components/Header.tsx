@@ -8,7 +8,10 @@ export default function Header() {
     <header className="w-full border-b bg-white shadow-sm">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
         {/* Logótipo ou nome do site à esquerda */}
-        <div className="font-bold text-lg text-gray-800">Ansião Seguros</div>
+        <div className="flex items-center gap-2">
+          <img src={`${import.meta.env.BASE_URL}logo-empresarial.svg`} alt="Logo Ansião Seguros" className="h-8 w-8" />
+          <span className="text-lg font-semibold text-gray-800">Ansião Seguros</span>
+        </div>
 
         {/* Controlos à direita */}
         <div className="flex items-center gap-4">
@@ -20,9 +23,7 @@ export default function Header() {
             <div className="h-6 w-24 animate-pulse rounded-md bg-gray-200" />
           ) : user ? (
             <>
-              <span className="hidden sm:inline text-sm text-gray-700">
-                Olá {displayName}
-              </span>
+              <span className="hidden sm:inline text-sm text-gray-700 max-w-[180px] truncate">Olá {displayName}</span>
               <button
                 onClick={logout}
                 className="rounded-md bg-gray-700 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-600"

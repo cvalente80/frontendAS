@@ -77,6 +77,23 @@ export default function Seo({ title, description, image, canonicalPath, noIndex,
       return typeof window !== 'undefined' ? `${base}${window.location.pathname}${window.location.search}` : undefined;
     })();
 
+    // Derive localized alternates from current/canonical path
+    const { altPt, altEn } = (() => {
+      if (!base) return { altPt: undefined as string | undefined, altEn: undefined as string | undefined };
+      const currentPath = canonicalPath
+        ? (canonicalPath.startsWith('/') ? canonicalPath : `/${canonicalPath}`)
+        : (typeof window !== 'undefined' ? window.location.pathname : '/');
+      // Expect paths like /pt/... or /en/...; normalize suffix after lang segment
+      const segs = currentPath.split('/').filter(Boolean);
+      const maybeLang = segs[0];
+      const suffix = (maybeLang === 'pt' || maybeLang === 'en') ? `/${segs.slice(1).join('/')}` : `/${segs.join('/')}`;
+      const normalizedSuffix = suffix === '/' ? '' : suffix;
+      return {
+        altPt: `${base}/pt${normalizedSuffix}`,
+        altEn: `${base}/en${normalizedSuffix}`,
+      };
+    })();
+
     // Title
     document.title = resolvedTitle;
     // Meta
@@ -88,6 +105,7 @@ export default function Seo({ title, description, image, canonicalPath, noIndex,
     upsertMetaByProp('og:type', 'website');
     upsertMetaByProp('og:site_name', 'Ansião Seguros');
   upsertMetaByProp('og:locale', lang === 'en' ? 'en_GB' : 'pt_PT');
+    upsertMetaByProp('og:locale:alternate', lang === 'en' ? 'pt_PT' : 'en_GB');
     upsertMetaByProp('og:title', resolvedTitle);
     upsertMetaByProp('og:description', desc);
     upsertMetaByProp('og:image', img);
@@ -101,10 +119,61 @@ export default function Seo({ title, description, image, canonicalPath, noIndex,
     // Canonical
     if (url) upsertLink('canonical', url);
 
+    // hreflang alternates: clean previous ones we created, then add fresh
+    const oldAlts = Array.from(document.head.querySelectorAll('link[data-seo-hreflang="true"]')) as HTMLLinkElement[];
+    oldAlts.forEach(n => n.parentElement?.removeChild(n));
+    const addAlt = (href: string | undefined, hreflang: string) => {
+      if (!href) return;
+      const l = document.createElement('link');
+      l.setAttribute('rel', 'alternate');
+      l.setAttribute('hreflang', hreflang);
+      l.setAttribute('href', href);
+      l.setAttribute('data-seo-hreflang', 'true');
+      document.head.appendChild(l);
+    };
+    addAlt(altPt, 'pt-PT');
+    addAlt(altEn, 'en-GB');
+    // x-default → prefer Portuguese site as default
+    addAlt(altPt, 'x-default');
+
     // Structured data: remove old ones we created then add fresh ones
     const old = Array.from(document.head.querySelectorAll('script[data-seo-jsonld="true"]'));
     old.forEach(n => n.parentElement?.removeChild(n));
-    const list = Array.isArray(structuredData) ? structuredData : structuredData ? [structuredData] : [];
+    const baseJsonLd: object[] = [];
+    // Organization and Website schema as safe defaults across pages
+    if (base) {
+      baseJsonLd.push(
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "Ansião Seguros",
+          url: base,
+          logo: `${import.meta.env.BASE_URL}logo-empresarial.svg`,
+          address: {
+            "@type": "PostalAddress",
+            addressLocality: "Ansião",
+            addressRegion: "Leiria",
+            addressCountry: "PT"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Ansião Seguros",
+          url: base,
+          inLanguage: lang === 'en' ? 'en-GB' : 'pt-PT',
+          potentialAction: {
+            "@type": "SearchAction",
+            target: `${base}/?q={search_term_string}`,
+            "query-input": "required name=search_term_string"
+          }
+        }
+      );
+    }
+    const list = [
+      ...baseJsonLd,
+      ...(Array.isArray(structuredData) ? structuredData : structuredData ? [structuredData] : []),
+    ];
     for (const obj of list) {
       const s = document.createElement('script');
       s.type = 'application/ld+json';

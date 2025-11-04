@@ -1,22 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://cvalente80.github.io/frontendAS/</loc></url>
-  <url><loc>https://cvalente80.github.io/frontendAS/produtos</loc></url>
-  <url><loc>https://cvalente80.github.io/frontendAS/contato</loc></url>
-  <url><loc>https://cvalente80.github.io/frontendAS/politica-rgpd</loc></url>
-  <url><loc>https://cvalente80.github.io/frontendAS/produto-auto</loc></url>
-  <url><loc>https://cvalente80.github.io/frontendAS/produto-vida</loc></url>
-  <url><loc>https://cvalente80.github.io/frontendAS/produto-saude</loc></url>
-  <url><loc>https://cvalente80.github.io/frontendAS/produto-habitacao</loc></url>
-  <url><loc>https://cvalente80.github.io/frontendAS/produto-frota</loc></url>
-  <url><loc>https://cvalente80.github.io/frontendAS/produto-acidentes-trabalho</loc></url>
-  <url><loc>https://cvalente80.github.io/frontendAS/produto-responsabilidade-civil-profissional</loc></url>
-  <url><loc>https://cvalente80.github.io/frontendAS/produto-multirriscos-empresarial</loc></url>
-  <url><loc>https://cvalente80.github.io/frontendAS/produto-condominio</loc></url>
-  <url><loc>https://cvalente80.github.io/frontendAS/simulacao-auto</loc></url>
-  <url><loc>https://cvalente80.github.io/frontendAS/simulacao-vida</loc></url>
-  <url><loc>https://cvalente80.github.io/frontendAS/simulacao-saude</loc></url>
-  <url><loc>https://cvalente80.github.io/frontendAS/simulacao-habitacao</loc></url>
-  <url><loc>https://cvalente80.github.io/frontendAS/simulacao-rc-profissional</loc></url>
-  <url><loc>https://cvalente80.github.io/frontendAS/simulacao-condominio</loc></url>
+  <!-- Portuguese -->
+  <url><loc>https://cvalente80.github.io/frontendAS/pt</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/pt/produtos</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/pt/contato</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/pt/politica-rgpd</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/pt/produto-auto</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/pt/produto-vida</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/pt/produto-saude</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/pt/produto-habitacao</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/pt/produto-frota</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/pt/produto-acidentes-trabalho</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/pt/produto-responsabilidade-civil-profissional</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/pt/produto-multirriscos-empresarial</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/pt/produto-condominio</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/pt/simulacao-auto</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/pt/simulacao-vida</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/pt/simulacao-saude</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/pt/simulacao-habitacao</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/pt/simulacao-rc-profissional</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/pt/simulacao-condominio</loc></url>
+
+  <!-- English -->
+  <url><loc>https://cvalente80.github.io/frontendAS/en</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/en/products</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/en/contact</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/en/privacy-policy</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/en/product-auto</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/en/product-life</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/en/product-health</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/en/product-home</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/en/product-fleet</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/en/product-work-accidents</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/en/product-professional-liability</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/en/product-business-multi-risk</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/en/product-condominium</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/en/simulation-auto</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/en/simulation-life</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/en/simulation-health</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/en/simulation-home</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/en/simulation-professional-liability</loc></url>
+  <url><loc>https://cvalente80.github.io/frontendAS/en/simulation-condominium</loc></url>
 </urlset>

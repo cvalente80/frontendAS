@@ -1,4 +1,5 @@
 import React, { useState, ChangeEvent, FormEvent } from "react";
+import Seo from "../components/Seo";
 import emailjs from "@emailjs/browser";
 import { EMAILJS_SERVICE_ID_SAUDE, EMAILJS_TEMPLATE_ID_HABITACAO, EMAILJS_USER_ID_SAUDE } from "../emailjs.config";
 import { Trans, useTranslation } from 'react-i18next';
@@ -362,6 +363,11 @@ Cliente: ${form.nome} | Email: ${form.email} | Tel: ${form.telefone} | NIF: ${fo
 
   return (
     <div className="min-h-screen flex items-start justify-center bg-blue-50 relative pt-8 md:pt-12">
+      <Seo
+        title={t('sim_home:seo.title', 'Simulação Seguro Habitação') as any}
+        description={t('sim_home:seo.description', 'Simule o seguro multirriscos habitação e receba proposta personalizada.') as any}
+        canonicalPath={`/${base}/simulacao-habitacao`}
+      />
       <img
   src={`${import.meta.env.BASE_URL}imagens/insurance-background.jpg`}
         alt={t('sim_home:title')}

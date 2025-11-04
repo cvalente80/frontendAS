@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import Seo from "../components/Seo";
 import emailjs from "@emailjs/browser";
 import { EMAILJS_SERVICE_ID_GENERIC, EMAILJS_TEMPLATE_ID_GENERIC, EMAILJS_USER_ID_GENERIC } from "../emailjs.config";
 import { useAuth } from '../context/AuthContext';
@@ -216,6 +217,11 @@ export default function SimulacaoCondominio(): React.ReactElement {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex flex-col items-center py-10 px-4">
+      <Seo
+        title={"Simulação Condomínio"}
+        description={"Simule o seguro de condomínio e receba proposta personalizada."}
+        canonicalPath={(typeof window !== 'undefined' ? window.location.pathname : '/pt/simulacao-condominio')}
+      />
       <div className="max-w-3xl w-full bg-white rounded-2xl shadow-xl p-6 md:p-8">
         <div className="text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-blue-900">Simulação Seguro Condomínio</h2>

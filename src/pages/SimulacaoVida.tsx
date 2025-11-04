@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Seo from "../components/Seo";
 import emailjs from "@emailjs/browser";
 import { EMAILJS_SERVICE_ID, EMAILJS_USER_ID } from "../emailjs.config";
 import DatePicker, { registerLocale } from "react-datepicker";
@@ -176,6 +177,11 @@ export default function SimulacaoVida() {
 
 	return (
 		<div className="min-h-screen flex items-center justify-center bg-blue-50 relative">
+			<Seo
+				title={t('seo.title', 'Simulação Seguro Vida') as any}
+				description={t('seo.description', 'Simule o seu seguro de vida e obtenha uma proposta adequada ao seu perfil.') as any}
+				canonicalPath={`/${base}/simulacao-vida`}
+			/>
 			{/* Background local (adicione o ficheiro em public/imagens/seguro-vida-bg.jpg). Fallback para imagem existente. */}
 			<img
 				src={`${import.meta.env.BASE_URL}imagens/seguro-vida-bg.jpg`}

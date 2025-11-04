@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Seo from "../components/Seo";
 import emailjs from "@emailjs/browser";
 import { EMAILJS_SERVICE_ID_SAUDE, EMAILJS_TEMPLATE_ID_SAUDE, EMAILJS_USER_ID_SAUDE } from "../emailjs.config";
 import DatePicker, { registerLocale } from "react-datepicker";
@@ -208,6 +209,11 @@ export default function SimulacaoSaude() {
 
 	return (
 		<div className="min-h-screen flex items-start justify-center bg-blue-50 relative pt-8 md:pt-12">
+			<Seo
+				title={t('seo.title', 'Simulação Seguro Saúde') as any}
+				description={t('seo.description', 'Simule o seu seguro de saúde e receba proposta personalizada.') as any}
+				canonicalPath={`/${base}/simulacao-saude`}
+			/>
 			<img
 				src={`${import.meta.env.BASE_URL}imagens/insurance-background.jpg`}
 				alt={t('backgroundAlt')}
