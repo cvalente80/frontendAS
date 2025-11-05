@@ -9,6 +9,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import { useAuth } from '../context/AuthContext';
+import { useAuthUX } from '../context/AuthUXContext';
+import { auth } from '../firebase';
 import { saveSimulation } from '../utils/simulations';
 
 registerLocale("pt", pt);
@@ -21,6 +23,7 @@ export default function SimulacaoSaude() {
 	const { lang } = useParams();
 	const base = lang === 'en' ? 'en' : 'pt';
 	const { user } = useAuth();
+	const { requireAuth } = useAuthUX();
 	const [step, setStep] = useState<1 | 2>(1);
 	const [segurados, setSegurados] = useState<Segurado[]>([
 		{ nome: "", nascimento: "", nascimentoManual: "", contribuinte: "" }
@@ -100,6 +103,8 @@ export default function SimulacaoSaude() {
 
 	async function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
+		// Exigir login antes de submeter e persistir
+		await requireAuth();
 		if (!validarPasso2()) return;
 		// Mapeamento conforme o template fornecido: {{nome}}, {{time}}, {{opcao}}, {{pessoasSeguras}}
 		const now = new Date();
@@ -116,9 +121,10 @@ export default function SimulacaoSaude() {
 		if (dryRun) {
 			try {
 				console.log('[EmailJS][DRY_RUN][Saude] Would send with params:', templateParams);
-				if (user?.uid) {
+				const uid = auth.currentUser?.uid;
+				if (uid) {
 					try {
-						await saveSimulation(user.uid, {
+						await saveSimulation(uid, {
 						type: 'saude',
 						title: `Saúde - ${opcao}`,
 						summary: `Plano: ${opcao} | Pessoas seguras: ${segurados.length}`,
@@ -144,9 +150,10 @@ export default function SimulacaoSaude() {
 		}
 		try {
 			console.log('[EmailJS][Saude] Sending', { service: EMAILJS_SERVICE_ID_SAUDE, template: EMAILJS_TEMPLATE_ID_SAUDE });
-			if (user?.uid) {
+			const uid = auth.currentUser?.uid;
+			if (uid) {
 				try {
-					await saveSimulation(user.uid, {
+					await saveSimulation(uid, {
 					type: 'saude',
 					title: `Saúde - ${opcao}`,
 					summary: `Plano: ${opcao} | Pessoas seguras: ${segurados.length}`,

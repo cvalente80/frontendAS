@@ -3,6 +3,8 @@ import Seo from "../components/Seo";
 import emailjs from "@emailjs/browser";
 import { EMAILJS_SERVICE_ID_GENERIC, EMAILJS_TEMPLATE_ID_GENERIC, EMAILJS_USER_ID_GENERIC } from "../emailjs.config";
 import { useAuth } from '../context/AuthContext';
+import { useAuthUX } from '../context/AuthUXContext';
+import { auth } from '../firebase';
 import { saveSimulation } from '../utils/simulations';
 
 type FormState = {
@@ -47,6 +49,7 @@ export default function SimulacaoCondominio(): React.ReactElement {
   const [mensagem, setMensagem] = useState('');
   const [mensagemTipo, setMensagemTipo] = useState<'sucesso'|'erro'|''>('');
   const { user } = useAuth();
+  const { requireAuth } = useAuthUX();
   const [form, setForm] = useState<FormState>({
     administradorNome: '',
     administradorEmail: '',
@@ -118,6 +121,7 @@ export default function SimulacaoCondominio(): React.ReactElement {
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
+    await requireAuth();
     if (!canSubmit) return;
     setEnviando(true); setMensagem(''); setMensagemTipo('');
 
@@ -181,9 +185,10 @@ export default function SimulacaoCondominio(): React.ReactElement {
     }
 
     try {
-      if (user?.uid) {
+      const uid = auth.currentUser?.uid;
+      if (uid) {
         try {
-          await saveSimulation(user.uid, {
+          await saveSimulation(uid, {
           type: 'condominio',
           title: `Condomínio - ${form.localidade || form.morada.split(',')[0] || ''}`,
           summary: `Fracoes: ${form.numeroFracoes || '-'} | Edifício: € ${form.capitalEdificio}`,

@@ -5,6 +5,8 @@ import { EMAILJS_SERVICE_ID_SAUDE, EMAILJS_TEMPLATE_ID_HABITACAO, EMAILJS_USER_I
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useAuthUX } from '../context/AuthUXContext';
+import { auth } from '../firebase';
 import { saveSimulation } from '../utils/simulations';
 
 type FormState = {
@@ -38,6 +40,7 @@ export default function SimulacaoHabitacao() {
   const { lang } = useParams();
   const base = lang === 'en' ? 'en' : 'pt';
   const { user } = useAuth();
+  const { requireAuth } = useAuthUX();
   const [step, setStep] = useState<number>(1);
   const [form, setForm] = useState<FormState>({
     situacao: "",
@@ -199,6 +202,8 @@ export default function SimulacaoHabitacao() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    // Exigir autenticação antes de submeter (persistir no DB)
+    await requireAuth();
     if (!form.produto) {
       setMensagem(t('sim_home:messages.productRequired'));
       setMensagemTipo("erro");
@@ -266,9 +271,10 @@ Cliente: ${form.nome} | Email: ${form.email} | Tel: ${form.telefone} | NIF: ${fo
     if (dryRun) {
       console.log('[EmailJS][DRY_RUN][Habitacao] Would send with params:', templateParams);
       try {
-        if (user?.uid) {
+        const uid = auth.currentUser?.uid;
+        if (uid) {
           try {
-            await saveSimulation(user.uid, {
+            await saveSimulation(uid, {
             type: 'habitacao',
             title: `Casa - ${produtoLabel}`,
             summary: `CP ${form.codigoPostal} | ${form.tipoImovel} | Capitais: Edi ${form.capitalEdificio || 'n/a'} / Cont ${form.capitalConteudo || 'n/a'}`,
@@ -308,9 +314,10 @@ Cliente: ${form.nome} | Email: ${form.email} | Tel: ${form.telefone} | NIF: ${fo
     }
 
     try {
-      if (user?.uid) {
+      const uid = auth.currentUser?.uid;
+      if (uid) {
         try {
-          await saveSimulation(user.uid, {
+          await saveSimulation(uid, {
           type: 'habitacao',
           title: `Casa - ${produtoLabel}`,
           summary: `CP ${form.codigoPostal} | ${form.tipoImovel} | Capitais: Edi ${form.capitalEdificio || 'n/a'} / Cont ${form.capitalConteudo || 'n/a'}`,

@@ -9,6 +9,8 @@ import emailjs from "@emailjs/browser";
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useAuthUX } from '../context/AuthUXContext';
+import { auth } from '../firebase';
 import { saveSimulation } from '../utils/simulations';
 registerLocale("pt", pt);
 registerLocale("en", enGB);
@@ -37,6 +39,7 @@ export default function SimulacaoAuto() {
   const { lang } = useParams();
   const base = lang === 'en' ? 'en' : 'pt';
   const { user } = useAuth();
+  const { requireAuth } = useAuthUX();
   const [step, setStep] = useState<number>(1);
   const [form, setForm] = useState<FormState>({
     nome: "",
@@ -128,6 +131,8 @@ export default function SimulacaoAuto() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    // Force login to persist simulation in DB
+    await requireAuth();
     if (!form.tipoSeguro) {
       setMensagem(t('messages.selectType'));
       setMensagemTipo('erro');
@@ -158,10 +163,11 @@ export default function SimulacaoAuto() {
       resultado: resumo,
     };
     try {
-      // Firestore persistence if authenticated (non-blocking)
-      if (user?.uid) {
+      // Firestore persistence if authenticated (will be after requireAuth)
+      const uid = auth.currentUser?.uid;
+      if (uid) {
         try {
-          await saveSimulation(user.uid, {
+          await saveSimulation(uid, {
             type: 'auto',
             title: `${form.marca || ''} ${form.modelo || ''}`.trim() || 'Auto',
             summary: resumo,

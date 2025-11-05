@@ -10,6 +10,8 @@ import './SimulacaoVida.css';
 import { useTranslation, Trans } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useAuthUX } from '../context/AuthUXContext';
+import { auth } from '../firebase';
 import { saveSimulation } from '../utils/simulations';
 registerLocale("pt", pt);
 registerLocale("en", enGB);
@@ -21,6 +23,7 @@ export default function SimulacaoVida() {
 	const { lang } = useParams();
 	const base = lang === 'en' ? 'en' : 'pt';
 	const { user } = useAuth();
+	const { requireAuth } = useAuthUX();
 	const [form, setForm] = useState({
 		tipoSeguro: "Vida Individual",
 		capital: "",
@@ -83,6 +86,8 @@ export default function SimulacaoVida() {
 
 	async function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
+		// Exigir login antes de submeter
+		await requireAuth();
 		// Validação final extra (proteção caso avance por DevTools)
 		const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 		if (!form.email || !emailRegex.test(form.email)) {
@@ -102,11 +107,12 @@ export default function SimulacaoVida() {
 			pessoasSeguras: form.segurados.map((s, i) => `${t('emailSummary.person')} ${i+1}: ${t('emailSummary.name')} ${s.nome}, ${t('emailSummary.birth')} ${s.nascimentoManual}, ${t('emailSummary.nif')} ${s.contribuinte}`).join(" | ")
 		};
 		try {
-			// Persistir no Firestore (se autenticado) — não bloquear envio de email se falhar
-			if (user?.uid) {
+			// Persistir no Firestore (se autenticado) — após requireAuth
+			const uid = auth.currentUser?.uid;
+			if (uid) {
 				try {
 					const resumo = `Vida - ${form.tipoSeguro} | Capital: ${form.capital} | Prazo: ${form.prazo} | Pessoas seguras: ${form.segurados.length}`;
-					await saveSimulation(user.uid, {
+					await saveSimulation(uid, {
 						type: 'vida',
 						title: `Vida (${form.tipoSeguro})`,
 						summary: resumo,
