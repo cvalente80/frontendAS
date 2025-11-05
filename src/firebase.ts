@@ -12,5 +12,8 @@ export {
   signInWithGoogle,
   handleAuthRedirect,
   signOutUser,
+  signInWithEmailPassword,
+  registerWithEmailPassword,
+  resetPassword,
   db,
 } from "../typescript";

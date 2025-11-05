@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import Seo from "../components/Seo";
 import { useAuth } from '../context/AuthContext';
 import { db } from '../firebase';
 import { collection, getDocs, limit, onSnapshot, orderBy, query, Timestamp, where } from 'firebase/firestore';
@@ -73,6 +74,7 @@ export default function MinhasSimulacoes(): React.ReactElement {
 
   return (
     <main className="container mx-auto px-4 py-8">
+      <Seo title="As minhas simulações" description="Área do utilizador para consultar as simulações submetidas." canonicalPath={(typeof window !== 'undefined' ? window.location.pathname : '/pt/minhas-simulacoes')} noIndex />
       <h1 className="text-2xl md:text-3xl font-bold text-blue-900 mb-2">As minhas simulações</h1>
       <p className="text-blue-800 mb-6">Bem-vindo{displayName ? `, ${displayName}` : ''}. Aqui poderá consultar as simulações submetidas com a sua conta.</p>
 

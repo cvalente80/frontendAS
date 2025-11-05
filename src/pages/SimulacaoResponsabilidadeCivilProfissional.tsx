@@ -1,7 +1,10 @@
 import React, { useState, ChangeEvent, FormEvent } from "react";
+import Seo from "../components/Seo";
 import emailjs from "@emailjs/browser";
 import { EMAILJS_SERVICE_ID_GENERIC, EMAILJS_TEMPLATE_ID_GENERIC, EMAILJS_USER_ID_GENERIC } from "../emailjs.config";
 import { useAuth } from '../context/AuthContext';
+import { useAuthUX } from '../context/AuthUXContext';
+import { auth } from '../firebase';
 import { saveSimulation } from '../utils/simulations';
 
 type FormState = {
@@ -31,6 +34,7 @@ function validarNIF(nif: string): boolean { if (!/^[0-9]{9}$/.test(nif)) return 
 export default function SimulacaoResponsabilidadeCivilProfissional() {
   const [step, setStep] = useState<number>(1);
   const { user } = useAuth();
+  const { requireAuth } = useAuthUX();
   const [form, setForm] = useState<FormState>({
     empresaNome: "",
     empresaNif: "",
@@ -95,6 +99,7 @@ export default function SimulacaoResponsabilidadeCivilProfissional() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    await requireAuth();
     if (!form.aceitaRgpd) { setMensagem('Necessário aceitar a Política de Privacidade & RGPD.'); setMensagemTipo('erro'); return; }
 
   const resumo = `Proposta - RC Profissional\nEmpresa: ${form.empresaNome} | NIF: ${form.empresaNif}\nEmail: ${form.empresaEmail}\nAtividade: ${form.atividade}\nDescrição atividade: ${form.descricaoAtividade||'-'}\nAnos de atividade: ${form.anosAtividade||'-'}\nColaboradores: ${form.numeroColaboradores||'-'}\nVolume de negócios: ${form.volumeNegocios||'-'}\nCapitais: ${form.capitais}\nFranquia: ${form.franquia}\nCoberturas: ${form.coberturas.join(', ')||'-'}\nMercados: ${form.mercados.join(', ')||'-'}\nTeve sinistros 5 anos?: ${form.teveSinistros? 'Sim':'Não'}${form.teveSinistros?`\nDetalhes sinistros: ${form.detalhesSinistros||'-'}`:''}\nOutros pedidos: ${form.outrosPedidos?.trim() ? form.outrosPedidos.trim() : '-'}`;
@@ -151,9 +156,10 @@ export default function SimulacaoResponsabilidadeCivilProfissional() {
     }
 
     try {
-      if (user?.uid) {
+      const uid = auth.currentUser?.uid;
+      if (uid) {
         try {
-          await saveSimulation(user.uid, {
+          await saveSimulation(uid, {
           type: 'rc_prof',
           title: `RC Profissional - ${form.atividade || form.empresaNome}`,
           summary: `Empresa: ${form.empresaNome} | Capitais: ${form.capitais} | Franquia: ${form.franquia}`,
@@ -178,6 +184,11 @@ export default function SimulacaoResponsabilidadeCivilProfissional() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex flex-col items-center py-12 px-4">
+      <Seo
+        title={"Simulação Responsabilidade Civil Profissional"}
+        description={"Simule o seguro de responsabilidade civil profissional e receba proposta personalizada."}
+        canonicalPath={(typeof window !== 'undefined' ? window.location.pathname : '/pt/simulacao-rc-profissional')}
+      />
       <div className="max-w-3xl w-full bg-white rounded-2xl shadow-xl p-8">
         <h2 className="text-3xl font-bold mb-6 text-blue-900 text-center">Simulação - RC Profissional</h2>
         {/* Stepper */}

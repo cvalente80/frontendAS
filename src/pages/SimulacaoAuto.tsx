@@ -1,4 +1,5 @@
 import React, { useState, ChangeEvent, FormEvent } from "react";
+import Seo from "../components/Seo";
 import DatePicker, { registerLocale } from "react-datepicker";
 import { pt } from "date-fns/locale/pt";
 import { enGB } from "date-fns/locale/en-GB";
@@ -8,6 +9,8 @@ import emailjs from "@emailjs/browser";
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useAuthUX } from '../context/AuthUXContext';
+import { auth } from '../firebase';
 import { saveSimulation } from '../utils/simulations';
 registerLocale("pt", pt);
 registerLocale("en", enGB);
@@ -36,6 +39,7 @@ export default function SimulacaoAuto() {
   const { lang } = useParams();
   const base = lang === 'en' ? 'en' : 'pt';
   const { user } = useAuth();
+  const { requireAuth } = useAuthUX();
   const [step, setStep] = useState<number>(1);
   const [form, setForm] = useState<FormState>({
     nome: "",
@@ -127,6 +131,8 @@ export default function SimulacaoAuto() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    // Force login to persist simulation in DB
+    await requireAuth();
     if (!form.tipoSeguro) {
       setMensagem(t('messages.selectType'));
       setMensagemTipo('erro');
@@ -157,10 +163,11 @@ export default function SimulacaoAuto() {
       resultado: resumo,
     };
     try {
-      // Firestore persistence if authenticated (non-blocking)
-      if (user?.uid) {
+      // Firestore persistence if authenticated (will be after requireAuth)
+      const uid = auth.currentUser?.uid;
+      if (uid) {
         try {
-          await saveSimulation(user.uid, {
+          await saveSimulation(uid, {
             type: 'auto',
             title: `${form.marca || ''} ${form.modelo || ''}`.trim() || 'Auto',
             summary: resumo,
@@ -245,6 +252,11 @@ export default function SimulacaoAuto() {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative">
+      <Seo
+        title={t('seo.title', 'Simulação Seguro Auto') as any}
+        description={t('seo.description', 'Faça a simulação do seu seguro automóvel e receba proposta personalizada.') as any}
+        canonicalPath={`/${base}/simulacao-auto`}
+      />
       <img src="https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=1200&q=80" alt="Road" className="absolute inset-0 w-full h-full object-cover opacity-30" />
       <div className="max-w-lg w-full p-8 bg-white bg-opacity-90 rounded-2xl shadow-xl relative z-10">
         <h2 className="text-3xl font-bold mb-6 text-blue-900 text-center">{t('title')}</h2>

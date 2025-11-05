@@ -3,7 +3,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - LoginUserFeature # Set a branch name to deploy from
+      - mobileFreshCleanUI # Set a branch name to deploy from
   workflow_dispatch:
 
 permissions:
