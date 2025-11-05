@@ -19,22 +19,46 @@ const resources = {
       },
       auth: {
         hello: 'Olá',
-        loginCta: 'Olá! Iniciar Sessão',
-        signIn: 'Iniciar Sessão',
-        signOut: 'Sair'
+        loginCta: 'Entrar',
+        signIn: 'Entrar',
+        signOut: 'Sair',
+        loginTitle: 'Entrar',
+        continueWithGoogle: 'Continuar com Google',
+        or: 'ou',
+        signInWithEmail: 'Entrar com Email/Password',
+        createAccount: 'Criar conta',
+        forgotPassword: 'Recuperar password',
+        loginWithEmailTitle: 'Entrar com Email',
+        email: 'Email',
+        password: 'Password',
+        passwordMin: 'Password (min 6)',
+        registerTitle: 'Criar conta',
+        name: 'Nome',
+        register: 'Registar',
+        resetTitle: 'Recuperar password',
+        showPassword: 'Mostrar password',
+        hidePassword: 'Ocultar password',
+        googleLoginFailed: 'Falha ao autenticar com Google',
+        loginFailed: 'Falha no login',
+        provideName: 'Indique o seu nome.',
+        registerFailed: 'Falha no registo',
+        emailSent: 'Email de recuperação enviado.',
+        emailSentSpamNote: 'Por favor, verifique também a pasta de spam/lixo caso não encontre o email.',
+        resetFailed: 'Falha ao enviar recuperação'
       },
-      a11y: {
-        switchToEN: 'Mudar para Inglês',
-        switchToPT: 'Mudar para Português',
+      actions: {
+        back: 'Voltar',
+        cancel: 'Cancelar',
+        send: 'Enviar'
       },
       chat: {
-        title: 'Converse agora',
-        subtitle: 'Responda com o seu pedido e os nossos consultores entram em contacto.',
-        talkNow: 'Conversar agora',
+        title: 'Fale connosco',
+        subtitle: 'Diga-nos o que precisa e entraremos em contacto.',
+        talkNow: 'Falar agora',
         callNow: 'Ligar agora',
         callShort: 'Ligar',
         close: 'Fechar',
-        namePlaceholder: 'O seu nome (opcional)',
+        namePlaceholder: 'Nome (opcional)',
         emailPlaceholder: 'Email (opcional)',
         phonePlaceholder: 'Telefone (opcional)',
         messagePlaceholder: 'Escreva a sua mensagem... (Ctrl/⌘+Enter para enviar)',
@@ -42,68 +66,11 @@ const resources = {
         sending: 'A enviar…',
         sent: 'Mensagem enviada. Obrigado!',
         error: 'Falha ao enviar. Tente novamente.',
-        you: 'Você',
+        you: 'Eu',
         agent: 'Agente',
-        empty: 'Comece por nos dizer em que o podemos ajudar.',
+        empty: 'Comece por dizer-nos como podemos ajudar.',
         whatsappNow: 'WhatsApp',
-        whatsPrefill: 'Olá! Gostaria de falar com Ansião Seguros'
-      }
-    },
-    sim_saude: {
-      title: 'Simulação Seguro Saúde',
-      stepProgress: 'Passo {{step}} de 2',
-      step1Title: '1. Pessoas Seguras',
-      step2Title: '2. Escolha a opção',
-      placeholders: {
-        fullName: 'Nome completo',
-        birthDate: 'Data de nascimento (dd-mm-aaaa)',
-        nif: 'NIF',
-        yourName: 'O seu nome',
-        email: 'nome@servidor.pt',
-        phone: '9 dígitos'
-      },
-      buttons: {
-        addInsured: 'Adicionar pessoa segura',
-        remove: 'Remover',
-        maxReached5: 'Máximo de 5 pessoas atingido',
-        prev: 'Anterior',
-        next: 'Próximo',
-        submit: 'Pedir Proposta'
-      },
-      validations: {
-        insuredNameRequired: 'Por favor, preencha o nome completo.',
-        insuredBirthRequired: 'Por favor, preencha a data de nascimento.',
-        insuredNifRequired: 'Por favor, preencha o NIF com 9 dígitos.',
-        planRequired: 'Por favor, escolha uma das opções de plano.',
-        nameRequired: 'Por favor, preencha o nome.',
-        emailRequired: 'Por favor, preencha o email.',
-        emailInvalid: 'Por favor, insira um email válido no formato nome@servidor.pt',
-        phoneRequired: 'Por favor, preencha o telefone (9 dígitos).'
-      },
-      table: {
-        coverages: 'Coberturas',
-        option1: 'Opção 1',
-        option2: 'Opção 2',
-        option3: 'Opção 3',
-        included: 'Incluído',
-        notApplicable: '—',
-        optional: 'Opcional',
-        add: 'Aderir',
-        discounts: 'Descontos',
-        partial: 'Parcial',
-        telemedicine: 'Telemedicina'
-      },
-      benefits: {
-        consultas: 'Consultas (rede)',
-        exames: 'Exames e meios complementares',
-        ambulatoria: 'Assistência ambulatória',
-        internamento: 'Internamento hospitalar',
-        urgencias: 'Serviço de urgência',
-        parto: 'Parto e assistência na maternidade',
-        estomatologia: 'Estomatologia (dentista)',
-        medicamentos: 'Medicamentos com prescrição',
-        internacional: 'Assistência em viagem (internacional)',
-        domicilio: 'Consulta ao domicílio / Telemedicina'
+        whatsPrefill: 'Olá! Gostaria de falar com a Ansião Seguros.'
       },
       messages: {
         submitSuccess: 'Pedido efetuado com sucesso! Irá receber as próximas instruções por email.',
@@ -111,78 +78,6 @@ const resources = {
       },
       emailSummary: { person: 'Pessoa', name: 'Nome:', birth: 'Nascimento:', nif: 'NIF:' },
       backgroundAlt: 'Seguro Saúde'
-    },
-    sim_home: {
-      title: 'Simulação Seguro Habitação',
-      stepProgress: 'Passo {{step}} de 3',
-      step1Title: '1. Dados do Imóvel',
-      step2Title: '2. Dados Pessoais',
-      step3Title: '3. Produto',
-      labels: {
-        situacao: 'Situação',
-        tipoImovel: 'Tipo de imóvel',
-        utilizacao: 'Utilização',
-        anoConstrucao: 'Ano de construção',
-        area: 'Área (m²)',
-        codigoPostal: 'Código Postal do risco',
-        construcao: 'Tipo de construção',
-        capitalEdificio: 'Capital do Edifício (€)',
-        capitalConteudo: 'Capital do Conteúdo (€)',
-        seguranca: 'Sistemas de segurança',
-        nomeCompleto: 'Nome completo',
-        email: 'Email',
-        telefone: 'Telefone',
-        nif: 'NIF (Contribuinte)',
-        adicionais: 'Coberturas adicionais',
-        detalhesAdicionais: 'Detalhes adicionais',
-        capitaisSelecionados: 'Capitais selecionados',
-        capitalImovel: 'Capital Imóvel',
-        capitalConteudoLabel: 'Capital Conteúdo'
-      },
-      options: {
-        selecione: 'Selecione',
-        situacao: { proprietario: 'Proprietário', inquilino: 'Inquilino' },
-        tipoImovel: { apartamento: 'Apartamento', moradia: 'Moradia' },
-        utilizacao: { permanente: 'Habitação Própria Permanente', secundaria: 'Habitação Secundária', arrendamento: 'Arrendamento' },
-        construcao: { betao: 'Betão armado', alvenaria: 'Alvenaria (tijolo/pedra)', madeira: 'Madeira' },
-        seguranca: { alarme: 'Alarme', portaBlindada: 'Porta blindada', cctv: 'Videovigilância' }
-      },
-      placeholders: {
-        year: 'AAAA',
-        area: 'Ex: 120',
-        postal: '____-___',
-        capEdificio: 'Ex: 150000',
-        capConteudo: 'Ex: 25 000',
-        yourName: 'O seu nome',
-        email: 'nome@servidor.pt',
-        phone: '__ _______',
-        nif: '___ ___ ___',
-        details: 'Descreva aqui necessidades específicas ou coberturas desejadas...'
-      },
-      product: {
-        cards: {
-          base: { title: 'Imóvel', desc: 'Proteção ao edifício com RC, incêndio/explosão, riscos elétricos e danos por água.' },
-          intermedio: { title: 'Imóvel + Recheio', desc: 'Inclui proteção ao conteúdo (recheio), com RC, incêndio/explosão, riscos elétricos e danos por água.' },
-          completo: { title: 'Imóvel + Recheio + Fenómenos Sísmicos', desc: 'Cobertura alargada incluindo fenómenos sísmicos, com RC e proteção ao edifício e recheio.' }
-        },
-        bullets: ['Responsabilidade civil','Incêndio e explosão','Riscos elétricos','Danos por água','Roubo (recheio)','Fenómenos sísmicos']
-      },
-      extras: { earthquake: 'Fenómenos sísmico', garageVehicles: 'Veículos em garagem' },
-      buttons: { prev: 'Anterior', next: 'Próximo', submit: 'Pedir Proposta' },
-      messages: {
-        step1Missing: 'Por favor, preencha todos os campos obrigatórios do imóvel.',
-        atLeastOneCapital: 'Indique pelo menos um capital: edifício ou conteúdo.',
-        postalInvalid: 'Código Postal inválido. Formato XXXX-XXX.',
-        yearInvalid: 'Ano de construção inválido (AAAA).',
-        nameRequired: 'Preencha o nome.',
-        emailInvalid: 'Insira um email válido.',
-        phoneInvalid: 'Telefone deve ter 9 dígitos.',
-        nifInvalid: 'NIF deve ter 9 dígitos.',
-        productRequired: 'Selecione o produto.',
-        rgpdRequired: 'Necessário aceitar a Política de Privacidade & RGPD.',
-        submitSuccess: 'Pedido enviado com sucesso! Receberá instruções por email.',
-        submitError: 'Ocorreu um erro ao enviar o pedido. Tente novamente.'
-      }
     },
     sim_vida: {
       title: 'Simulação Seguro Vida',
@@ -219,7 +114,7 @@ const resources = {
         prazoRequired: 'Por favor, preencha o prazo do seguro.',
         nameRequired: 'Por favor, preencha o nome completo.',
         emailRequired: 'Por favor, preencha o email.',
-        emailInvalid: 'Por favor, insira um email válido no formato nome@servidor.pt',
+        emailInvalid: 'Por favor, insira um email válido (ex.: nome@servidor.pt).',
         phoneRequired: 'Por favor, preencha o telefone (9 dígitos).'
       },
       disability: {
@@ -231,12 +126,12 @@ const resources = {
           ITP: 'Invalidez Total e Permanente (ITP)'
         },
         explanations: {
-          IAD: 'Invalidez Absoluta e Definitiva (IAD): A indemnização é realizada quando o segurado fica totalmente dependente de terceiros para as atividades básicas do dia a dia.',
-          ITP: 'Invalidez Total e Permanente (ITP): A indemnização é realizada quando segurado fica impossibilitado de exercer qualquer atividade profissional, mas pode realizar tarefas básicas sozinho.'
+          IAD: 'A indemnização é realizada quando o segurado fica totalmente dependente de terceiros para as atividades básicas do dia a dia.',
+          ITP: 'A indemnização é realizada quando o segurado fica impossibilitado de exercer qualquer atividade profissional, embora possa realizar tarefas básicas.'
         }
       },
       messages: {
-        submitSuccess: 'Pedido efetuado com sucesso! Irá receber as próximas instruções por email.',
+        submitSuccess: 'Pedido submetido com sucesso! Irá receber instruções por email.',
         submitError: 'Erro ao enviar pedido. Tente novamente ou contacte-nos.'
       },
       emailSummary: {
@@ -245,7 +140,142 @@ const resources = {
         birth: 'Nascimento:',
         nif: 'NIF:'
       },
-      backgroundAlt: 'Plano de proteção familiar - Seguro de Vida'
+      backgroundAlt: 'Plano de proteção familiar — Seguro de Vida'
+    },
+    sim_home: {
+      title: 'Simulação Seguro Habitação',
+      stepProgress: 'Passo {{step}} de 3',
+      step1Title: '1. Dados do Imóvel',
+      step2Title: '2. Dados Pessoais',
+      step3Title: '3. Produto',
+      labels: {
+        situacao: 'Situação',
+        tipoImovel: 'Tipo de imóvel',
+        utilizacao: 'Utilização',
+        anoConstrucao: 'Ano de construção',
+        area: 'Área (m²)',
+        codigoPostal: 'Código Postal do risco',
+        construcao: 'Tipo de construção',
+        capitalEdificio: 'Capital do Edifício (€)',
+        capitalConteudo: 'Capital do Conteúdo (€)',
+        seguranca: 'Sistemas de segurança',
+        nomeCompleto: 'Nome completo',
+        email: 'Email',
+        telefone: 'Telefone',
+        nif: 'NIF (Contribuinte)',
+        adicionais: 'Coberturas adicionais',
+        detalhesAdicionais: 'Detalhes adicionais',
+        capitaisSelecionados: 'Capitais selecionados',
+        capitalImovel: 'Capital Imóvel',
+        capitalConteudoLabel: 'Capital Conteúdo'
+      },
+      options: {
+        selecione: 'Selecione',
+        situacao: { proprietario: 'Proprietário', inquilino: 'Inquilino' },
+        tipoImovel: { apartamento: 'Apartamento', moradia: 'Moradia' },
+        utilizacao: { permanente: 'Habitação permanente', secundaria: 'Habitação secundária', arrendamento: 'Arrendamento' },
+        construcao: { betao: 'Betão armado', alvenaria: 'Alvenaria (tijolo/pedra)', madeira: 'Madeira' },
+        seguranca: { alarme: 'Alarme', portaBlindada: 'Porta blindada', cctv: 'CCTV' }
+      },
+      placeholders: {
+        year: 'AAAA',
+        area: 'ex.: 120',
+        postal: '____-___',
+        capEdificio: 'ex.: 150000',
+        capConteudo: 'ex.: 25 000',
+        yourName: 'O seu nome',
+        email: 'nome@servidor.pt',
+        phone: '__ _______',
+        nif: '___ ___ ___',
+        details: 'Descreva necessidades específicas ou coberturas desejadas...'
+      },
+      product: {
+        cards: {
+          base: { title: 'Edifício', desc: 'Cobertura do edifício com RC, incêndio/explosão, sobretensão elétrica e danos por água.' },
+          intermedio: { title: 'Edifício + Conteúdo', desc: 'Inclui cobertura de conteúdo com RC, incêndio/explosão, sobretensão elétrica e danos por água.' },
+          completo: { title: 'Edifício + Conteúdo + Sismos', desc: 'Cobertura alargada incluindo eventos sísmicos, com RC e coberturas para edifício e conteúdo.' }
+        },
+        bullets: ['Responsabilidade civil','Incêndio e explosão','Sobretensão elétrica','Danos por água','Roubo (conteúdo)','Eventos sísmicos']
+      },
+      extras: { earthquake: 'Eventos sísmicos', garageVehicles: 'Veículos em garagem' },
+      buttons: { prev: 'Anterior', next: 'Próximo', submit: 'Pedir proposta' },
+      messages: {
+        step1Missing: 'Preencha todos os campos obrigatórios do imóvel.',
+        atLeastOneCapital: 'Indique pelo menos um capital: edifício ou conteúdo.',
+        postalInvalid: 'Código postal inválido. Formato XXXX-XXX.',
+        yearInvalid: 'Ano de construção inválido (AAAA).',
+        nameRequired: 'Indique o seu nome.',
+        emailInvalid: 'Indique um email válido.',
+        phoneInvalid: 'O telefone deve ter 9 dígitos.',
+        nifInvalid: 'O NIF deve ter 9 dígitos.',
+        productRequired: 'Selecione um produto.',
+        rgpdRequired: 'Tem de aceitar a Política de Privacidade & RGPD.',
+        submitSuccess: 'Pedido enviado com sucesso! Irá receber instruções por email.',
+        submitError: 'Ocorreu um erro ao enviar o pedido. Tente novamente.'
+      }
+    },
+    sim_saude: {
+      title: 'Simulação Seguro Saúde',
+      stepProgress: 'Passo {{step}} de 2',
+      step1Title: '1. Pessoas Seguras',
+      step2Title: '2. Escolha uma opção',
+      placeholders: {
+        fullName: 'Nome completo',
+        birthDate: 'Data de nascimento (dd-mm-aaaa)',
+        nif: 'NIF',
+        yourName: 'O seu nome',
+        email: 'Email',
+        phone: '9 dígitos'
+      },
+      buttons: {
+        addInsured: 'Adicionar pessoa segura',
+        remove: 'Remover',
+        maxReached5: 'Máximo de 5 pessoas atingido',
+        prev: 'Anterior',
+        next: 'Próximo',
+        submit: 'Pedir proposta'
+      },
+      validations: {
+        insuredNameRequired: 'Por favor, preencha o nome completo.',
+        insuredBirthRequired: 'Por favor, preencha a data de nascimento.',
+        insuredNifRequired: 'Por favor, preencha o NIF com 9 dígitos.',
+        planRequired: 'Por favor, escolha uma das opções de plano.',
+        nameRequired: 'Por favor, indique o seu nome.',
+        emailRequired: 'Por favor, preencha o seu email.',
+        emailInvalid: 'Por favor, insira um email válido (ex.: nome@servidor.pt).',
+        phoneRequired: 'Por favor, preencha o telefone (9 dígitos).'
+      },
+      table: {
+        coverages: 'Coberturas',
+        option1: 'Opção 1',
+        option2: 'Opção 2',
+        option3: 'Opção 3',
+        included: 'Incluído',
+        notApplicable: '—',
+        optional: 'Opcional',
+        add: 'Adicionar',
+        discounts: 'Descontos',
+        partial: 'Parcial',
+        telemedicine: 'Telemedicina'
+      },
+      benefits: {
+        consultas: 'Consultas (rede convencionada)',
+        exames: 'Exames e diagnósticos',
+        ambulatoria: 'Cuidados ambulatórios',
+        internamento: 'Internamento',
+        urgencias: 'Urgências',
+        parto: 'Parto e cuidados de maternidade',
+        estomatologia: 'Estomatologia',
+        medicamentos: 'Medicamentos com prescrição',
+        internacional: 'Assistência em viagem (internacional)',
+        domicilio: 'Consulta ao domicílio / Telemedicina'
+      },
+      messages: {
+        submitSuccess: 'Pedido submetido com sucesso! Irá receber instruções por email.',
+        submitError: 'Erro ao enviar pedido. Tente novamente ou contacte-nos.'
+      },
+      emailSummary: { person: 'Pessoa', name: 'Nome:', birth: 'Nascimento:', nif: 'NIF:' },
+      backgroundAlt: 'Seguro Saúde'
     },
     sim_auto: {
       title: 'Simulação de Seguro Auto',
@@ -851,7 +881,35 @@ const resources = {
         hello: 'Hello',
         loginCta: 'Hello! Sign in',
         signIn: 'Sign in',
-        signOut: 'Sign out'
+        signOut: 'Sign out',
+        loginTitle: 'Sign in',
+        continueWithGoogle: 'Continue with Google',
+        or: 'or',
+        signInWithEmail: 'Sign in with Email/Password',
+        createAccount: 'Create account',
+        forgotPassword: 'Forgot password',
+        loginWithEmailTitle: 'Sign in with Email',
+        email: 'Email',
+        password: 'Password',
+        passwordMin: 'Password (min 6)',
+        registerTitle: 'Create account',
+        name: 'Name',
+        register: 'Register',
+        resetTitle: 'Recover password',
+        showPassword: 'Show password',
+        hidePassword: 'Hide password',
+        googleLoginFailed: 'Failed to authenticate with Google',
+        loginFailed: 'Login failed',
+        provideName: 'Please provide your name.',
+        registerFailed: 'Registration failed',
+        emailSent: 'Recovery email sent.',
+        emailSentSpamNote: 'If you don\'t see it, please also check your spam/junk folder.',
+        resetFailed: 'Failed to send recovery email'
+      },
+      actions: {
+        back: 'Back',
+        cancel: 'Cancel',
+        send: 'Send'
       },
       a11y: {
         switchToEN: 'Switch to English',

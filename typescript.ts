@@ -12,6 +12,9 @@ import {
   signInWithRedirect,
   signOut,
   getRedirectResult,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
@@ -121,3 +124,18 @@ export const signOutUser = () => signOut(auth);
 
 // Firestore singleton
 export const db = getFirestore(app);
+
+// Email/password auth helpers
+export async function signInWithEmailPassword(email: string, password: string) {
+  const res = await signInWithEmailAndPassword(auth, email, password);
+  return res.user;
+}
+
+export async function registerWithEmailPassword(email: string, password: string) {
+  const res = await createUserWithEmailAndPassword(auth, email, password);
+  return res.user;
+}
+
+export async function resetPassword(email: string) {
+  await sendPasswordResetEmail(auth, email);
+}

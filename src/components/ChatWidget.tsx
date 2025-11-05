@@ -128,7 +128,7 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
               aria-label={t('chat.whatsappNow')}
             >
               <WhatsAppIcon className="w-5 h-5 text-white" />
-              <span className="font-semibold text-sm">WhatsApp</span>
+              <span className="font-semibold text-sm">{t('chat.whatsappNow')}</span>
             </a>
           )}
           <a
@@ -177,7 +177,7 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
                   rel="noopener noreferrer"
                   className="px-2 py-1 text-[11px] rounded bg-[#25D366] hover:brightness-95 text-white inline-flex items-center"
                   aria-label={t('chat.whatsappNow')}
-                  title="WhatsApp"
+                  title={t('chat.whatsappNow') as string}
                 >
                   <WhatsAppIcon className="w-4 h-4 text-white" />
                 </a>

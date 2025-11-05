@@ -3,9 +3,11 @@ import { NavLink, useLocation, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useAuth } from '../context/AuthContext';
+import AuthChoiceModal from './AuthChoiceModal';
 
 export default function MobileNav() {
   const [open, setOpen] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
   const location = useLocation();
   const { t } = useTranslation('common');
   const { lang } = useParams();
@@ -45,7 +47,7 @@ export default function MobileNav() {
               </button>
             </div>
           ) : (
-            <button aria-label={t('auth.signIn')} className="p-2 rounded-full border border-blue-200" onClick={loginWithGoogle}>
+            <button aria-label={t('auth.signIn')} className="p-2 rounded-full border border-blue-200" onClick={() => setAuthOpen(true)}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1e3a8a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                 <circle cx="12" cy="7" r="4"/>
@@ -105,6 +107,7 @@ export default function MobileNav() {
           </ul>
         </nav>
       )}
+      <AuthChoiceModal open={authOpen} onClose={() => setAuthOpen(false)} />
     </header>
   );
 }
