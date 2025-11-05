@@ -127,20 +127,27 @@ export default function MinhasSimulacoes(): React.ReactElement {
                 ? it.createdAt.toDate().toLocaleString()
                 : '';
               const title = it.title || (it.type ? it.type.toUpperCase() : 'Simulação');
-              const plate = it?.payload?.matricula as string | undefined;
-              const brand = it?.payload?.marca as string | undefined;
-              const model = it?.payload?.modelo as string | undefined;
-              const year = it?.payload?.ano as string | undefined;
+              const plate = (it as any)?.payload?.matricula || (it as any)?.matricula as string | undefined;
+              const brand = (it as any)?.payload?.marca || (it as any)?.marca as string | undefined;
+              const model = (it as any)?.payload?.modelo || (it as any)?.modelo as string | undefined;
+              const year = (it as any)?.payload?.ano || (it as any)?.ano as string | undefined;
               return (
                 <li key={it.id} className="p-4 border border-blue-100 rounded bg-white shadow-sm flex flex-col gap-2">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-blue-900">{title}</h3>
+                    <h3 className="font-semibold text-blue-900 flex items-center gap-2">
+                      <span>{title}</span>
+                      {plate && (
+                        <span className="text-[11px] leading-none px-2 py-1 rounded bg-blue-50 border border-blue-200 text-blue-800 font-medium">
+                          {plate}
+                        </span>
+                      )}
+                    </h3>
                     {it.status && <span className="text-xs px-2 py-0.5 rounded bg-blue-50 border border-blue-200 text-blue-800">{it.status}</span>}
                   </div>
                   {date && <p className="text-xs text-blue-700">{date}</p>}
                   {it.summary && <p className="text-sm text-blue-800">{it.summary}</p>}
                   {/* Campos específicos por tipo (ex.: Auto) */}
-                  {it.type === 'auto' && (
+                  {(it.type === 'auto' || plate) && (
                     <div className="text-sm text-blue-900 space-y-0.5">
                       {plate && (
                         <p><span className="font-medium">Matrícula:</span> {plate}</p>
