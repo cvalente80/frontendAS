@@ -101,7 +101,7 @@ function App(): React.ReactElement {
           <div className="container mx-auto flex flex-col md:flex-row justify-between items-center px-4 gap-2">
             <span className="text-sm">© {new Date().getFullYear()} Ansião Seguros. Todos os direitos reservados.</span>
             <div className="flex gap-4 items-center">
-              <NavLink to={`/${base}/contato`} className="text-blue-200 underline hover:text-white text-sm">Contato</NavLink>
+              <NavLink to={`/${base}/contato`} className="text-blue-200 underline hover:text-white text-sm">Contacto</NavLink>
               <span className="hidden md:inline-block">|</span>
               <NavLink to={`/${base}/politica-rgpd`} className="text-blue-200 underline hover:text-white text-sm">Política de Privacidade &amp; RGPD</NavLink>
               <span className="hidden md:inline-block">|</span>

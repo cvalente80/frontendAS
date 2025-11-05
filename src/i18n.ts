@@ -14,7 +14,7 @@ const resources = {
         homeInsurance: 'Simulação Habitação',
         simulator: 'Simulador',
         products: 'Produtos',
-        contact: 'Contato',
+        contact: 'Contacto',
         mySimulations: 'As minhas simulações'
       },
       auth: {

@@ -11,6 +11,8 @@ type SimulationDoc = {
   status?: 'draft' | 'submitted' | 'quoted' | 'archived' | string;
   title?: string;
   summary?: string;
+  // Dados adicionais guardados pela página de simulação (ex.: auto: matricula, marca, modelo, ...)
+  payload?: Record<string, any>;
 };
 
 export default function MinhasSimulacoes(): React.ReactElement {
@@ -125,6 +127,10 @@ export default function MinhasSimulacoes(): React.ReactElement {
                 ? it.createdAt.toDate().toLocaleString()
                 : '';
               const title = it.title || (it.type ? it.type.toUpperCase() : 'Simulação');
+              const plate = it?.payload?.matricula as string | undefined;
+              const brand = it?.payload?.marca as string | undefined;
+              const model = it?.payload?.modelo as string | undefined;
+              const year = it?.payload?.ano as string | undefined;
               return (
                 <li key={it.id} className="p-4 border border-blue-100 rounded bg-white shadow-sm flex flex-col gap-2">
                   <div className="flex items-center justify-between">
@@ -133,6 +139,21 @@ export default function MinhasSimulacoes(): React.ReactElement {
                   </div>
                   {date && <p className="text-xs text-blue-700">{date}</p>}
                   {it.summary && <p className="text-sm text-blue-800">{it.summary}</p>}
+                  {/* Campos específicos por tipo (ex.: Auto) */}
+                  {it.type === 'auto' && (
+                    <div className="text-sm text-blue-900 space-y-0.5">
+                      {plate && (
+                        <p><span className="font-medium">Matrícula:</span> {plate}</p>
+                      )}
+                      {(brand || model || year) && (
+                        <p>
+                          <span className="font-medium">Veículo:</span>
+                          {" "}
+                          {[brand, model, year].filter(Boolean).join(' ')}
+                        </p>
+                      )}
+                    </div>
+                  )}
                   {/* Futuro: Botões para ver detalhe, repetir, etc. */}
                 </li>
               );

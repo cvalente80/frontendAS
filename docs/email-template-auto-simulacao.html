@@ -1,0 +1,53 @@
+<!-- Template: Simulação Seguro Auto (EmailJS) -->
+<!-- Variables available (from frontend):
+  {{nome}}
+  {{email}}
+  {{contribuinte}}
+  {{dataNascimento}}
+  {{dataCartaConducao}}
+  {{codigoPostal}}
+  {{marca}}
+  {{modelo}}
+  {{ano}}
+  {{matricula}}
+  {{tipoSeguro}}
+  {{coberturas}}
+  {{outrosPedidos}}
+  {{resultado}}
+  {{time}} (if added by EmailJS)
+-->
+<div style="font-family: system-ui, sans-serif, Arial; font-size: 12px;">
+  <div>Olá {{nome}}!&nbsp;</div>
+  <div>&nbsp;</div>
+  <div>Vamos reponder à sua solicitação o mais rápido possivel.</div>
+  <div>&nbsp;</div>
+  <div>Os nossos consultores vão procurar no mercado a melhor cotação de acordo com o seu perfil.</div>
+  <div>&nbsp;</div>
+  <div>Obrigado,</div>
+  <div>&nbsp;</div>
+  <div>Ansião Seguros</div>
+  <div style="margin-top: 20px; padding: 15px 0; border-width: 1px 0; border-style: dashed; border-color: lightgrey;">
+    <table role="presentation">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top;">
+            <div style="padding: 6px 10px; margin: 0 10px; background-color: aliceblue; border-radius: 5px; font-size: 26px;" role="img">🚗</div>
+          </td>
+          <td style="vertical-align: top;">
+            <div style="color: #2c3e50; font-size: 16px;"><strong>Nome: {{nome}}</strong></div>
+            <div style="color: #cccccc; font-size: 13px;">{{time}}</div>
+            <p style="font-size: 16px;">Marca: {{marca}}</p>
+            <p style="font-size: 16px;">Modelo: {{modelo}}</p>
+            <p style="font-size: 16px;">Ano: {{ano}}</p>
+            <p style="font-size: 16px;">Matrícula: {{matricula}}</p>
+            <p style="font-size: 16px;">Tipo de seguro: {{tipoSeguro}}</p>
+            <p style="font-size: 16px;">Coberturas adicionais: {{coberturas}}</p>
+            <p style="font-size: 16px;">Resumo: {{resultado}}</p>
+            <p style="font-size: 16px;">Estado da simulação: <span style="background-color: #2dc26b;">Em Processamento</span></p>
+            <p style="font-size: 16px;">&nbsp;</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
