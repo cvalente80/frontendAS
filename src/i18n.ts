@@ -77,7 +77,13 @@ const resources = {
         submitError: 'Erro ao enviar pedido. Tente novamente ou contacte-nos.'
       },
       emailSummary: { person: 'Pessoa', name: 'Nome:', birth: 'Nascimento:', nif: 'NIF:' },
-      backgroundAlt: 'Seguro Saúde'
+      backgroundAlt: 'Seguro Saúde',
+      status: {
+        draft: 'Rascunho',
+        submitted: 'Em Processamento',
+        quoted: 'Com proposta',
+        archived: 'Arquivado'
+      }
     },
     sim_vida: {
       title: 'Simulação Seguro Vida',
@@ -910,6 +916,12 @@ const resources = {
         back: 'Back',
         cancel: 'Cancel',
         send: 'Send'
+      },
+      status: {
+        draft: 'Draft',
+        submitted: 'In Process',
+        quoted: 'Quoted',
+        archived: 'Archived'
       },
       a11y: {
         switchToEN: 'Switch to English',

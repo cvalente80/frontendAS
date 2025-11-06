@@ -3,6 +3,7 @@ import Seo from "../components/Seo";
 import { useAuth } from '../context/AuthContext';
 import { db } from '../firebase';
 import { collection, getDocs, limit, onSnapshot, orderBy, query, Timestamp, where } from 'firebase/firestore';
+import { useTranslation } from 'react-i18next';
 
 type SimulationDoc = {
   id: string;
@@ -17,6 +18,7 @@ type SimulationDoc = {
 
 export default function MinhasSimulacoes(): React.ReactElement {
   const { user, displayName } = useAuth();
+  const { t } = useTranslation('common');
   const [items, setItems] = useState<SimulationDoc[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -131,6 +133,7 @@ export default function MinhasSimulacoes(): React.ReactElement {
               const brand = (it as any)?.payload?.marca || (it as any)?.marca as string | undefined;
               const model = (it as any)?.payload?.modelo || (it as any)?.modelo as string | undefined;
               const year = (it as any)?.payload?.ano || (it as any)?.ano as string | undefined;
+              const statusLabel = it.status ? (t(`status.${it.status}` as any) || it.status) : undefined;
               return (
                 <li key={it.id} className="p-4 border border-blue-100 rounded bg-white shadow-sm flex flex-col gap-2">
                   <div className="flex items-center justify-between">
@@ -142,7 +145,7 @@ export default function MinhasSimulacoes(): React.ReactElement {
                         </span>
                       )}
                     </h3>
-                    {it.status && <span className="text-xs px-2 py-0.5 rounded bg-blue-50 border border-blue-200 text-blue-800">{it.status}</span>}
+                    {statusLabel && <span className="text-xs px-2 py-0.5 rounded bg-blue-50 border border-blue-200 text-blue-800">{statusLabel}</span>}
                   </div>
                   {date && <p className="text-xs text-blue-700">{date}</p>}
                   {it.summary && <p className="text-sm text-blue-800">{it.summary}</p>}
