@@ -146,21 +146,6 @@ export default function MinhasSimulacoes(): React.ReactElement {
                   </div>
                   {date && <p className="text-xs text-blue-700">{date}</p>}
                   {it.summary && <p className="text-sm text-blue-800">{it.summary}</p>}
-                  {/* Campos específicos por tipo (ex.: Auto) */}
-                  {(it.type === 'auto' || plate) && (
-                    <div className="text-sm text-blue-900 space-y-0.5">
-                      {plate && (
-                        <p><span className="font-medium">Matrícula:</span> {plate}</p>
-                      )}
-                      {(brand || model || year) && (
-                        <p>
-                          <span className="font-medium">Veículo:</span>
-                          {" "}
-                          {[brand, model, year].filter(Boolean).join(' ')}
-                        </p>
-                      )}
-                    </div>
-                  )}
                   {/* Futuro: Botões para ver detalhe, repetir, etc. */}
                 </li>
               );
