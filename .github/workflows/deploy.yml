@@ -3,7 +3,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - mobileFreshCleanUI # Set a branch name to deploy from
+      - fixMail-fixtypo-fizMissingPlate # Set a branch name to deploy from
   workflow_dispatch:
 
 permissions:

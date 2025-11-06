@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import React, { useState, ChangeEvent, FormEvent, useRef } from "react";
 import Seo from "../components/Seo";
 import DatePicker, { registerLocale } from "react-datepicker";
 import { pt } from "date-fns/locale/pt";
@@ -63,6 +63,8 @@ export default function SimulacaoAuto() {
   const [erroCarta, setErroCarta] = useState<string>("");
   const [mensagem, setMensagem] = useState<string | null>(null);
   const [mensagemTipo, setMensagemTipo] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const busyRef = useRef(false);
 
 
   function handleChange(e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
@@ -131,6 +133,8 @@ export default function SimulacaoAuto() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    if (isSubmitting || busyRef.current) return; // prevent double-submit
+    setIsSubmitting(true); busyRef.current = true;
     // Force login to persist simulation in DB
     await requireAuth();
     if (!form.tipoSeguro) {
@@ -167,6 +171,14 @@ export default function SimulacaoAuto() {
       const uid = auth.currentUser?.uid;
       if (uid) {
         try {
+          // Generate a deterministic idempotency key for this combination and minute
+          const minuteBucket = new Date(); minuteBucket.setSeconds(0,0);
+          const key = [
+            'auto',
+            form.email || 'anon',
+            (form.matricula || '').replace(/[^A-Za-z0-9]/g,'').toUpperCase(),
+            minuteBucket.toISOString(),
+          ].join(':');
           await saveSimulation(uid, {
             type: 'auto',
             title: `${form.marca || ''} ${form.modelo || ''}`.trim() || 'Auto',
@@ -187,7 +199,7 @@ export default function SimulacaoAuto() {
               coberturas: form.coberturas,
               outrosPedidos: form.outrosPedidos,
             }
-          });
+          }, { idempotencyKey: key });
         } catch (e) {
           console.warn('[SimulacaoAuto] Falha a guardar simulação (ignorado):', e);
         }
@@ -224,6 +236,7 @@ export default function SimulacaoAuto() {
       setMensagem(null);
       setMensagemTipo(null);
     }, 6000);
+    setIsSubmitting(false); busyRef.current = false;
   }
 
   function formatDate(dateStr: string) {
@@ -650,7 +663,7 @@ export default function SimulacaoAuto() {
 </div>
               <div className="flex justify-between gap-2 mt-4">
                 <button type="button" onClick={handlePrev} className="px-6 py-2 bg-gray-200 rounded">{t('buttons.prev')}</button>
-                <button type="submit" className="px-6 py-2 bg-green-600 text-white rounded font-bold hover:bg-green-700 transition">{t('buttons.simulate')}</button>
+                <button type="submit" disabled={isSubmitting} className={`px-6 py-2 text-white rounded font-bold transition ${isSubmitting ? 'bg-green-300 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}>{isSubmitting ? t('buttons.simulating', { defaultValue: 'A enviar…' }) : t('buttons.simulate')}</button>
               </div>
             </>
           )}

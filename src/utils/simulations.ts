@@ -1,4 +1,4 @@
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection, doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
 export type SimulationType = 'auto' | 'vida' | 'saude' | 'habitacao' | 'rc_prof' | 'condominio' | string;
@@ -12,13 +12,28 @@ export type SimulationRecord = {
   createdAt?: any; // serverTimestamp will set this
 };
 
-export async function saveSimulation(uid: string, data: SimulationRecord) {
-  const col = collection(db, 'users', uid, 'simulations');
+/**
+ * Persist a simulation for a user. Optionally provide an idempotencyKey to avoid duplicates.
+ * When idempotencyKey is provided, the document ID is fixed, so repeated calls will upsert the same doc
+ * instead of creating multiple records. This is useful to prevent double clicks or re-submits.
+ */
+export async function saveSimulation(
+  uid: string,
+  data: SimulationRecord,
+  opts?: { idempotencyKey?: string }
+) {
+  const colRef = collection(db, 'users', uid, 'simulations');
   const toSave = {
     ...data,
     status: data.status ?? 'submitted',
     createdAt: serverTimestamp(),
   };
-  const ref = await addDoc(col, toSave);
-  return ref.id;
+  if (opts?.idempotencyKey) {
+    const docRef = doc(colRef, opts.idempotencyKey);
+    await setDoc(docRef, toSave, { merge: true });
+    return docRef.id;
+  } else {
+    const ref = await addDoc(colRef, toSave);
+    return ref.id;
+  }
 }

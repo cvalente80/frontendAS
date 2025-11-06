@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import Seo from "../components/Seo";
 import emailjs from "@emailjs/browser";
 import { EMAILJS_SERVICE_ID_SAUDE, EMAILJS_TEMPLATE_ID_SAUDE, EMAILJS_USER_ID_SAUDE } from "../emailjs.config";
@@ -38,6 +38,8 @@ export default function SimulacaoSaude() {
 	const [email, setEmail] = useState("");
 	const [telefone, setTelefone] = useState("");
 	const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null);
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const busyRef = useRef(false);
 
 	function handleChangeSegurado(e: React.ChangeEvent<HTMLInputElement>, idx: number) {
 		const { name, value } = e.target;
@@ -103,6 +105,8 @@ export default function SimulacaoSaude() {
 
 	async function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
+		if (isSubmitting || busyRef.current) return; // block double submit
+		setIsSubmitting(true); busyRef.current = true;
 		// Exigir login antes de submeter e persistir
 		await requireAuth();
 		if (!validarPasso2()) return;
@@ -124,13 +128,15 @@ export default function SimulacaoSaude() {
 				const uid = auth.currentUser?.uid;
 				if (uid) {
 					try {
+						const minuteBucket = new Date(); minuteBucket.setSeconds(0,0);
+						const key = ['saude', email || 'anon', minuteBucket.toISOString()].join(':');
 						await saveSimulation(uid, {
 						type: 'saude',
 						title: `Saúde - ${opcao}`,
 						summary: `Plano: ${opcao} | Pessoas seguras: ${segurados.length}`,
 						status: 'submitted',
 						payload: { segurados, plano, addEstomatologia2, addEstomatologia3, nome, email, telefone },
-					});
+					}, { idempotencyKey: key });
 					} catch (err) {
 						console.warn('[SimulacaoSaude][DRY] Falha a guardar simulação (ignorado):', err);
 					}
@@ -153,13 +159,15 @@ export default function SimulacaoSaude() {
 			const uid = auth.currentUser?.uid;
 			if (uid) {
 				try {
+					const minuteBucket = new Date(); minuteBucket.setSeconds(0,0);
+					const key = ['saude', email || 'anon', minuteBucket.toISOString()].join(':');
 					await saveSimulation(uid, {
 					type: 'saude',
 					title: `Saúde - ${opcao}`,
 					summary: `Plano: ${opcao} | Pessoas seguras: ${segurados.length}`,
 					status: 'submitted',
 					payload: { segurados, plano, addEstomatologia2, addEstomatologia3, nome, email, telefone },
-					});
+					}, { idempotencyKey: key });
 				} catch (err) {
 					console.warn('[SimulacaoSaude] Falha a guardar simulação (ignorado):', err);
 				}
@@ -183,6 +191,7 @@ export default function SimulacaoSaude() {
 				setMensagemSucesso(t('messages.submitError'));
 				setTimeout(() => setMensagemSucesso(null), 7000);
 		}
+		setIsSubmitting(false); busyRef.current = false;
 	}
 
 	// Dados da grelha comparativa de planos (texto genérico, sem preços)
@@ -471,7 +480,7 @@ export default function SimulacaoSaude() {
 
 							<div className="flex justify-between mt-6">
 								<button type="button" onClick={() => setStep(1)} className="px-6 py-2 bg-gray-200 rounded">{t('buttons.prev')}</button>
-								<button type="submit" className="px-6 py-2 bg-green-600 text-white rounded font-bold hover:bg-green-700 transition">{t('buttons.submit')}</button>
+								<button type="submit" disabled={isSubmitting} className={`px-6 py-2 text-white rounded font-bold transition ${isSubmitting ? 'bg-green-300 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}>{isSubmitting ? t('buttons.submitting', { defaultValue: 'A enviar…' }) : t('buttons.submit')}</button>
 							</div>
 						</div>
 					)}

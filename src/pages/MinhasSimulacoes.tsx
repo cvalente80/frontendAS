@@ -3,6 +3,7 @@ import Seo from "../components/Seo";
 import { useAuth } from '../context/AuthContext';
 import { db } from '../firebase';
 import { collection, getDocs, limit, onSnapshot, orderBy, query, Timestamp, where } from 'firebase/firestore';
+import { useTranslation } from 'react-i18next';
 
 type SimulationDoc = {
   id: string;
@@ -11,10 +12,13 @@ type SimulationDoc = {
   status?: 'draft' | 'submitted' | 'quoted' | 'archived' | string;
   title?: string;
   summary?: string;
+  // Dados adicionais guardados pela página de simulação (ex.: auto: matricula, marca, modelo, ...)
+  payload?: Record<string, any>;
 };
 
 export default function MinhasSimulacoes(): React.ReactElement {
   const { user, displayName } = useAuth();
+  const { t } = useTranslation('common');
   const [items, setItems] = useState<SimulationDoc[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -125,11 +129,23 @@ export default function MinhasSimulacoes(): React.ReactElement {
                 ? it.createdAt.toDate().toLocaleString()
                 : '';
               const title = it.title || (it.type ? it.type.toUpperCase() : 'Simulação');
+              const plate = (it as any)?.payload?.matricula || (it as any)?.matricula as string | undefined;
+              const brand = (it as any)?.payload?.marca || (it as any)?.marca as string | undefined;
+              const model = (it as any)?.payload?.modelo || (it as any)?.modelo as string | undefined;
+              const year = (it as any)?.payload?.ano || (it as any)?.ano as string | undefined;
+              const statusLabel = it.status ? (t(`status.${it.status}` as any) || it.status) : undefined;
               return (
                 <li key={it.id} className="p-4 border border-blue-100 rounded bg-white shadow-sm flex flex-col gap-2">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-blue-900">{title}</h3>
-                    {it.status && <span className="text-xs px-2 py-0.5 rounded bg-blue-50 border border-blue-200 text-blue-800">{it.status}</span>}
+                    <h3 className="font-semibold text-blue-900 flex items-center gap-2">
+                      <span>{title}</span>
+                      {plate && (
+                        <span className="text-[11px] leading-none px-2 py-1 rounded bg-blue-50 border border-blue-200 text-blue-800 font-medium">
+                          {plate}
+                        </span>
+                      )}
+                    </h3>
+                    {statusLabel && <span className="text-xs px-2 py-0.5 rounded bg-blue-50 border border-blue-200 text-blue-800">{statusLabel}</span>}
                   </div>
                   {date && <p className="text-xs text-blue-700">{date}</p>}
                   {it.summary && <p className="text-sm text-blue-800">{it.summary}</p>}

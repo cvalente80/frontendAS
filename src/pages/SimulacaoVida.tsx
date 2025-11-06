@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import Seo from "../components/Seo";
 import emailjs from "@emailjs/browser";
 import { EMAILJS_SERVICE_ID, EMAILJS_USER_ID } from "../emailjs.config";
@@ -42,6 +42,8 @@ export default function SimulacaoVida() {
 	const [errosSegurados, setErrosSegurados] = useState<{ nome?: string; nascimento?: string; contribuinte?: string }[]>([]);
 	const [errosPasso2, setErrosPasso2] = useState<{ capital?: string; prazo?: string }>({});
 	const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const busyRef = useRef(false);
 
 	// Formata capital em milhares (apenas visual)
 	function formatMilhares(valor: string) {
@@ -86,6 +88,8 @@ export default function SimulacaoVida() {
 
 	async function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
+		if (isSubmitting || busyRef.current) return; // prevent double submits
+		setIsSubmitting(true); busyRef.current = true;
 		// Exigir login antes de submeter
 		await requireAuth();
 		// Validação final extra (proteção caso avance por DevTools)
@@ -112,13 +116,19 @@ export default function SimulacaoVida() {
 			if (uid) {
 				try {
 					const resumo = `Vida - ${form.tipoSeguro} | Capital: ${form.capital} | Prazo: ${form.prazo} | Pessoas seguras: ${form.segurados.length}`;
+					const minuteBucket = new Date(); minuteBucket.setSeconds(0,0);
+					const key = [
+						'vida',
+						form.email || 'anon',
+						minuteBucket.toISOString(),
+					].join(':');
 					await saveSimulation(uid, {
 						type: 'vida',
 						title: `Vida (${form.tipoSeguro})`,
 						summary: resumo,
 						status: 'submitted',
 						payload: { ...form },
-					});
+					}, { idempotencyKey: key });
 				} catch (err) {
 					console.warn('[SimulacaoVida] Falha a guardar simulação (ignorado):', err);
 				}
@@ -150,6 +160,7 @@ export default function SimulacaoVida() {
 			setMensagemSucesso(t('messages.submitError'));
 			setTimeout(() => setMensagemSucesso(null), 7000);
 		}
+		setIsSubmitting(false); busyRef.current = false;
 	}
 
 	function handleNext(e: React.FormEvent) {
@@ -445,7 +456,7 @@ export default function SimulacaoVida() {
 									</div>
 									<div className="flex justify-between mt-4">
 										<button type="button" onClick={() => setStep(2)} className="px-6 py-2 bg-gray-200 rounded">{t('buttons.prev')}</button>
-										<button type="submit" className="px-6 py-2 bg-green-600 text-white rounded font-bold hover:bg-green-700 transition">{t('buttons.simulate')}</button>
+										<button type="submit" disabled={isSubmitting} className={`px-6 py-2 text-white rounded font-bold transition ${isSubmitting ? 'bg-green-300 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}>{isSubmitting ? t('buttons.submitting', { defaultValue: 'A enviar…' }) : t('buttons.simulate')}</button>
 									</div>
 								</div>
 							)}
