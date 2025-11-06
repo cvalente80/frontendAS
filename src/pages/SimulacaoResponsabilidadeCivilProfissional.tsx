@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import React, { useRef, useState, ChangeEvent, FormEvent } from "react";
 import Seo from "../components/Seo";
 import emailjs from "@emailjs/browser";
 import { EMAILJS_SERVICE_ID_GENERIC, EMAILJS_TEMPLATE_ID_GENERIC, EMAILJS_USER_ID_GENERIC } from "../emailjs.config";
@@ -35,6 +35,8 @@ export default function SimulacaoResponsabilidadeCivilProfissional() {
   const [step, setStep] = useState<number>(1);
   const { user } = useAuth();
   const { requireAuth } = useAuthUX();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const busyRef = useRef(false);
   const [form, setForm] = useState<FormState>({
     empresaNome: "",
     empresaNif: "",
@@ -99,6 +101,8 @@ export default function SimulacaoResponsabilidadeCivilProfissional() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    if (isSubmitting || busyRef.current) return; // prevent double-submit
+    setIsSubmitting(true); busyRef.current = true;
     await requireAuth();
     if (!form.aceitaRgpd) { setMensagem('Necessário aceitar a Política de Privacidade & RGPD.'); setMensagemTipo('erro'); return; }
 
@@ -159,13 +163,15 @@ export default function SimulacaoResponsabilidadeCivilProfissional() {
       const uid = auth.currentUser?.uid;
       if (uid) {
         try {
+          const minuteBucket = new Date(); minuteBucket.setSeconds(0,0);
+          const key = ['rc_prof', form.empresaEmail || 'anon', minuteBucket.toISOString()].join(':');
           await saveSimulation(uid, {
           type: 'rc_prof',
           title: `RC Profissional - ${form.atividade || form.empresaNome}`,
           summary: `Empresa: ${form.empresaNome} | Capitais: ${form.capitais} | Franquia: ${form.franquia}`,
           status: 'submitted',
           payload: { ...form },
-          });
+          }, { idempotencyKey: key });
         } catch (err) {
           console.warn('[RCProf] Falha a guardar simulação (ignorado):', err);
         }
@@ -179,6 +185,7 @@ export default function SimulacaoResponsabilidadeCivilProfissional() {
       setMensagem('Ocorreu um erro ao enviar. Tente novamente.'); setMensagemTipo('erro');
     } finally {
       setTimeout(()=>{ setMensagem(null); setMensagemTipo(null); }, 6000);
+      setIsSubmitting(false); busyRef.current = false;
     }
   }
 
@@ -293,7 +300,7 @@ export default function SimulacaoResponsabilidadeCivilProfissional() {
                 <label className="block text-sm font-semibold mb-1">Outros pedidos / detalhes</label>
                 <textarea name="outrosPedidos" value={form.outrosPedidos||''} onChange={handleChange} placeholder="Ex.: limites, projetos, retroatividade específica, observações…" className="w-full p-3 border rounded bg-white min-h-[90px]" />
               </div>
-              <div className="flex justify-between gap-2 mt-4"><button type="button" onClick={handlePrev} className="px-6 py-2 bg-gray-200 rounded">Anterior</button><button type="submit" className="px-6 py-2 bg-green-600 text-white rounded font-bold hover:bg-green-700 transition">Pedir Proposta</button></div>
+              <div className="flex justify-between gap-2 mt-4"><button type="button" onClick={handlePrev} className="px-6 py-2 bg-gray-200 rounded">Anterior</button><button type="submit" disabled={isSubmitting} className={`px-6 py-2 text-white rounded font-bold transition ${isSubmitting ? 'bg-green-300 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}>{isSubmitting ? 'A enviar…' : 'Pedir Proposta'}</button></div>
               {resultado && (<div className="mt-6 p-4 bg-blue-50 text-blue-900 rounded-lg text-center font-semibold shadow whitespace-pre-line">{resultado}</div>)}
             </>
           )}

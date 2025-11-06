@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useRef } from "react";
 import Seo from "../components/Seo";
 import emailjs from "@emailjs/browser";
 import { EMAILJS_SERVICE_ID_GENERIC, EMAILJS_TEMPLATE_ID_GENERIC, EMAILJS_USER_ID_GENERIC } from "../emailjs.config";
@@ -46,6 +46,7 @@ function sanitizeTemplateParams(params: Record<string, any>) {
 export default function SimulacaoCondominio(): React.ReactElement {
   const [step, setStep] = useState(1);
   const [enviando, setEnviando] = useState(false);
+  const busyRef = useRef(false);
   const [mensagem, setMensagem] = useState('');
   const [mensagemTipo, setMensagemTipo] = useState<'sucesso'|'erro'|''>('');
   const { user } = useAuth();
@@ -122,6 +123,7 @@ export default function SimulacaoCondominio(): React.ReactElement {
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     await requireAuth();
+    if (enviando || busyRef.current) return; // prevent double submit
     if (!canSubmit) return;
     setEnviando(true); setMensagem(''); setMensagemTipo('');
 
@@ -188,13 +190,15 @@ export default function SimulacaoCondominio(): React.ReactElement {
       const uid = auth.currentUser?.uid;
       if (uid) {
         try {
-          await saveSimulation(uid, {
+              const minuteBucket = new Date(); minuteBucket.setSeconds(0,0);
+              const key = ['condominio', form.administradorEmail || 'anon', minuteBucket.toISOString()].join(':');
+              await saveSimulation(uid, {
           type: 'condominio',
           title: `Condomínio - ${form.localidade || form.morada.split(',')[0] || ''}`,
           summary: `Fracoes: ${form.numeroFracoes || '-'} | Edifício: € ${form.capitalEdificio}`,
           status: 'submitted',
           payload: { ...form },
-          });
+              }, { idempotencyKey: key });
         } catch (err) {
           console.warn('[Condominio] Falha a guardar simulação (ignorado):', err);
         }

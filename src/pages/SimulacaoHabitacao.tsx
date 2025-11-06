@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import React, { useRef, useState, ChangeEvent, FormEvent } from "react";
 import Seo from "../components/Seo";
 import emailjs from "@emailjs/browser";
 import { EMAILJS_SERVICE_ID_SAUDE, EMAILJS_TEMPLATE_ID_HABITACAO, EMAILJS_USER_ID_SAUDE } from "../emailjs.config";
@@ -64,6 +64,8 @@ export default function SimulacaoHabitacao() {
   });
   const [mensagem, setMensagem] = useState<string | null>(null);
   const [mensagemTipo, setMensagemTipo] = useState<"sucesso" | "erro" | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const busyRef = useRef(false);
 
   // Helper para formatar capitais em EUR (sem casas decimais)
   const formatCapital = (v?: string) => {
@@ -202,6 +204,8 @@ export default function SimulacaoHabitacao() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    if (isSubmitting || busyRef.current) return; // prevent double submit
+    setIsSubmitting(true); busyRef.current = true;
     // Exigir autenticação antes de submeter (persistir no DB)
     await requireAuth();
     if (!form.produto) {
@@ -268,19 +272,21 @@ Cliente: ${form.nome} | Email: ${form.email} | Tel: ${form.telefone} | NIF: ${fo
       });
     }
 
-    if (dryRun) {
+  if (dryRun) {
       console.log('[EmailJS][DRY_RUN][Habitacao] Would send with params:', templateParams);
       try {
         const uid = auth.currentUser?.uid;
         if (uid) {
           try {
+            const minuteBucket = new Date(); minuteBucket.setSeconds(0,0);
+            const key = ['habitacao', form.email || 'anon', minuteBucket.toISOString()].join(':');
             await saveSimulation(uid, {
             type: 'habitacao',
             title: `Casa - ${produtoLabel}`,
             summary: `CP ${form.codigoPostal} | ${form.tipoImovel} | Capitais: Edi ${form.capitalEdificio || 'n/a'} / Cont ${form.capitalConteudo || 'n/a'}`,
             status: 'submitted',
             payload: { ...form },
-            });
+            }, { idempotencyKey: key });
           } catch (err) {
             console.warn('[SimulacaoHabitacao][DRY] Falha a guardar simulação (ignorado):', err);
           }
@@ -317,13 +323,15 @@ Cliente: ${form.nome} | Email: ${form.email} | Tel: ${form.telefone} | NIF: ${fo
       const uid = auth.currentUser?.uid;
       if (uid) {
         try {
+          const minuteBucket = new Date(); minuteBucket.setSeconds(0,0);
+          const key = ['habitacao', form.email || 'anon', minuteBucket.toISOString()].join(':');
           await saveSimulation(uid, {
           type: 'habitacao',
           title: `Casa - ${produtoLabel}`,
           summary: `CP ${form.codigoPostal} | ${form.tipoImovel} | Capitais: Edi ${form.capitalEdificio || 'n/a'} / Cont ${form.capitalConteudo || 'n/a'}`,
           status: 'submitted',
           payload: { ...form },
-          });
+          }, { idempotencyKey: key });
         } catch (err) {
           console.warn('[SimulacaoHabitacao] Falha a guardar simulação (ignorado):', err);
         }
@@ -366,6 +374,7 @@ Cliente: ${form.nome} | Email: ${form.email} | Tel: ${form.telefone} | NIF: ${fo
         console.error(error);
         setTimeout(() => { setMensagem(null); setMensagemTipo(null); }, 6000);
     }
+    setIsSubmitting(false); busyRef.current = false;
   }
 
   return (
@@ -641,7 +650,7 @@ Cliente: ${form.nome} | Email: ${form.email} | Tel: ${form.telefone} | NIF: ${fo
               </div>
               <div className="flex justify-between gap-2 mt-2">
                 <button type="button" onClick={handlePrev} className="px-6 py-2 bg-gray-200 rounded">{t('sim_home:buttons.prev')}</button>
-                <button type="submit" className="px-6 py-2 bg-green-600 text-white rounded font-bold hover:bg-green-700 transition">{t('sim_home:buttons.submit')}</button>
+                <button type="submit" disabled={isSubmitting} className={`px-6 py-2 text-white rounded font-bold transition ${isSubmitting ? 'bg-green-300 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}>{isSubmitting ? t('sim_home:buttons.submitting', { defaultValue: 'A enviar…' }) : t('sim_home:buttons.submit')}</button>
               </div>
               <div className="mt-4 flex items-center gap-2">
                 <input type="checkbox" id="aceitaRgpd" name="aceitaRgpd" checked={form.aceitaRgpd} onChange={handleChange} className="accent-blue-700 w-5 h-5" required onInvalid={e=>setCustomValidity(e as any,t('sim_home:messages.rgpdRequired'))} onInput={e=>setCustomValidity(e as any,'')} />
