@@ -105,7 +105,7 @@ export function DesktopNav() {
                   onClick={() => setProfileOpen(false)}
                   className={({ isActive }) => (isActive ? "bg-blue-50 text-blue-900 font-semibold" : "hover:bg-gray-50 hover:text-blue-900") + " rounded px-3 py-2"}
                 >
-                  As minhas simulações
+                  {t('nav.mySimulations')}
                 </NavLink>
                 <button onClick={() => { setProfileOpen(false); logout(); }} className="text-left rounded px-3 py-2 hover:bg-gray-50 hover:text-blue-900">{t('auth.signOut')}</button>
               </div>

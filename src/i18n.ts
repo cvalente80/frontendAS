@@ -85,6 +85,49 @@ const resources = {
         archived: 'Arquivado'
       }
     },
+    mysims: {
+      seoTitle: 'As minhas simulações',
+      seoDesc: 'Área do utilizador para consultar as simulações submetidas.',
+      heading: 'As minhas simulações',
+      welcome: 'Bem-vindo{{name}}. Aqui poderá consultar as simulações submetidas com a sua conta.',
+      authRequired: 'É necessário iniciar sessão para ver as suas simulações.',
+      filters: {
+        typeLabel: 'Tipo de seguro:',
+        statusLabel: 'Estado:',
+        all: 'Todos',
+        types: {
+          auto: 'Auto',
+          vida: 'Vida',
+          saude: 'Saúde',
+          habitacao: 'Habitação',
+          rc_prof: 'RC Profissional',
+          condominio: 'Condomínio'
+        }
+      },
+      statuses: {
+        em_processamento: 'Em processamento',
+        simulacao_enviada: 'Simulação enviada'
+      },
+      loading: 'A carregar…',
+      empty: 'Sem simulações para mostrar.',
+      pdf: {
+        viewCta: 'Consultar simulação aqui',
+        delete: 'Remover anexo PDF',
+        uploadLabel: 'Carregar PDF (apenas admin)',
+        uploading: 'A enviar PDF…',
+        successUpload: 'PDF carregado com sucesso.',
+        errorUpload: 'Falha ao carregar PDF.',
+        tooLarge: 'O ficheiro é maior que 1 MB. Não é possível anexar.',
+        confirmDelete: 'Remover o anexo PDF desta simulação?',
+        successDelete: 'Anexo PDF removido.',
+        errorDelete: 'Falha ao remover anexo PDF.'
+      },
+      errors: {
+        listenFallbackNote: 'Sem atualização em tempo real (listen falhou). A mostrar resultados atuais apenas uma vez.',
+        loadFailed: 'Falha ao carregar simulações ({{code}}).'
+      },
+      simulationFallback: 'Simulação'
+    },
     sim_vida: {
       title: 'Simulação Seguro Vida',
       step1Title: '1. Pessoas Seguras',
@@ -362,6 +405,10 @@ const resources = {
       seoDesc: 'Fale connosco para pedidos de informação, simulações ad hoc ou propostas personalizadas.',
       pageTitle: 'Fale connosco',
       pageSubtitle: 'Envie-nos um pedido de informação ou uma simulação ad hoc. Respondemos com brevidade.',
+      phoneHeadline: 'Contacte-nos por telefone',
+      phoneDesc: 'Linha direta para apoio e esclarecimentos.',
+      phoneNumberLabel: 'Telefone:',
+      callNowCta: 'Ligar agora',
       placeholders: {
         name: 'Nome completo',
         email: 'Email',
@@ -949,6 +996,49 @@ const resources = {
         whatsPrefill: 'Hello! I would like to chat with Ansião Seguros.'
       }
     },
+    mysims: {
+      seoTitle: 'My quotes',
+      seoDesc: 'User area to view your submitted quotes.',
+      heading: 'My quotes',
+      welcome: 'Welcome{{name}}. Here you can view the quotes you have submitted with your account.',
+      authRequired: 'You need to sign in to see your quotes.',
+      filters: {
+        typeLabel: 'Insurance type:',
+        statusLabel: 'Status:',
+        all: 'All',
+        types: {
+          auto: 'Auto',
+          vida: 'Life',
+          saude: 'Health',
+          habitacao: 'Home',
+          rc_prof: 'Professional Liability',
+          condominio: 'Condominium'
+        }
+      },
+      statuses: {
+        em_processamento: 'Processing',
+        simulacao_enviada: 'Quote sent'
+      },
+      loading: 'Loading…',
+      empty: 'No quotes to display.',
+      pdf: {
+        viewCta: 'Open quote here',
+        delete: 'Remove PDF attachment',
+        uploadLabel: 'Upload PDF (admin only)',
+        uploading: 'Uploading PDF…',
+        successUpload: 'PDF uploaded successfully.',
+        errorUpload: 'Failed to upload PDF.',
+        tooLarge: 'The file is larger than 1 MB. Upload is not allowed.',
+        confirmDelete: 'Remove the PDF attachment from this quote?',
+        successDelete: 'PDF attachment removed.',
+        errorDelete: 'Failed to remove PDF attachment.'
+      },
+      errors: {
+        listenFallbackNote: 'Realtime updates unavailable (listen failed). Showing a one-time snapshot.',
+        loadFailed: 'Failed to load quotes ({{code}}).'
+      },
+      simulationFallback: 'Quote'
+    },
     sim_saude: {
       title: 'Health Insurance Quote',
       stepProgress: 'Step {{step}} of 2',
@@ -1226,6 +1316,10 @@ const resources = {
       seoDesc: 'Get in touch for information requests, ad‑hoc quotes or tailored proposals.',
       pageTitle: 'Get in touch',
   pageSubtitle: 'Send us an information request or an ad‑hoc quote. We’ll reply shortly.',
+      phoneHeadline: 'Call our team',
+      phoneDesc: 'Direct line for support and clarifications.',
+      phoneNumberLabel: 'Phone:',
+      callNowCta: 'Call now',
       placeholders: {
         name: 'Full name',
         email: 'Email',
@@ -1745,7 +1839,7 @@ i18n
     resources,
     fallbackLng: 'pt',
     supportedLngs: ['pt', 'en'],
-  ns: ['common', 'home', 'products', 'product_auto', 'product_life', 'product_health', 'product_home', 'product_mreb', 'product_rcp', 'product_condo', 'product_work', 'product_fleet', 'contact', 'sim_auto', 'sim_vida', 'sim_saude', 'sim_home'],
+  ns: ['common', 'home', 'products', 'product_auto', 'product_life', 'product_health', 'product_home', 'product_mreb', 'product_rcp', 'product_condo', 'product_work', 'product_fleet', 'contact', 'sim_auto', 'sim_vida', 'sim_saude', 'sim_home', 'mysims'],
     defaultNS: 'common',
     interpolation: { escapeValue: false },
     detection: {
