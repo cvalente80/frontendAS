@@ -16,7 +16,7 @@ import {
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
 } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
@@ -124,6 +124,7 @@ export const signOutUser = () => signOut(auth);
 
 // Firestore singleton
 export const db = getFirestore(app);
+export const storage = getStorage(app);
 
 // Email/password auth helpers
 export async function signInWithEmailPassword(email: string, password: string) {
@@ -133,6 +134,18 @@ export async function signInWithEmailPassword(email: string, password: string) {
 
 export async function registerWithEmailPassword(email: string, password: string) {
   const res = await createUserWithEmailAndPassword(auth, email, password);
+  // Ensure a user profile doc exists with default isAdmin false
+  try {
+    const ref = doc(db, 'users', res.user.uid);
+    await setDoc(ref, {
+      email: res.user.email ?? email,
+      displayName: res.user.displayName ?? '',
+      createdAt: serverTimestamp(),
+      isAdmin: false,
+    }, { merge: true });
+  } catch {
+    // ignore profile creation failures
+  }
   return res.user;
 }
 

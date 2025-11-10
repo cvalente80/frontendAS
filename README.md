@@ -18,6 +18,31 @@ Este projeto pode ser facilmente adaptado para outras empresas e produtos de seg
 	- Importante: como o build usa `base: '/frontendAS/'`, abra a app em `http://localhost:<porta>/frontendAS/pt` (e não apenas `/pt`).
 	- Em desenvolvimento (`npm run dev`), o endereço é `http://localhost:5173/pt`.
 
+
+## Gestão de PDFs de simulação (Admin)
+
+- O sistema permite associar um PDF (por exemplo, uma proposta/simulação) a cada registo de simulação.
+- Apenas utilizadores com perfil `isAdmin` verdadeiro conseguem carregar o PDF.
+- O PDF é guardado no Firebase Storage em `simulations/{uid}/{simulationId}/quote.pdf` e o link público (`pdfUrl`) é gravado no documento da simulação em Firestore (`users/{uid}/simulations/{simulationId}`).
+
+### Como definir um administrador
+
+1. No Firestore, abra a coleção `users` e edite/crie o documento do utilizador com o seu `uid`.
+2. Adicione o campo booleano `isAdmin` com valor `true`.
+3. Opcionalmente mantenha `email`, `displayName` e `createdAt`.
+
+Nota: durante o registo via email/palavra‑passe, criamos/atualizamos o documento `users/{uid}` com `isAdmin: false` por omissão.
+
+### Onde carregar/ver o PDF
+
+- Na página "As minhas simulações" (`/minhas-simulacoes`), cada card mostra:
+  - Se existir `pdfUrl`, um link "Ver PDF da simulação" visível para todos os utilizadores.
+  - Se o utilizador atual for admin, surge um campo para carregar ficheiro `.pdf`; após upload ficará imediatamente disponível.
+
+### Regras de segurança recomendadas
+
+- Configure as regras do Firebase Storage/Firestore para que apenas admins possam escrever o campo `pdfUrl` e fazer upload para o caminho `simulations/**`.
+- Exemplo (pseudo): permitir `read` ao dono do documento, mas `write` apenas a `isAdmin == true`.
 ## Personalização
 Adicione ou edite componentes em `src/` para adaptar o site a outros clientes ou produtos.
 

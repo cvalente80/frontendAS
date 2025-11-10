@@ -149,6 +149,43 @@ export default function Contato() {
       <div className="bg-white/80 backdrop-blur rounded-xl shadow-md p-6 md:p-8">
         <h2 className="text-3xl md:text-4xl font-bold text-blue-900 text-center">{t('pageTitle')}</h2>
         <p className="text-blue-700 text-center mt-2">{t('pageSubtitle')}</p>
+        {/* Destaque de contacto telefónico */}
+        <div className="mt-6">
+          <div className="flex flex-col md:flex-row items-center md:items-stretch gap-4 p-4 border border-blue-200 rounded-xl bg-blue-50">
+            <div className="flex items-center gap-3">
+              <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 text-white shadow">
+                {/* Phone Icon */}
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.86 19.86 0 0 1 2.08 4.2 2 2 0 0 1 4.06 2h3a2 2 0 0 1 2 1.72c.12.89.32 1.76.59 2.6a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.48-1.11a2 2 0 0 1 2.11-.45c.84.27 1.71.47 2.6.59A2 2 0 0 1 22 16.92z"/>
+                </svg>
+              </span>
+              <div>
+                <div className="text-blue-900 font-semibold">{t('phoneHeadline')}</div>
+                <div className="text-blue-800 text-sm">{t('phoneDesc')}</div>
+              </div>
+            </div>
+            <div className="flex-1" />
+            <div className="flex items-center gap-3">
+              <div className="text-blue-900 font-medium">
+                <span className="sr-only">{t('phoneNumberLabel')}</span>
+                <a
+                  href={`tel:+351962116764`}
+                  className="text-2xl font-bold tracking-wide hover:underline whitespace-nowrap"
+                  title={t('callNowCta') as string}
+                >
+                  +351 962 116 764
+                </a>
+              </div>
+              <a
+                href={`tel:+351962116764`}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold shadow hover:bg-blue-500"
+                aria-label={t('callNowCta')}
+              >
+                {t('callNowCta')}
+              </a>
+            </div>
+          </div>
+        </div>
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Formulário */}
           <form onSubmit={handleSubmit} className="space-y-4">

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
-import { auth, handleAuthRedirect, signInWithGoogle, signOutUser } from '../firebase';
+import { auth, handleAuthRedirect, signInWithGoogle, signOutUser, db, signInWithEmailPassword, registerWithEmailPassword, resetPassword } from '../firebase';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 // Helper para obter o nome mais fiável do utilizador
@@ -18,8 +19,12 @@ type AuthContextType = {
   user: User | null;
   loading: boolean;
   displayName: string;
+  isAdmin: boolean;
   loginWithGoogle: () => Promise<any>; // signInWithGoogle pode retornar um user ou null
   logout: () => Promise<void>;
+  login: (email: string, password: string) => Promise<any>;
+  register: (email: string, password: string, name?: string) => Promise<any>;
+  forgotPassword: (email: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -27,6 +32,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -70,6 +76,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       setUser(currentUser);
       setLoading(false);
+
+      // Carrega o perfil do utilizador (ex.: isAdmin) de Firestore
+      if (currentUser) {
+        try {
+          const ref = doc(db, 'users', currentUser.uid);
+          const snap = await getDoc(ref);
+          if (!snap.exists()) {
+            try {
+              await setDoc(ref, {
+                email: currentUser.email ?? null,
+                displayName: currentUser.displayName ?? null,
+                createdAt: serverTimestamp(),
+                isAdmin: false,
+              }, { merge: true });
+            } catch {
+              // ignore
+            }
+            setIsAdmin(false);
+          } else {
+            const data = snap.data() as any;
+            setIsAdmin(Boolean(data?.isAdmin));
+          }
+        } catch (e) {
+          console.warn('[Auth] Falha ao obter perfil do utilizador:', e);
+          setIsAdmin(false);
+        }
+      } else {
+        setIsAdmin(false);
+      }
 
       if (currentUser && location.pathname.includes('/login')) {
         navigate('/', { replace: true });
@@ -115,11 +150,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         loading,
         displayName: getDisplayName(user) || persistedName || 'Utilizador',
+        isAdmin,
         loginWithGoogle: signInWithGoogle,
         logout: signOutUser,
+        login: signInWithEmailPassword,
+        register: async (email: string, password: string, _name?: string) => registerWithEmailPassword(email, password),
+        forgotPassword: resetPassword,
       };
     },
-    [user, loading]
+    [user, loading, isAdmin]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

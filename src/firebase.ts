@@ -16,4 +16,5 @@ export {
   registerWithEmailPassword,
   resetPassword,
   db,
+  storage,
 } from "../typescript";
