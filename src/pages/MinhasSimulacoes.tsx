@@ -2,9 +2,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import Seo from "../components/Seo";
 import { useAuth } from '../context/AuthContext';
 import { db, storage } from '../firebase';
-import { collection, collectionGroup, doc, getDocs, limit, onSnapshot, orderBy, query, Timestamp, updateDoc, deleteField } from 'firebase/firestore';
+import { collection, collectionGroup, doc, getDoc, getDocs, limit, onSnapshot, orderBy, query, Timestamp, updateDoc, deleteField } from 'firebase/firestore';
 import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { useTranslation } from 'react-i18next';
+import emailjs from '@emailjs/browser';
+import { EMAILJS_SERVICE_ID_GENERIC, EMAILJS_TEMPLATE_ID_NOTIFY, EMAILJS_USER_ID_GENERIC } from '../emailjs.config';
 
 type SimulationDoc = {
   id: string;
@@ -68,6 +70,49 @@ export default function MinhasSimulacoes(): React.ReactElement {
       const simRef = doc(db, 'users', targetUid, 'simulations', simId);
       await updateDoc(simRef, { pdfUrl: url });
       showToast(t('mysims:pdf.successUpload'), 'success');
+      // Try sending a notification email to the user informing the quote is ready
+      try {
+        const simSnap = await getDoc(simRef);
+        const simData = simSnap.exists() ? (simSnap.data() as any) : undefined;
+        // Try to infer recipient email from simulation payload or fall back to the account email
+        const recipientEmail: string | undefined = simData?.payload?.email || simData?.email || user.email || undefined;
+        if (recipientEmail) {
+          showToast(t('mysims:pdf.emailSending'), 'info');
+          const subject = t('mysims:pdf.emailSubject') as string;
+          const nameForEmail = simData?.payload?.nome || user.displayName || 'Cliente';
+          // Force GH Pages absolute base for email links
+          const ghBase = 'https://cvalente80.github.io/frontendAS/';
+          const currentLang = (typeof window !== 'undefined' && window.location.pathname.startsWith('/en')) ? 'en' : 'pt';
+          const mysimsPath = currentLang === 'en' ? 'en/minhas-simulacoes' : 'pt/minhas-simulacoes';
+          const mysimsLink = ghBase + mysimsPath;
+          const pdfLink = url;
+          const body = t('mysims:pdf.emailBody', { pdfLink, mysimsLink });
+          const templateParams: Record<string, any> = {
+            subjectEmail: subject,
+            name: nameForEmail,
+            body,
+            email: recipientEmail,
+          };
+          try {
+            await emailjs.send(
+              EMAILJS_SERVICE_ID_GENERIC,
+              EMAILJS_TEMPLATE_ID_NOTIFY,
+              templateParams,
+              EMAILJS_USER_ID_GENERIC
+            );
+            showToast(t('mysims:pdf.emailSuccess'), 'success');
+          } catch (sendErr) {
+            console.error('[MinhasSimulacoes] EmailJS send error', sendErr);
+            showToast(t('mysims:pdf.emailError'), 'error');
+          }
+        } else {
+          // No recipient email available; do not treat as error, just inform silently in console
+          console.warn('[MinhasSimulacoes] No recipient email found for simulation', simId);
+        }
+      } catch (mailErr) {
+        console.error('[MinhasSimulacoes] Failed to send notification email:', mailErr);
+          showToast(t('mysims:pdf.emailError'), 'error');
+      }
     } catch (e) {
       console.error(e);
       showToast(t('mysims:pdf.errorUpload'), 'error');

@@ -15,3 +15,6 @@ export const EMAILJS_USER_ID_SAUDE = "rhKWX9EC7oQt2nwPK";
 export const EMAILJS_SERVICE_ID_GENERIC = "service_sginz04";
 export const EMAILJS_TEMPLATE_ID_GENERIC = "template_1hel704";
 export const EMAILJS_USER_ID_GENERIC = "qQ4BV2IFiEIcJ28OA";
+
+// Template para notificação de simulação pronta
+export const EMAILJS_TEMPLATE_ID_NOTIFY = "template_2rab695";
