@@ -121,6 +121,11 @@ const resources = {
         confirmDelete: 'Remover o anexo PDF desta simulação?',
         successDelete: 'Anexo PDF removido.',
         errorDelete: 'Falha ao remover anexo PDF.'
+        , emailSuccess: 'Email enviado ao utilizador a informar da simulação pronta.',
+        emailError: 'PDF anexado, mas falhou o envio de email ao utilizador.'
+        , emailSending: 'A enviar email de notificação…'
+  , emailBody: 'A sua simulação está pronta. Pode aceder ao PDF diretamente aqui: {{pdfLink}} ou visualizar dentro do site em "As minhas simulações": {{mysimsLink}}.'
+        , emailSubject: 'Simulação pronta — Ansião Seguros'
       },
       errors: {
         listenFallbackNote: 'Sem atualização em tempo real (listen falhou). A mostrar resultados atuais apenas uma vez.',
@@ -1032,6 +1037,11 @@ const resources = {
         confirmDelete: 'Remove the PDF attachment from this quote?',
         successDelete: 'PDF attachment removed.',
         errorDelete: 'Failed to remove PDF attachment.'
+        , emailSuccess: 'Notification email sent to the user.',
+        emailError: 'PDF attached, but failed to send notification email.'
+        , emailSending: 'Sending notification email…'
+  , emailBody: 'Your quote is ready. Access the PDF directly here: {{pdfLink}} or view it inside the site in "My quotes": {{mysimsLink}}.'
+        , emailSubject: 'Quote ready — Ansião Seguros'
       },
       errors: {
         listenFallbackNote: 'Realtime updates unavailable (listen failed). Showing a one-time snapshot.',
