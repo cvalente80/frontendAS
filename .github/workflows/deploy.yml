@@ -3,7 +3,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - notificationAfterDeliverSimulation # Set a branch name to deploy from
+      - addFieldFormAutoInsurance # Set a branch name to deploy from
   workflow_dispatch:
 
 permissions:

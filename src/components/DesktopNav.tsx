@@ -52,12 +52,23 @@ export function DesktopNav() {
               <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clipRule="evenodd" />
             </svg>
           </button>
-          <div className="absolute left-0 top-full w-56 rounded-lg border border-gray-200 bg-white shadow-lg opacity-0 scale-95 translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:scale-100 group-focus-within:translate-y-0 group-focus-within:pointer-events-auto transition duration-150 ease-out p-2 z-50">
-            <div className="flex flex-col text-blue-800">
-              <NavLink to={`/${base}/simulacao-auto`} className={({ isActive }) => (isActive ? "bg-blue-50 text-blue-900 font-semibold" : "hover:bg-gray-50 hover:text-blue-900") + " rounded px-3 py-2"}>{t('nav.auto')}</NavLink>
-              <NavLink to={`/${base}/simulacao-vida`} className={({ isActive }) => (isActive ? "bg-blue-50 text-blue-900 font-semibold" : "hover:bg-gray-50 hover:text-blue-900") + " rounded px-3 py-2"}>{t('nav.life')}</NavLink>
-              <NavLink to={`/${base}/simulacao-saude`} className={({ isActive }) => (isActive ? "bg-blue-50 text-blue-900 font-semibold" : "hover:bg-gray-50 hover:text-blue-900") + " rounded px-3 py-2"}>{t('nav.health')}</NavLink>
-              <NavLink to={`/${base}/simulacao-habitacao`} className={({ isActive }) => (isActive ? "bg-blue-50 text-blue-900 font-semibold" : "hover:bg-gray-50 hover:text-blue-900") + " rounded px-3 py-2"}>{t('nav.homeInsurance')}</NavLink>
+          <div className="absolute left-0 top-full w-[22rem] rounded-lg border border-gray-200 bg-white shadow-lg opacity-0 scale-95 translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:scale-100 group-focus-within:translate-y-0 group-focus-within:pointer-events-auto transition duration-150 ease-out p-2 z-50">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-blue-800">
+              <div>
+                <div className="px-3 pt-2 pb-1 text-xs uppercase tracking-wide text-blue-400">{t('nav.individuals')}</div>
+                <NavLink to={`/${base}/simulacao-auto`} className={({ isActive }) => (isActive ? "bg-blue-50 text-blue-900 font-semibold" : "hover:bg-gray-50 hover:text-blue-900") + " block rounded px-3 py-2"}>{t('nav.auto')}</NavLink>
+                <NavLink to={`/${base}/simulacao-vida`} className={({ isActive }) => (isActive ? "bg-blue-50 text-blue-900 font-semibold" : "hover:bg-gray-50 hover:text-blue-900") + " block rounded px-3 py-2"}>{t('nav.life')}</NavLink>
+                <NavLink to={`/${base}/simulacao-saude`} className={({ isActive }) => (isActive ? "bg-blue-50 text-blue-900 font-semibold" : "hover:bg-gray-50 hover:text-blue-900") + " block rounded px-3 py-2"}>{t('nav.health')}</NavLink>
+                <NavLink to={`/${base}/simulacao-habitacao`} className={({ isActive }) => (isActive ? "bg-blue-50 text-blue-900 font-semibold" : "hover:bg-gray-50 hover:text-blue-900") + " block rounded px-3 py-2"}>{t('nav.homeInsurance')}</NavLink>
+              </div>
+              <div>
+                <div className="px-3 pt-2 pb-1 text-xs uppercase tracking-wide text-blue-400">{t('nav.business')}</div>
+                <NavLink to={`/${base}/simulacao-rc-profissional`} className={({ isActive }) => (isActive ? "bg-blue-50 text-blue-900 font-semibold" : "hover:bg-gray-50 hover:text-blue-900") + " block rounded px-3 py-2"}>{t('nav.businessRcp')}</NavLink>
+                <NavLink to={`/${base}/simulacao-condominio`} className={({ isActive }) => (isActive ? "bg-blue-50 text-blue-900 font-semibold" : "hover:bg-gray-50 hover:text-blue-900") + " block rounded px-3 py-2"}>{t('nav.businessCondo')}</NavLink>
+                <NavLink to={`/${base}/produto-multirriscos-empresarial`} className={({ isActive }) => (isActive ? "bg-blue-50 text-blue-900 font-semibold" : "hover:bg-gray-50 hover:text-blue-900") + " block rounded px-3 py-2"}>{t('nav.businessMreb')}</NavLink>
+                <NavLink to={`/${base}/produto-frota`} className={({ isActive }) => (isActive ? "bg-blue-50 text-blue-900 font-semibold" : "hover:bg-gray-50 hover:text-blue-900") + " block rounded px-3 py-2"}>{t('nav.businessFleet')}</NavLink>
+                <NavLink to={`/${base}/produto-acidentes-trabalho`} className={({ isActive }) => (isActive ? "bg-blue-50 text-blue-900 font-semibold" : "hover:bg-gray-50 hover:text-blue-900") + " block rounded px-3 py-2"}>{t('nav.businessWork')}</NavLink>
+              </div>
             </div>
           </div>
         </div>

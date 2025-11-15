@@ -13,6 +13,13 @@ const resources = {
         health: 'Simulação Saúde',
         homeInsurance: 'Simulação Habitação',
         simulator: 'Simulador',
+        individuals: 'Particulares',
+        business: 'Empresas',
+        businessRcp: 'Simulação RC Profissional',
+        businessCondo: 'Simulação Condomínio',
+        businessMreb: 'Multirriscos Empresarial',
+        businessFleet: 'Frota (informação/produto)',
+        businessWork: 'Acidentes de Trabalho (produto)',
         products: 'Produtos',
         contact: 'Contacto',
         mySimulations: 'As minhas simulações'
@@ -344,11 +351,19 @@ const resources = {
         licenseDate: 'Data da Carta de condução (dd-mm-aaaa)',
         postalCode: 'Código Postal (____-___)',
         nif: 'NIF (Contribuinte)',
-        carBrand: 'Marca do carro',
-        carModel: 'Modelo do carro',
+  carBrand: 'Marca da viatura',
+  carModel: 'Modelo da viatura',
+  carVersion: 'Versão',
         carYear: 'Ano',
         plate: 'XX-XX-XX',
         otherRequests: 'Ex.: limites, condutor jovem, franquias desejadas, observações...'
+      },
+      examples: {
+        brand: 'Exemplo: Ford',
+        model: 'Exemplo: Focus',
+        version: 'Exemplo: 1.0 EcoBoost Titanium',
+        year: 'Exemplo: 2018',
+        plate: 'Exemplo: 12-AB-34'
       },
       validations: {
         under18: 'Apenas condutores com 18 anos ou mais podem prosseguir.',
@@ -399,6 +414,7 @@ const resources = {
           birthDate: 'Data Nascimento:',
           licenseDate: 'Data Carta:',
           postalCode: 'Código Postal:',
+          version: 'Versão:',
           type: 'Tipo:',
           coverages: 'Coberturas:',
           otherRequests: 'Outros pedidos:'
@@ -931,6 +947,13 @@ const resources = {
         health: 'Health Quote',
         homeInsurance: 'Home Insurance Quote',
         simulator: 'Quotes',
+        individuals: 'Individuals',
+        business: 'Business',
+        businessRcp: 'Professional Liability Quote',
+        businessCondo: 'Condominium Quote',
+        businessMreb: 'Business Multi-risk (info)',
+        businessFleet: 'Fleet (info)',
+        businessWork: 'Workers’ Compensation (info)',
         products: 'Products',
         contact: 'Contact',
         mySimulations: 'My quotes'
@@ -1262,9 +1285,17 @@ const resources = {
         nif: 'NIF (Tax ID)',
         carBrand: 'Car make',
         carModel: 'Car model',
+  carVersion: 'Version/trim',
         carYear: 'Year',
-        plate: 'Portuguese registration (XX-XX-XX)',
+  plate: 'XX-XX-XX',
         otherRequests: 'E.g.: limits, young driver, desired deductibles, notes...'
+      },
+      examples: {
+        brand: 'Example: Ford',
+        model: 'Example: Focus',
+        version: 'Example: 1.0 EcoBoost Titanium',
+        year: 'Example: 2018',
+        plate: 'Example: 12-AB-34'
       },
       validations: {
         under18: 'Only drivers aged 18 or older can proceed.',
@@ -1315,6 +1346,7 @@ const resources = {
           birthDate: 'Date of Birth:',
           licenseDate: 'Driving licence issue date:',
           postalCode: 'Postcode:',
+          version: 'Version:',
           type: 'Type:',
           coverages: 'Cover:',
           otherRequests: 'Other requests:'
