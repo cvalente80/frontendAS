@@ -26,6 +26,7 @@ interface FormState {
   dataCartaConducaoManual?: string;
   modelo: string;
   marca?: string;
+  versao?: string;
   ano: string;
   matricula: string;
   tipoSeguro: string;
@@ -48,6 +49,7 @@ export default function SimulacaoAuto() {
     dataNascimento: "",
     modelo: "",
     marca: "",
+    versao: "",
     ano: "",
     matricula: "",
     tipoSeguro: "",
@@ -61,6 +63,7 @@ export default function SimulacaoAuto() {
   const [openCarta, setOpenCarta] = useState<boolean>(false);
   const [erroNascimento, setErroNascimento] = useState<string>("");
   const [erroCarta, setErroCarta] = useState<string>("");
+  const [erroMatricula, setErroMatricula] = useState<string>("");
   const [mensagem, setMensagem] = useState<string | null>(null);
   const [mensagemTipo, setMensagemTipo] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -111,6 +114,12 @@ export default function SimulacaoAuto() {
     return controlo === n[8];
   }
 
+  function validarMatricula(m: string): boolean {
+    if (!m) return false;
+    // Formato genérico: XX-XX-XX (cada XX é alfanumérico maiúsculo)
+    return /^[A-Z0-9]{2}-[A-Z0-9]{2}-[A-Z0-9]{2}$/.test(m);
+  }
+
 
   function handleNext(e: FormEvent) {
     e.preventDefault();
@@ -119,6 +128,15 @@ export default function SimulacaoAuto() {
       if (idadeMenorQue18(form.dataNascimento)) {
         setErroNascimento(t('validations.under18'));
         return;
+      }
+    }
+    if (step === 2) {
+      // validação da matrícula antes de avançar
+      if (!validarMatricula(form.matricula)) {
+        setErroMatricula(t('validations.plateFormat'));
+        return;
+      } else {
+        setErroMatricula("");
       }
     }
     setStep((s) => s + 1);
@@ -146,7 +164,7 @@ export default function SimulacaoAuto() {
       }, 6000);
       return;
     }
-  const resumo = `${t('summary.title')} ${form.marca} ${form.modelo} (${form.ano}) - ${form.tipoSeguro}\n${t('summary.labels.nif')} ${form.contribuinte}\n${t('summary.labels.birthDate')} ${form.dataNascimento ? formatDate(form.dataNascimento) : '-'}\n${t('summary.labels.licenseDate')} ${form.dataCartaConducao ? formatDate(form.dataCartaConducao) : '-'}\n${t('summary.labels.postalCode')} ${form.codigoPostal || '-'}\n${t('summary.labels.coverages')} ${form.coberturas.join(", ")}\n${t('summary.labels.otherRequests')} ${form.outrosPedidos?.trim() ? form.outrosPedidos.trim() : '-'}`;
+  const resumo = `${t('summary.title')} ${form.marca} ${form.modelo}${form.versao ? ' ' + form.versao : ''} (${form.ano}) - ${form.tipoSeguro}\n${t('summary.labels.nif')} ${form.contribuinte}\n${t('summary.labels.birthDate')} ${form.dataNascimento ? formatDate(form.dataNascimento) : '-'}\n${t('summary.labels.licenseDate')} ${form.dataCartaConducao ? formatDate(form.dataCartaConducao) : '-'}\n${t('summary.labels.postalCode')} ${form.codigoPostal || '-'}\n${t('summary.labels.version')} ${form.versao?.trim() ? form.versao.trim() : '-'}\n${t('summary.labels.coverages')} ${form.coberturas.join(", ")}\n${t('summary.labels.otherRequests')} ${form.outrosPedidos?.trim() ? form.outrosPedidos.trim() : '-'}`;
     setResultado(resumo);
 
     // Enviar email via EmailJS
@@ -158,6 +176,7 @@ export default function SimulacaoAuto() {
       dataCartaConducao: form.dataCartaConducao ? formatDate(form.dataCartaConducao) : '',
       codigoPostal: form.codigoPostal || '',
       modelo: form.modelo,
+  versao: form.versao || '',
       marca: form.marca,
       ano: form.ano,
       matricula: form.matricula,
@@ -193,6 +212,7 @@ export default function SimulacaoAuto() {
               codigoPostal: form.codigoPostal,
               marca: form.marca,
               modelo: form.modelo,
+              versao: form.versao,
               ano: form.ano,
               matricula: form.matricula,
               tipoSeguro: form.tipoSeguro,
@@ -551,15 +571,30 @@ export default function SimulacaoAuto() {
           {step === 2 && (
             <>
               <h3 className="text-xl font-semibold text-blue-700 mb-2 text-center">{t('step2Title')}</h3>
-              <input name="marca" value={form.marca || ""} onChange={handleChange} placeholder={t('placeholders.carBrand')} className="w-full p-3 border border-blue-300 rounded-lg" required onInvalid={e => setCustomValidity(e, t('validations.brandRequired'))} onInput={e => setCustomValidity(e, '')} />
-              <input name="modelo" value={form.modelo} onChange={handleChange} placeholder={t('placeholders.carModel')} className="w-full p-3 border border-blue-300 rounded-lg" required onInvalid={e => setCustomValidity(e, t('validations.modelRequired'))} onInput={e => setCustomValidity(e, '')} />
-              <input name="ano" value={form.ano} onChange={e => {
+              <div className="space-y-4">
+                <div>
+                  <input name="marca" value={form.marca || ""} onChange={handleChange} placeholder={t('placeholders.carBrand')} className="w-full p-3 border border-blue-300 rounded-lg" required onInvalid={e => setCustomValidity(e, t('validations.brandRequired'))} onInput={e => setCustomValidity(e, '')} />
+                  <div className="text-[11px] text-blue-600 mt-1 italic pl-1 text-left">{t('examples.brand')}</div>
+                </div>
+                <div>
+                  <input name="modelo" value={form.modelo} onChange={handleChange} placeholder={t('placeholders.carModel')} className="w-full p-3 border border-blue-300 rounded-lg" required onInvalid={e => setCustomValidity(e, t('validations.modelRequired'))} onInput={e => setCustomValidity(e, '')} />
+                  <div className="text-[11px] text-blue-600 mt-1 italic pl-1 text-left">{t('examples.model')}</div>
+                </div>
+                <div>
+                  <input name="versao" value={form.versao || ''} onChange={handleChange} placeholder={t('placeholders.carVersion')} className="w-full p-3 border border-blue-300 rounded-lg" />
+                  <div className="text-[11px] text-blue-600 mt-1 italic pl-1 text-left">{t('examples.version')}</div>
+                </div>
+                <div>
+                  <input name="ano" value={form.ano} onChange={e => {
   let v = e.target.value.replace(/[^\d]/g, "");
   if (v.length > 4) v = v.slice(0, 4);
   setForm({ ...form, ano: v });
 }} placeholder={t('placeholders.carYear')} className="w-full p-3 border border-blue-300 rounded-lg" required maxLength={4} onInvalid={e => setCustomValidity(e, t('validations.yearRequired'))} onInput={e => setCustomValidity(e, '')} />
+                  <div className="text-[11px] text-blue-600 mt-1 italic pl-1 text-left">{t('examples.year')}</div>
+                </div>
+              </div>
 
-              <div className="flex justify-center my-2">
+              <div className="flex flex-col items-stretch justify-center my-4">
   <div className="border-4 border-gray-700 rounded-lg flex items-center px-4 py-2 shadow-md" style={{ minWidth: '180px', maxWidth: '220px', background: 'white' }}>
     <input
       name="matricula"
@@ -570,6 +605,7 @@ export default function SimulacaoAuto() {
         if (v.length > 5) v = v.slice(0,5) + '-' + v.slice(5,7);
         if (v.length > 8) v = v.slice(0,8);
         setForm({ ...form, matricula: v });
+        if (erroMatricula) setErroMatricula("");
       }}
   placeholder={t('placeholders.plate')}
       className="text-center font-mono text-lg bg-transparent outline-none w-full"
@@ -581,6 +617,10 @@ export default function SimulacaoAuto() {
     />
     <svg width="32" height="20" viewBox="0 0 32 20" className="ml-2" fill="none"><rect x="0.5" y="0.5" width="31" height="19" rx="3" fill="#2563eb" stroke="#1e293b"/><text x="16" y="14" textAnchor="middle" fontSize="10" fill="#fff">PT</text></svg>
   </div>
+  <div className="text-[11px] text-blue-600 mt-2 italic pl-1 text-left">{t('examples.plate')}</div>
+  {erroMatricula && (
+    <div className="text-red-600 text-xs mt-1 text-left">{erroMatricula}</div>
+  )}
 </div>
               <div className="flex justify-between gap-2">
                 <button type="button" onClick={handlePrev} className="px-6 py-2 bg-gray-200 rounded">{t('buttons.prev')}</button>
@@ -591,21 +631,6 @@ export default function SimulacaoAuto() {
           {step === 3 && (
             <>
               <h3 className="text-xl font-semibold text-blue-700 mb-2 text-center">{t('step3Title')}</h3>
-              {/* RGPD Checkbox */}
-              <div className="mb-4 flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="aceitaRgpd"
-                  required
-                  className="accent-blue-700 w-5 h-5"
-                  style={{ minWidth: 20, minHeight: 20 }}
-                  onInvalid={e => (e.target as HTMLInputElement).setCustomValidity(t('validations.rgpdRequired'))}
-                  onInput={e => (e.target as HTMLInputElement).setCustomValidity('')}
-                />
-                <label htmlFor="aceitaRgpd" className="text-blue-900 text-sm select-none">
-                  <Trans i18nKey="contact:rgpdText" components={[<a href={`/${base}/politica-rgpd`} target="_blank" rel="noopener noreferrer" className="underline text-blue-700 hover:text-blue-900" />]} />
-                </label>
-              </div>
               <label className="block font-semibold mb-2 text-left" htmlFor="tipoSeguro">{t('typeLabel')}</label>
 <select id="tipoSeguro" name="tipoSeguro" value={form.tipoSeguro || ""} onChange={handleChange} className="w-full p-3 border border-blue-300 rounded-lg text-left" required onInvalid={e => setCustomValidity(e, t('messages.selectType'))} onInput={e => setCustomValidity(e, '')}>
 
@@ -665,6 +690,21 @@ export default function SimulacaoAuto() {
                 <button type="button" onClick={handlePrev} className="px-6 py-2 bg-gray-200 rounded">{t('buttons.prev')}</button>
                 <button type="submit" disabled={isSubmitting} className={`px-6 py-2 text-white rounded font-bold transition ${isSubmitting ? 'bg-green-300 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}>{isSubmitting ? t('buttons.simulating', { defaultValue: 'A enviar…' }) : t('buttons.simulate')}</button>
               </div>
+                {/* RGPD Checkbox moved to bottom */}
+                <div className="mb-4 mt-2 flex items-start gap-2">
+                  <input
+                    type="checkbox"
+                    id="aceitaRgpd"
+                    required
+                    className="accent-blue-700 w-5 h-5 mt-0.5"
+                    style={{ minWidth: 20, minHeight: 20 }}
+                    onInvalid={e => (e.target as HTMLInputElement).setCustomValidity(t('validations.rgpdRequired'))}
+                    onInput={e => (e.target as HTMLInputElement).setCustomValidity('')}
+                  />
+                  <label htmlFor="aceitaRgpd" className="text-blue-900 text-sm select-none">
+                    <Trans i18nKey="contact:rgpdText" components={[<a href={`/${base}/politica-rgpd`} target="_blank" rel="noopener noreferrer" className="underline text-blue-700 hover:text-blue-900" />]} />
+                  </label>
+                </div>
             </>
           )}
         </form>
