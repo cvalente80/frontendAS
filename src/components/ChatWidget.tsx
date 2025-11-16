@@ -170,24 +170,6 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
               </div>
             </div>
             <div className="flex items-center gap-1">
-              {whatsappNumber && (
-                <a
-                  href={whatsHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-2 py-1 text-[11px] rounded bg-[#25D366] hover:brightness-95 text-white inline-flex items-center"
-                  aria-label={t('chat.whatsappNow')}
-                  title={t('chat.whatsappNow') as string}
-                >
-                  <WhatsAppIcon className="w-4 h-4 text-white" />
-                </a>
-              )}
-              <a
-                href={telHref}
-                className="px-2 py-1 text-[11px] rounded bg-green-500 hover:bg-green-600"
-              >
-                {t('chat.callShort')}
-              </a>
               <button
                 type="button"
                 className="p-1 rounded hover:bg-blue-500"

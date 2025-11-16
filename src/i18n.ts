@@ -12,7 +12,7 @@ const resources = {
         life: 'Simulação Vida',
         health: 'Simulação Saúde',
         homeInsurance: 'Simulação Habitação',
-        simulator: 'Simulador',
+        simulator: 'Simuladores',
         individuals: 'Particulares',
         business: 'Empresas',
         businessRcp: 'Simulação RC Profissional',
@@ -58,10 +58,10 @@ const resources = {
         cancel: 'Cancelar',
         send: 'Enviar'
       },
-      chat: {
+  chat: {
         title: 'Fale connosco',
         subtitle: 'Diga-nos o que precisa e entraremos em contacto.',
-        talkNow: 'Falar agora',
+  talkNow: 'Conversa Instantânea',
         callNow: 'Ligar agora',
         callShort: 'Ligar',
         close: 'Fechar',
