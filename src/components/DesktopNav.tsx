@@ -14,6 +14,15 @@ export function DesktopNav() {
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement | null>(null);
 
+  // Listen for global requests to open auth modal (e.g., from ChatWidget)
+  useEffect(() => {
+    function onAuthOpen() {
+      setAuthOpen(true);
+    }
+    window.addEventListener('auth:open', onAuthOpen);
+    return () => window.removeEventListener('auth:open', onAuthOpen);
+  }, []);
+
   // Close profile menu on outside click or Escape
   useEffect(() => {
     function onDocPointer(e: MouseEvent | TouchEvent) {

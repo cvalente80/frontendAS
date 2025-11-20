@@ -1,7 +1,8 @@
 import React, { useMemo, useRef, useState } from 'react';
-import emailjs from '@emailjs/browser';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
-import { EMAILJS_SERVICE_ID_GENERIC, EMAILJS_TEMPLATE_ID_GENERIC, EMAILJS_USER_ID_GENERIC } from '../emailjs.config';
+import { ensureChatForUser, addUserMessage, subscribeMessages, markUserOpened, updateChatIdentity } from '../lib/chat';
 
 type ChatMessage = { id: string; who: 'user' | 'agent'; text: string; at: number };
 
@@ -13,6 +14,11 @@ export type ChatWidgetProps = {
 
 export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = false }: ChatWidgetProps) {
   const { t } = useTranslation('common');
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { lang } = useParams();
+  const base = lang === 'en' ? 'en' : 'pt';
   const [open, setOpen] = useState(defaultOpen);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -22,6 +28,18 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
   const [sending, setSending] = useState(false);
   const [feedback, setFeedback] = useState<null | { type: 'ok' | 'err'; text: string }>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const unsubRef = useRef<null | (() => void)>(null);
+  const [chatId, setChatId] = useState<string | null>(null);
+  const persistTimer = useRef<any>(null);
+
+  // Ouvir pedido global para abrir o chat (após login)
+  React.useEffect(() => {
+    function onChatOpen() {
+      setOpen(true);
+    }
+    window.addEventListener('chat:open', onChatOpen);
+    return () => window.removeEventListener('chat:open', onChatOpen);
+  }, []);
 
   const telHref = useMemo(() => `tel:${phoneNumber.replace(/[^+\d]/g, '')}`, [phoneNumber]);
   const whatsHref = useMemo(() => {
@@ -39,74 +57,84 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
     });
   }
 
-  function pushUserMessage(text: string) {
-    const msg: ChatMessage = { id: Math.random().toString(36).slice(2), who: 'user', text, at: Date.now() };
-    setMessages((prev) => [...prev, msg]);
-    scrollToBottomSoon();
-  }
-
-  async function handleSendEmail() {
-    if (!input.trim()) return;
-    // First, add message to the local conversation
-    pushUserMessage(input.trim());
-    setInput('');
-
-    // Prepare email payload based on the current form + messages
-    const safe = (s: string) => s.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    const items = [...messages, { id: 'pending', who: 'user', text: input.trim(), at: Date.now() }];
-    const detalhesHtml = `
-      <div>
-        <h3 style="margin:0 0 8px 0;color:#1f2937;">${safe(t('chat.title'))}</h3>
-        <table role="presentation" style="border-collapse:collapse;font-size:14px;">
-          <tbody>
-            <tr><td style="padding:4px 8px;color:#374151;">Nome</td><td style="padding:4px 8px;color:#111827;font-weight:600;">${safe(name || '-')}</td></tr>
-            <tr><td style="padding:4px 8px;color:#374151;">Email</td><td style="padding:4px 8px;color:#111827;font-weight:600;">${safe(email || '-')}</td></tr>
-            <tr><td style="padding:4px 8px;color:#374151;">Telefone</td><td style="padding:4px 8px;color:#111827;font-weight:600;">${safe(phone || '-')}</td></tr>
-          </tbody>
-        </table>
-        <div style="margin-top:10px">
-          <h4 style="margin:0 0 6px 0;color:#1f2937;">Mensagens</h4>
-          ${items
-            .map(
-              (m) => `
-            <div style="padding:8px 10px;margin:6px 0;border:1px solid #e5e7eb;border-radius:8px;background:${
-              m.who === 'user' ? '#ecfeff' : '#f9fafb'
-            }">
-              <div style="font-size:12px;color:#6b7280;margin-bottom:2px;">${m.who === 'user' ? 'Utilizador' : 'Agente'} — ${new Date(
-                m.at
-              ).toLocaleString()}</div>
-              <div style="white-space:pre-wrap;color:#111827;">${safe(m.text)}</div>
-            </div>`
-            )
-            .join('')}
-        </div>
-      </div>`;
-
-    const resumo = `Chat Website\nNome: ${name || '-'}\nEmail: ${email || '-'}\nTelefone: ${phone || '-'}\nMensagens:\n` +
-      items.map((m) => `${m.who === 'user' ? 'Utilizador' : 'Agente'} [${new Date(m.at).toLocaleString()}]: ${m.text}`).join('\n');
-
-    const templateParams: Record<string, any> = {
-      nome: name || '(chat anónimo)',
-      email: email || '',
-      telefone: phone || '',
-      subjectEmail: 'Chat Website',
-      tipoSeguro: 'Chat',
-      resultado: resumo,
-      detalhes_html: detalhesHtml,
+  // Subscribe to Firestore messages when panel is open and user is authenticated
+  React.useEffect(() => {
+    // cleanup previous subscription
+    if (unsubRef.current) {
+      unsubRef.current();
+      unsubRef.current = null;
+    }
+    setMessages([]);
+    setChatId(null);
+    if (!open || !user) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const id = await ensureChatForUser(user.uid);
+        if (cancelled) return;
+        setChatId(id);
+        // Reset unread for the user when opening their chat
+        try { await markUserOpened(id); } catch {}
+        unsubRef.current = subscribeMessages(id, (list) => {
+          setMessages(
+            list.map((m) => ({
+              id: m.id,
+              who: m.authorRole === 'user' ? 'user' : 'agent',
+              text: m.text,
+              at: m.createdAt ? m.createdAt.getTime() : Date.now(),
+            }))
+          );
+          scrollToBottomSoon();
+        });
+      } catch (e) {
+        console.error('[ChatWidget] subscribe error', e);
+      }
+    })();
+    return () => {
+      cancelled = true;
+      if (unsubRef.current) {
+        unsubRef.current();
+        unsubRef.current = null;
+      }
     };
+  }, [open, user]);
 
+  // Persist identity fields (name/email/phone) to chat doc with debounce
+  React.useEffect(() => {
+    if (!user || !chatId) return;
+    if (persistTimer.current) clearTimeout(persistTimer.current);
+    persistTimer.current = setTimeout(() => {
+      const payload: { name?: string | null; email?: string | null; phone?: string | null } = {};
+      if (name) payload.name = name;
+      if (email) payload.email = email;
+      if (phone) payload.phone = phone;
+      if (Object.keys(payload).length > 0) {
+        updateChatIdentity(chatId, payload).catch(() => {});
+      }
+    }, 600);
+    return () => {
+      if (persistTimer.current) clearTimeout(persistTimer.current);
+    };
+  }, [name, email, phone, chatId, user]);
+
+  async function handleSend() {
+    if (!input.trim()) return;
+    if (!user) {
+      try { localStorage.setItem('chat:intentOpen', '1'); } catch {}
+      window.dispatchEvent(new CustomEvent('auth:open'));
+      return;
+    }
     try {
       setSending(true);
-      await emailjs.send(
-        EMAILJS_SERVICE_ID_GENERIC,
-        EMAILJS_TEMPLATE_ID_GENERIC,
-        templateParams,
-        EMAILJS_USER_ID_GENERIC
-      );
+      const id = chatId ?? (await ensureChatForUser(user.uid));
+      if (!chatId) setChatId(id);
+      await addUserMessage(id, user.uid, input.trim());
+      setInput('');
+      // feedback optional for realtime chat; show success briefly
       setFeedback({ type: 'ok', text: t('chat.sent') });
-      setTimeout(() => setFeedback(null), 5000);
+      setTimeout(() => setFeedback(null), 3000);
     } catch (e) {
-      console.error('[ChatWidget][EmailJS] send error', e);
+      console.error('[ChatWidget] send error', e);
       setFeedback({ type: 'err', text: t('chat.error') });
       setTimeout(() => setFeedback(null), 6000);
     } finally {
@@ -141,7 +169,18 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
           </a>
           <button
             type="button"
-            onClick={() => setOpen(true)}
+            onClick={() => {
+              if (!user) {
+                try {
+                  // Guarda intenção de abrir chat após login
+                  localStorage.setItem('chat:intentOpen', '1');
+                } catch {}
+                // Abre o mesmo modal de autenticação usado no botão Entrar
+                window.dispatchEvent(new CustomEvent('auth:open'));
+                return;
+              }
+              setOpen(true);
+            }}
             className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-500 transition"
             aria-expanded={open}
             aria-controls="chat-panel"
@@ -238,16 +277,16 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
                 onKeyDown={(e) => {
                   if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
                     e.preventDefault();
-                    if (!sending) handleSendEmail();
+                    if (!sending) handleSend();
                   }
                 }}
               />
               <button
                 type="button"
-                onClick={handleSendEmail}
-                disabled={!input.trim() || sending}
+                onClick={handleSend}
+                disabled={!input.trim() || sending || !user}
                 className={`px-4 py-2 rounded-lg text-white font-semibold shadow ${
-                  !input.trim() || sending ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500'
+                  !input.trim() || sending || !user ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500'
                 }`}
               >
                 {sending ? t('chat.sending') : t('chat.send')}

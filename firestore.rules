@@ -1,0 +1,67 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      // Admins are defined either by a document in /admins/{uid}
+      // or by the users/{uid}.isAdmin flag. Provision the first admin via console.
+      return exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    // Users collection: users can read/write their own profile; admins can read.
+    match /users/{uid} {
+      allow read: if isSignedIn() && (isAdmin() || request.auth.uid == uid);
+      allow write: if isSignedIn() && request.auth.uid == uid &&
+        // Prevent users from granting themselves admin rights
+        (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == resource.data.isAdmin);
+    }
+
+    // Admins registry: only admins can read/write
+    match /admins/{uid} {
+      allow read, write: if isSignedIn() && isAdmin();
+    }
+
+    // Chats root
+    match /chats/{chatId} {
+      allow create: if isSignedIn() && request.auth.uid == chatId &&
+        request.resource.data.userId == request.auth.uid;
+      // Owner can read. Admin can read. Owner can update limited fields; admin can update all.
+      allow read: if isSignedIn() && (isAdmin() || request.auth.uid == chatId);
+      allow update: if isSignedIn() && (
+        // Admin: allow update
+        isAdmin() ||
+        // Owner: allow only certain fields to change (identity & read markers)
+        (
+          request.auth.uid == chatId && (
+            request.resource.data.diff(resource.data).changedKeys().hasOnly(['name','email','phone','unreadForUser','lastReadAtUser'])
+          )
+        )
+      );
+
+      // Messages subcollection
+      match /messages/{msgId} {
+        allow read: if isSignedIn() && (isAdmin() || request.auth.uid == chatId);
+
+        // User can create their own messages marked as user
+        allow create: if isSignedIn() && request.auth.uid == chatId &&
+          request.resource.data.authorId == request.auth.uid &&
+          request.resource.data.authorRole == 'user' &&
+          request.resource.data.text is string &&
+          size(request.resource.data.text) > 0 && size(request.resource.data.text) <= 5000;
+
+        // Admin can create admin messages
+        allow create: if isSignedIn() && isAdmin() &&
+          request.resource.data.authorRole == 'admin' &&
+          request.resource.data.text is string &&
+          size(request.resource.data.text) > 0 && size(request.resource.data.text) <= 5000;
+
+        // Prevent updates/deletes for simplicity (append-only)
+        allow update, delete: if false;
+      }
+    }
+  }
+}

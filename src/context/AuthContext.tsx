@@ -107,7 +107,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (currentUser && location.pathname.includes('/login')) {
-        navigate('/', { replace: true });
+        const params = new URLSearchParams(location.search);
+        const redirect = params.get('redirect');
+        navigate(redirect || '/', { replace: true });
+        try {
+          // Sinalizar ao UI que pode abrir o chat, se havia intenção
+          if (typeof window !== 'undefined' && localStorage.getItem('chat:intentOpen') === '1') {
+            localStorage.removeItem('chat:intentOpen');
+            window.dispatchEvent(new CustomEvent('chat:open'));
+          }
+        } catch {}
       }
     });
 

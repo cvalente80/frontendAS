@@ -18,6 +18,14 @@ export default function MobileNav() {
   useEffect(() => {
     setOpen(false);
   }, [location.pathname]);
+  // Listen for global auth open requests (e.g., from ChatWidget)
+  useEffect(() => {
+    function onAuthOpen() {
+      setAuthOpen(true);
+    }
+    window.addEventListener('auth:open', onAuthOpen);
+    return () => window.removeEventListener('auth:open', onAuthOpen);
+  }, []);
   return (
     <header className="bg-white sticky top-0 z-50 shadow-sm md:hidden">
       <div className="py-4 px-4 flex justify-between items-center">

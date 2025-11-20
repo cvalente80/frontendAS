@@ -24,6 +24,9 @@ import ProdutoCondominio from "./pages/ProdutoCondominio";
 import SimulacaoCondominio from "./pages/SimulacaoCondominio";
 import PoliticaRGPD from "./pages/PoliticaRGPD";
 import './App.css';
+import ChatInbox from './pages/admin/ChatInbox';
+import ChatThread from './pages/admin/ChatThread';
+import { useAuth } from './context/AuthContext';
 const Login = lazy(() => import('./pages/auth/Login'));
 const Register = lazy(() => import('./pages/auth/Register'));
 const ForgotPassword = lazy(() => import('./pages/auth/ForgotPassword'));
@@ -64,7 +67,7 @@ function App(): React.ReactElement {
         {/* Navbar responsiva: Mobile (md-) e Desktop (md+) */}
         <ResponsiveGate mobile={<MobileNav />} desktop={<DesktopNav />} />
         <Suspense fallback={<div className="p-6 text-center">Carregando…</div>}>
-        <Routes>
+  <Routes>
           <Route index element={<Home />} />
           <Route path="inicio" element={<Home />} />
           {/* Auth */}
@@ -92,6 +95,9 @@ function App(): React.ReactElement {
           <Route path="produto-condominio" element={<ProdutoCondominio />} />
           <Route path="simulacao-condominio" element={<SimulacaoCondominio />} />
           <Route path="politica-rgpd" element={<PoliticaRGPD />} />
+    {/* Admin chat (guarded) */}
+    <Route path="admin/inbox" element={<AdminRoute><ChatInbox /></AdminRoute>} />
+    <Route path="admin/chat/:chatId" element={<AdminRoute><ChatThread /></AdminRoute>} />
           {/* Not found inside lang: redirect to index within the same lang */}
           <Route path="*" element={<Navigate to={`/${base}`} replace />} />
   </Routes>
@@ -144,6 +150,14 @@ function App(): React.ReactElement {
         </React.Suspense>
       );
     }
+  }
+
+  function AdminRoute({ children }: { children: React.ReactElement }) {
+    const { user, loading, isAdmin } = useAuth();
+    if (loading) return <div className="p-4 text-center">A carregar…</div>;
+    if (!user) return <div className="p-6 text-center">Acesso restrito. É necessário autenticação.</div>;
+    if (!isAdmin) return <div className="p-6 text-center">Acesso restrito a administradores.</div>;
+    return children;
   }
 
   return (
