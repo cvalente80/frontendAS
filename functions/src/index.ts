@@ -31,12 +31,17 @@ const mailConfig = {
   siteBase: env('SITE_BASE_URL', 'https://ansiao.pt'),
 };
 
-const transporter = nodemailer.createTransport({
-  host: mailConfig.host,
-  port: mailConfig.port,
-  secure: mailConfig.secure,
-  auth: mailConfig.auth.user ? mailConfig.auth : undefined,
-});
+// Email notifications toggle (disabled by default). Enable by setting MAIL_NOTIFICATIONS_ENABLED=true.
+const notificationsEnabled = (process.env.MAIL_NOTIFICATIONS_ENABLED || 'false') === 'true';
+
+const transporter = notificationsEnabled
+  ? nodemailer.createTransport({
+      host: mailConfig.host,
+      port: mailConfig.port,
+      secure: mailConfig.secure,
+      auth: mailConfig.auth.user ? mailConfig.auth : undefined,
+    })
+  : null as any;
 
 function htmlEscape(s: string) {
   return s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
@@ -79,8 +84,9 @@ export const notifyOnFirstUserMessage = onDocumentCreated('chats/{chatId}/messag
       </div>
     `;
 
-  if (!mailConfig.adminTo || !mailConfig.host) {
-    logger.warn('[notifyOnFirstUserMessage] Missing SMTP host or admin recipient; skipping email.');
+  // Skip sending emails when notifications are disabled (default) or SMTP config is missing
+  if (!notificationsEnabled || !mailConfig.adminTo || !mailConfig.host) {
+    logger.info('[notifyOnFirstUserMessage] Email notifications disabled or not configured; skipping send.');
   } else {
     try {
       await transporter.sendMail({ from: mailConfig.from, to: mailConfig.adminTo, subject, html });

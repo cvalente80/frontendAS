@@ -77,29 +77,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(currentUser);
       setLoading(false);
 
-      // Carrega o perfil do utilizador (ex.: isAdmin) de Firestore
+      // Carrega o perfil do utilizador (ex.: isAdmin) de Firestore com estratégia resiliente a offline
       if (currentUser) {
+        const ref = doc(db, 'users', currentUser.uid);
+        // Primeiro garante que o documento existe via merge write; não depende de leitura
         try {
-          const ref = doc(db, 'users', currentUser.uid);
+          await setDoc(ref, {
+            email: currentUser.email ?? null,
+            displayName: currentUser.displayName ?? null,
+            createdAt: serverTimestamp(),
+            isAdmin: false,
+          }, { merge: true });
+        } catch {
+          // Ignora falhas de escrita (offline). Vamos assumir não-admin até haver conectividade.
+        }
+        // Depois tenta ler, mas se falhar (offline), assume não-admin sem log ruidoso
+        try {
           const snap = await getDoc(ref);
-          if (!snap.exists()) {
-            try {
-              await setDoc(ref, {
-                email: currentUser.email ?? null,
-                displayName: currentUser.displayName ?? null,
-                createdAt: serverTimestamp(),
-                isAdmin: false,
-              }, { merge: true });
-            } catch {
-              // ignore
-            }
-            setIsAdmin(false);
-          } else {
+          if (snap.exists()) {
             const data = snap.data() as any;
             setIsAdmin(Boolean(data?.isAdmin));
+          } else {
+            setIsAdmin(false);
           }
-        } catch (e) {
-          console.warn('[Auth] Falha ao obter perfil do utilizador:', e);
+        } catch {
           setIsAdmin(false);
         }
       } else {

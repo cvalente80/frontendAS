@@ -41,8 +41,11 @@ export type ChatMessageDoc = {
 export async function ensureChatForUser(userId: string): Promise<string> {
   const chatId = userId;
   const ref = doc(db, 'chats', chatId);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) {
+  // Avoid getDoc first to prevent failures when client is considered offline.
+  // Just ensure the document exists via a merge write; if it fails, we still return chatId
+  // so that subscriptions can proceed and cache can populate when connectivity resumes.
+  try {
+    console.log('[chat] ensureChatForUser:setDoc', { chatId });
     const payload: ChatDoc = {
       userId,
       status: 'open',
@@ -52,6 +55,12 @@ export async function ensureChatForUser(userId: string): Promise<string> {
       unreadForUser: 0,
     };
     await setDoc(ref, payload, { merge: true });
+    console.log('[chat] ensureChatForUser:ok', { chatId });
+  } catch (e) {
+    // Ignore write failures (e.g., offline). Firestore listeners can still attach,
+    // and the write will be retried by the SDK when back online if queued elsewhere.
+    // console.warn('[ensureChatForUser] setDoc failed, proceeding', e);
+    console.log('[chat] ensureChatForUser:write_failed_offline?', { chatId });
   }
   return chatId;
 }
@@ -64,6 +73,7 @@ export async function addUserMessage(chatId: string, userId: string, text: strin
     text,
     createdAt: serverTimestamp(),
   };
+  console.log('[chat] addUserMessage', { chatId, len: text.length });
   await addDoc(col, msg);
   // update chat meta
   const chatRef = doc(db, 'chats', chatId);
@@ -73,11 +83,13 @@ export async function addUserMessage(chatId: string, userId: string, text: strin
     unreadForAdmin: increment(1),
     status: 'open',
   });
+  console.log('[chat] addUserMessage:metaUpdated', { chatId });
 }
 
 export function subscribeMessages(chatId: string, cb: (messages: Array<{ id: string; text: string; authorRole: string; createdAt: Date | null }>) => void) {
   const col = collection(db, 'chats', chatId, 'messages');
   const q = query(col, orderBy('createdAt', 'asc'));
+  console.log('[chat] subscribeMessages:start', { chatId });
   return onSnapshot(q, (snap) => {
     const out = snap.docs.map((d) => {
       const data = d.data() as any;
@@ -89,6 +101,7 @@ export function subscribeMessages(chatId: string, cb: (messages: Array<{ id: str
         createdAt: ts && ts.toDate ? ts.toDate() : null,
       };
     });
+    console.log('[chat] subscribeMessages:update', { chatId, count: out.length });
     cb(out);
   });
 }
@@ -124,6 +137,7 @@ export async function markAdminOpened(chatId: string) {
 // Mark that user viewed the chat; reset unread counter for the user
 export async function markUserOpened(chatId: string) {
   const chatRef = doc(db, 'chats', chatId);
+  console.log('[chat] markUserOpened', { chatId });
   await updateDoc(chatRef, {
     unreadForUser: 0,
     lastReadAtUser: serverTimestamp(),

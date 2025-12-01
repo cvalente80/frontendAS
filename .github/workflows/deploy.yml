@@ -3,7 +3,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - addFiledFormAutoInsurance # Set a branch name to deploy from
+      - chatbot_implementation # Set a branch name to deploy from
   workflow_dispatch:
 
 permissions:

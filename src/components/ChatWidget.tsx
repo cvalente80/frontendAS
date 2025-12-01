@@ -2,7 +2,9 @@ import React, { useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
-import { ensureChatForUser, addUserMessage, subscribeMessages, markUserOpened, updateChatIdentity } from '../lib/chat';
+import { ensureChatForUser, addUserMessage, subscribeMessages, markUserOpened, updateChatIdentity, getChat } from '../lib/chat';
+import { db } from '../firebase';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 type ChatMessage = { id: string; who: 'user' | 'agent'; text: string; at: number };
 
@@ -31,6 +33,20 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
   const unsubRef = useRef<null | (() => void)>(null);
   const [chatId, setChatId] = useState<string | null>(null);
   const persistTimer = useRef<any>(null);
+  const isDev = typeof import.meta !== 'undefined' && !!(import.meta as any).env?.DEV;
+  const [online, setOnline] = useState<boolean>(typeof navigator !== 'undefined' ? navigator.onLine : true);
+
+  // Track browser online/offline state
+  React.useEffect(() => {
+    function onUp() { setOnline(true); }
+    function onDown() { setOnline(false); }
+    window.addEventListener('online', onUp);
+    window.addEventListener('offline', onDown);
+    return () => {
+      window.removeEventListener('online', onUp);
+      window.removeEventListener('offline', onDown);
+    };
+  }, []);
 
   // Ouvir pedido global para abrir o chat (após login)
   React.useEffect(() => {
@@ -124,21 +140,89 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
       window.dispatchEvent(new CustomEvent('auth:open'));
       return;
     }
-    try {
-      setSending(true);
-      const id = chatId ?? (await ensureChatForUser(user.uid));
-      if (!chatId) setChatId(id);
-      await addUserMessage(id, user.uid, input.trim());
-      setInput('');
-      // feedback optional for realtime chat; show success briefly
-      setFeedback({ type: 'ok', text: t('chat.sent') });
-      setTimeout(() => setFeedback(null), 3000);
-    } catch (e) {
+    // Optimistic send: avoid awaiting network when SDK flags offline
+    setSending(true);
+    const id = chatId ?? user.uid;
+    if (!chatId) setChatId(id);
+    // Ensure chat exists (best-effort, non-blocking)
+    ensureChatForUser(user.uid).catch(() => {});
+    const text = input.trim();
+    setInput('');
+    setFeedback({ type: 'ok', text: t('chat.sent') });
+    setTimeout(() => setFeedback(null), 3000);
+    // Optimistic echo in UI
+    const optimisticId = `optimistic-${Date.now()}`;
+    setMessages((prev) => [...prev, { id: optimisticId, who: 'user', text, at: Date.now() }]);
+    scrollToBottomSoon();
+    addUserMessage(id, user.uid, text).catch((e) => {
       console.error('[ChatWidget] send error', e);
       setFeedback({ type: 'err', text: t('chat.error') });
       setTimeout(() => setFeedback(null), 6000);
-    } finally {
-      setSending(false);
+      // Optionally mark optimistic message as failed
+      setMessages((prev) => prev.map((m) => (m.id === optimisticId ? { ...m, text: `${m.text}\n(erro ao enviar)` } : m)));
+    });
+    setSending(false);
+  }
+
+  // Dev-only diagnostic: force create/merge chat doc and report result
+  async function debugEnsureChat() {
+    if (!user) return;
+    try {
+      setFeedback({ type: 'ok', text: 'A criar chat…' });
+      const id = user.uid;
+      const ref = doc(db, 'chats', id);
+      await setDoc(ref, {
+        userId: user.uid,
+        status: 'open',
+        firstNotified: false,
+        createdAt: serverTimestamp(),
+      }, { merge: true });
+      setChatId(id);
+      setFeedback({ type: 'ok', text: `Chat garantido: ${id}` });
+      setTimeout(() => setFeedback(null), 3000);
+    } catch (e: any) {
+      console.error('[ChatWidget] debugEnsureChat error', e);
+      const code = String(e?.code || 'unknown');
+      setFeedback({ type: 'err', text: `Falha ao criar chat (${code})` });
+      setTimeout(() => setFeedback(null), 5000);
+    }
+  }
+
+  // Dev-only diagnostic: create a test message directly and report result
+  async function debugSendTestMessage() {
+    if (!user) return;
+    const id = chatId ?? user.uid;
+    try {
+      setFeedback({ type: 'ok', text: 'A enviar mensagem de teste…' });
+      await addUserMessage(id, user.uid, '[diagnóstico] mensagem de teste');
+      setFeedback({ type: 'ok', text: 'Mensagem de teste enviada' });
+      setTimeout(() => setFeedback(null), 3000);
+    } catch (e: any) {
+      console.error('[ChatWidget] debugSendTestMessage error', e);
+      const code = String(e?.code || 'unknown');
+      setFeedback({ type: 'err', text: `Falha ao enviar mensagem (${code})` });
+      setTimeout(() => setFeedback(null), 5000);
+    }
+  }
+
+  // Dev-only diagnostic: fetch chat doc and show counters
+  async function debugFetchChat() {
+    if (!user) return;
+    const id = chatId ?? user.uid;
+    try {
+      const data = await getChat(id);
+      if (data) {
+        const ua = Number(data.unreadForAdmin || 0);
+        const uu = Number(data.unreadForUser || 0);
+        setFeedback({ type: 'ok', text: `Chat ${id}: UA=${ua} UU=${uu}` });
+      } else {
+        setFeedback({ type: 'err', text: `Chat ${id} não existe` });
+      }
+      setTimeout(() => setFeedback(null), 4000);
+    } catch (e: any) {
+      const code = String(e?.code || 'unknown');
+      setFeedback({ type: 'err', text: `Falha ao obter chat (${code})` });
+      setTimeout(() => setFeedback(null), 5000);
     }
   }
 
@@ -205,7 +289,14 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
               <span>🤖</span>
               <div>
                 <div className="text-sm font-bold leading-tight">{t('chat.title')}</div>
-                <div className="text-[11px] opacity-90">{t('chat.subtitle')}</div>
+                  <div className="text-[11px] opacity-90 flex items-center gap-2">
+                    <span>{t('chat.subtitle')}</span>
+                    <span className={`inline-flex items-center gap-1 px-2 py-[2px] rounded ${online ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}
+                          title={online ? 'Online' : 'Offline'}>
+                      <span className={`w-2 h-2 rounded-full ${online ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
+                      <span className="text-[10px] font-semibold">{online ? 'Online' : 'Offline'}</span>
+                    </span>
+                  </div>
               </div>
             </div>
             <div className="flex items-center gap-1">
@@ -217,6 +308,37 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
               >
                 ✕
               </button>
+              {isDev && (
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    className="ml-1 px-2 py-1 text-[11px] rounded bg-white text-blue-700 hover:bg-blue-100"
+                    onClick={debugEnsureChat}
+                    aria-label="Diagnóstico: garantir chat"
+                    title="Diagnóstico: garantir chat"
+                  >
+                    Debug chat
+                  </button>
+                  <button
+                    type="button"
+                    className="ml-1 px-2 py-1 text-[11px] rounded bg-white text-blue-700 hover:bg-blue-100"
+                    onClick={debugSendTestMessage}
+                    aria-label="Diagnóstico: enviar mensagem"
+                    title="Diagnóstico: enviar mensagem"
+                  >
+                    Debug mensagem
+                  </button>
+                  <button
+                    type="button"
+                    className="ml-1 px-2 py-1 text-[11px] rounded bg-white text-blue-700 hover:bg-blue-100"
+                    onClick={debugFetchChat}
+                    aria-label="Diagnóstico: obter chat"
+                    title="Diagnóstico: obter chat"
+                  >
+                    Debug obter chat
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
