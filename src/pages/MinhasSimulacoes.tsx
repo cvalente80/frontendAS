@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import Seo from "../components/Seo";
 import { useAuth } from '../context/AuthContext';
 import { db, storage } from '../firebase';
+import { getApp } from 'firebase/app';
 import { collection, collectionGroup, doc, getDoc, getDocs, limit, onSnapshot, orderBy, query, Timestamp, updateDoc, deleteField } from 'firebase/firestore';
 import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { useTranslation } from 'react-i18next';
@@ -22,7 +23,7 @@ type SimulationDoc = {
 };
 
 export default function MinhasSimulacoes(): React.ReactElement {
-  const { user, displayName, isAdmin } = useAuth();
+  const { user, displayName, isAdmin, refreshAdminStatus } = useAuth();
   const { t } = useTranslation(['mysims', 'common']);
   const [items, setItems] = useState<SimulationDoc[]>([]);
   const [loading, setLoading] = useState(false);
@@ -33,13 +34,28 @@ export default function MinhasSimulacoes(): React.ReactElement {
   const [uploadingId, setUploadingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [toast, setToast] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+  const app = typeof window !== 'undefined' ? getApp() : undefined;
+  const firebaseCfg = (app && (app.options as any)) || {};
+  const diagnostics = useMemo(() => {
+    const apiKey: string = firebaseCfg.apiKey || '';
+    const apiKeyRedacted = apiKey ? `${apiKey.slice(0, 8)}…` : '-';
+    const origin = typeof window !== 'undefined' ? window.location.origin : '-';
+    return {
+      uid: user?.uid || '-',
+      isAdmin,
+      projectId: firebaseCfg.projectId || '-',
+      apiKey: apiKeyRedacted,
+      authDomain: firebaseCfg.authDomain || '-',
+      origin,
+      when: new Date().toISOString(),
+    };
+  }, [user?.uid, isAdmin, firebaseCfg.projectId, firebaseCfg.apiKey, firebaseCfg.authDomain]);
 
   const uid = user?.uid;
 
   const baseRef = useMemo(() => {
-    if (isAdmin) return collectionGroup(db, 'simulations');
     if (!uid) return null;
-    return collection(db, 'users', uid, 'simulations');
+    return isAdmin ? collectionGroup(db, 'simulations') : collection(db, 'users', uid, 'simulations');
   }, [uid, isAdmin]);
 
   function showToast(message: string, type: 'success' | 'error' | 'info' = 'info') {
@@ -230,6 +246,7 @@ export default function MinhasSimulacoes(): React.ReactElement {
 
       {user && (
         <section className="space-y-4">
+          {/* Debug UI removed: admin status and diagnostics */}
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-2">
               <label className="text-sm text-blue-800">{t('mysims:filters.typeLabel')}</label>

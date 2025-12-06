@@ -25,6 +25,7 @@ type AuthContextType = {
   login: (email: string, password: string) => Promise<any>;
   register: (email: string, password: string, name?: string) => Promise<any>;
   forgotPassword: (email: string) => Promise<void>;
+  refreshAdminStatus: () => Promise<boolean>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -77,31 +78,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(currentUser);
       setLoading(false);
 
-      // Carrega o perfil do utilizador (ex.: isAdmin) de Firestore com estratégia resiliente a offline
+      // Carrega o perfil do utilizador (ex.: isAdmin) sem sobrescrever o campo no DB
       if (currentUser) {
-        const ref = doc(db, 'users', currentUser.uid);
-        // Primeiro garante que o documento existe via merge write; não depende de leitura
+        const userRef = doc(db, 'users', currentUser.uid);
+        // Garante apenas dados básicos; NÃO tocar em isAdmin aqui
         try {
-          await setDoc(ref, {
+          await setDoc(userRef, {
             email: currentUser.email ?? null,
             displayName: currentUser.displayName ?? null,
             createdAt: serverTimestamp(),
-            isAdmin: false,
           }, { merge: true });
         } catch {
-          // Ignora falhas de escrita (offline). Vamos assumir não-admin até haver conectividade.
+          // Ignora falhas de escrita (offline)
         }
-        // Depois tenta ler, mas se falhar (offline), assume não-admin sem log ruidoso
+        // Determina isAdmin: prioridade à coleção admins/{uid}; fallback para users/{uid}.isAdmin
         try {
-          const snap = await getDoc(ref);
-          if (snap.exists()) {
-            const data = snap.data() as any;
-            setIsAdmin(Boolean(data?.isAdmin));
+          const adminRef = doc(db, 'admins', currentUser.uid);
+          const adminSnap = await getDoc(adminRef);
+          if (adminSnap.exists()) {
+            setIsAdmin(true);
           } else {
-            setIsAdmin(false);
+            try {
+              const snap = await getDoc(userRef);
+              if (snap.exists()) {
+                const data = snap.data() as any;
+                setIsAdmin(Boolean(data?.isAdmin));
+              } else {
+                setIsAdmin(false);
+              }
+            } catch {
+              // Sem conectividade: não alterar o estado atual para evitar falsos negativos
+            }
           }
         } catch {
-          setIsAdmin(false);
+          // Sem conectividade: não alterar o estado atual
         }
       } else {
         setIsAdmin(false);
@@ -166,6 +176,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login: signInWithEmailPassword,
         register: async (email: string, password: string, _name?: string) => registerWithEmailPassword(email, password),
         forgotPassword: resetPassword,
+        refreshAdminStatus: async () => {
+          if (!user) {
+            setIsAdmin(false);
+            return false;
+          }
+          try {
+            const adminRef = doc(db, 'admins', user.uid);
+            const adminSnap = await getDoc(adminRef);
+            if (adminSnap.exists()) {
+              setIsAdmin(true);
+              return true;
+            }
+            const userRef = doc(db, 'users', user.uid);
+            const snap = await getDoc(userRef);
+            const flag = snap.exists() && Boolean((snap.data() as any)?.isAdmin);
+            setIsAdmin(flag);
+            return flag;
+          } catch (e) {
+            console.warn('[Auth] refreshAdminStatus erro', e);
+            return isAdmin;
+          }
+        },
       };
     },
     [user, loading, isAdmin]

@@ -12,7 +12,7 @@ export default function MobileNav() {
   const { t } = useTranslation('common');
   const { lang } = useParams();
   const base = lang === 'en' ? 'en' : 'pt';
-  const { user, loading, displayName, loginWithGoogle, logout } = useAuth();
+  const { user, loading, displayName, loginWithGoogle, logout, isAdmin } = useAuth();
 
   // Close menu on route change
   useEffect(() => {
@@ -111,12 +111,23 @@ export default function MobileNav() {
             </li>
             <li><NavLink to={`/${base}/produtos`} onClick={() => setOpen(false)} className={({ isActive }) => isActive ? "font-bold text-blue-900" : "hover:text-blue-900"}>{t('nav.products')}</NavLink></li>
             <li><NavLink to={`/${base}/contato`} onClick={() => setOpen(false)} className={({ isActive }) => isActive ? "font-bold text-blue-900" : "hover:text-blue-900"}>{t('nav.contact')}</NavLink></li>
+            {/* Admin inbox link removed from mobile main nav; available under profile */}
             {user && (
               <li>
                 <NavLink to={`/${base}/minhas-simulacoes`} onClick={() => setOpen(false)} className={({ isActive }) => isActive ? "font-bold text-blue-900" : "hover:text-blue-900"}>
                   {t('nav.mySimulations')}
                 </NavLink>
               </li>
+            )}
+            {user && isAdmin && (
+              <li>
+                <NavLink to={`/${base}/admin/inbox`} onClick={() => setOpen(false)} className={({ isActive }) => isActive ? "font-bold text-blue-900" : "hover:text-blue-900"}>
+                  {base === 'en' ? t('admin.inboxEn', { defaultValue: 'Admin Inbox' }) : t('admin.inboxPt', { defaultValue: 'Inbox Admin' })}
+                </NavLink>
+              </li>
+            )}
+            {user && (
+              <li><div className="h-px bg-gray-200" /></li>
             )}
             {user && (
               <li>

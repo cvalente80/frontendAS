@@ -2,7 +2,7 @@ import React, { useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
-import { ensureChatForUser, addUserMessage, subscribeMessages, markUserOpened, updateChatIdentity, getChat } from '../lib/chat';
+import { ensureChatForUser, addUserMessage, subscribeMessages, markUserOpened, updateChatIdentity, getChat, subscribeChatDoc, setUserTyping } from '../lib/chat';
 import { db } from '../firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
@@ -34,7 +34,29 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
   const [chatId, setChatId] = useState<string | null>(null);
   const persistTimer = useRef<any>(null);
   const isDev = typeof import.meta !== 'undefined' && !!(import.meta as any).env?.DEV;
+  const DEBUG = typeof import.meta !== 'undefined' && ((import.meta as any).env?.DEV || (import.meta as any).env?.VITE_CHAT_DEBUG === '1');
   const [online, setOnline] = useState<boolean>(typeof navigator !== 'undefined' ? navigator.onLine : true);
+  const [typingAdmin, setTypingAdmin] = useState(false);
+  const prevCountRef = useRef(0);
+  const metaUnsubRef = useRef<null | (() => void)>(null);
+  const stopTypingTimerRef = useRef<any>(null);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [pos, setPos] = useState<{ left: number; top: number }>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem('chat:pos');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (typeof parsed?.left === 'number' && typeof parsed?.top === 'number') {
+            return parsed;
+          }
+        }
+      } catch {}
+      return { left: 24, top: window.innerHeight - 520 };
+    }
+    return { left: 24, top: 200 };
+  });
+  const dragRef = useRef<{ dragging: boolean; offsetX: number; offsetY: number }>({ dragging: false, offsetX: 0, offsetY: 0 });
 
   // Track browser online/offline state
   React.useEffect(() => {
@@ -45,6 +67,39 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
     return () => {
       window.removeEventListener('online', onUp);
       window.removeEventListener('offline', onDown);
+    };
+  }, []);
+
+  // Persist position to localStorage
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try { localStorage.setItem('chat:pos', JSON.stringify(pos)); } catch {}
+    }
+  }, [pos]);
+
+  // Drag handlers to move the chat panel
+  React.useEffect(() => {
+    function onMove(e: MouseEvent) {
+      if (!dragRef.current.dragging) return;
+      setPos((p) => {
+        const left = e.clientX - dragRef.current.offsetX;
+        const top = e.clientY - dragRef.current.offsetY;
+        const maxLeft = (typeof window !== 'undefined' ? window.innerWidth : 800) - 320; // approximate width
+        const maxTop = (typeof window !== 'undefined' ? window.innerHeight : 600) - 480; // approximate height
+        return {
+          left: Math.max(8, Math.min(left, maxLeft)),
+          top: Math.max(8, Math.min(top, maxTop)),
+        };
+      });
+    }
+    function onUp() {
+      dragRef.current.dragging = false;
+    }
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    return () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
     };
   }, []);
 
@@ -69,19 +124,17 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
 
   function scrollToBottomSoon() {
     requestAnimationFrame(() => {
-      listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' });
+      listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
     });
   }
 
-  // Subscribe to Firestore messages when panel is open and user is authenticated
+  // Subscribe mensagens + presença typing
   React.useEffect(() => {
-    // cleanup previous subscription
-    if (unsubRef.current) {
-      unsubRef.current();
-      unsubRef.current = null;
-    }
+    if (unsubRef.current) { unsubRef.current(); unsubRef.current = null; }
+    if (metaUnsubRef.current) { metaUnsubRef.current(); metaUnsubRef.current = null; }
     setMessages([]);
     setChatId(null);
+    prevCountRef.current = 0;
     if (!open || !user) return;
     let cancelled = false;
     (async () => {
@@ -89,18 +142,54 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
         const id = await ensureChatForUser(user.uid);
         if (cancelled) return;
         setChatId(id);
-        // Reset unread for the user when opening their chat
+        // Write-back identity from authenticated user profile if fields are empty
+        try {
+          const display = user.displayName || user.email?.split('@')[0] || '';
+          const patch: { name?: string | null; email?: string | null; phone?: string | null } = {};
+          if (display && !name) patch.name = display;
+          if (user.email && !email) patch.email = user.email;
+          if (Object.keys(patch).length) {
+            await updateChatIdentity(id, patch);
+            if (patch.name && !name) setName(patch.name || '');
+            if (patch.email && !email) setEmail(patch.email || '');
+          }
+        } catch {}
         try { await markUserOpened(id); } catch {}
         unsubRef.current = subscribeMessages(id, (list) => {
-          setMessages(
-            list.map((m) => ({
-              id: m.id,
-              who: m.authorRole === 'user' ? 'user' : 'agent',
-              text: m.text,
-              at: m.createdAt ? m.createdAt.getTime() : Date.now(),
-            }))
-          );
+          const mapped = list.map((m) => ({
+            id: m.id,
+            who: m.authorRole === 'user' ? 'user' : 'agent',
+            text: m.text,
+            at: m.createdAt ? m.createdAt.getTime() : Date.now(),
+          }));
+          const isNewAdminMsg = list.length > prevCountRef.current && list[list.length - 1].authorRole === 'admin';
+          prevCountRef.current = list.length;
+          setMessages(mapped);
           scrollToBottomSoon();
+          if (soundEnabled && isNewAdminMsg) {
+            try {
+              const Ctx: any = (window as any).AudioContext || (window as any).webkitAudioContext;
+              const ctx = new Ctx();
+              const osc = ctx.createOscillator();
+              const gain = ctx.createGain();
+              osc.type = 'sine';
+              osc.frequency.value = 880;
+              osc.connect(gain); gain.connect(ctx.destination);
+              gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+              gain.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + 0.02);
+              gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.3);
+              osc.start(); osc.stop(ctx.currentTime + 0.31);
+            } catch {}
+          }
+        });
+        metaUnsubRef.current = subscribeChatDoc(id, (doc) => {
+          if (!doc) { setTypingAdmin(false); return; }
+          const ts: any = doc.typingAdminAt;
+          let recent = false;
+          if (ts && ts.toDate) {
+            recent = Date.now() - ts.toDate().getTime() < 5000;
+          }
+          setTypingAdmin(Boolean(doc.typingAdmin) && recent);
         });
       } catch (e) {
         console.error('[ChatWidget] subscribe error', e);
@@ -108,12 +197,10 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
     })();
     return () => {
       cancelled = true;
-      if (unsubRef.current) {
-        unsubRef.current();
-        unsubRef.current = null;
-      }
+      if (unsubRef.current) { unsubRef.current(); unsubRef.current = null; }
+      if (metaUnsubRef.current) { metaUnsubRef.current(); metaUnsubRef.current = null; }
     };
-  }, [open, user]);
+  }, [open, user, soundEnabled]);
 
   // Persist identity fields (name/email/phone) to chat doc with debounce
   React.useEffect(() => {
@@ -154,6 +241,7 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
     const optimisticId = `optimistic-${Date.now()}`;
     setMessages((prev) => [...prev, { id: optimisticId, who: 'user', text, at: Date.now() }]);
     scrollToBottomSoon();
+    if (DEBUG) console.log('[ChatWidget] debug ids', { authUid: user.uid, chatId: id });
     addUserMessage(id, user.uid, text).catch((e) => {
       console.error('[ChatWidget] send error', e);
       setFeedback({ type: 'err', text: t('chat.error') });
@@ -162,6 +250,16 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
       setMessages((prev) => prev.map((m) => (m.id === optimisticId ? { ...m, text: `${m.text}\n(erro ao enviar)` } : m)));
     });
     setSending(false);
+    if (chatId) setUserTyping(chatId, false).catch(() => {});
+  }
+
+  function signalTyping() {
+    if (!chatId || !user) return;
+    if (stopTypingTimerRef.current) clearTimeout(stopTypingTimerRef.current);
+    setUserTyping(chatId, true).catch(() => {});
+    stopTypingTimerRef.current = setTimeout(() => {
+      setUserTyping(chatId, false).catch(() => {});
+    }, 3500);
   }
 
   // Dev-only diagnostic: force create/merge chat doc and report result
@@ -279,92 +377,41 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
       {open && (
         <div
           id="chat-panel"
-          className="w-80 sm:w-96 h-[28rem] bg-white border border-gray-200 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+          className="w-80 sm:w-96 h-[28rem] bg-white border border-gray-200 rounded-2xl shadow-2xl overflow-hidden flex flex-col fixed"
+          style={{ left: pos.left, top: pos.top }}
           role="dialog"
           aria-label={t('chat.title')}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-3 py-2 bg-blue-600 text-white">
-            <div className="flex items-center gap-2">
-              <span>🤖</span>
-              <div>
-                <div className="text-sm font-bold leading-tight">{t('chat.title')}</div>
-                  <div className="text-[11px] opacity-90 flex items-center gap-2">
-                    <span>{t('chat.subtitle')}</span>
-                    <span className={`inline-flex items-center gap-1 px-2 py-[2px] rounded ${online ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}
-                          title={online ? 'Online' : 'Offline'}>
-                      <span className={`w-2 h-2 rounded-full ${online ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
-                      <span className="text-[10px] font-semibold">{online ? 'Online' : 'Offline'}</span>
-                    </span>
-                  </div>
-              </div>
+          <div
+            className="flex items-center justify-between px-3 py-2 bg-blue-600 text-white cursor-move"
+            onMouseDown={(e) => {
+              const rect = (e.currentTarget.parentElement as HTMLElement)?.getBoundingClientRect();
+              dragRef.current.dragging = true;
+              dragRef.current.offsetX = e.clientX - rect.left;
+              dragRef.current.offsetY = e.clientY - rect.top;
+            }}
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="text-xl leading-none">🤖</span>
+              <span className="text-sm font-bold truncate">{t('chat.title')}</span>
+              <span className={`ml-1 inline-flex items-center gap-1 px-2 py-[2px] rounded ${online ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`} title={online ? 'Online' : 'Offline'}>
+                <span className={`w-2 h-2 rounded-full ${online ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
+                <span className="text-[10px] font-semibold">{online ? 'Online' : 'Offline'}</span>
+              </span>
             </div>
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                className="p-1 rounded hover:bg-blue-500"
-                onClick={() => setOpen(false)}
-                aria-label={t('chat.close')}
-              >
-                ✕
-              </button>
-              {isDev && (
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    className="ml-1 px-2 py-1 text-[11px] rounded bg-white text-blue-700 hover:bg-blue-100"
-                    onClick={debugEnsureChat}
-                    aria-label="Diagnóstico: garantir chat"
-                    title="Diagnóstico: garantir chat"
-                  >
-                    Debug chat
-                  </button>
-                  <button
-                    type="button"
-                    className="ml-1 px-2 py-1 text-[11px] rounded bg-white text-blue-700 hover:bg-blue-100"
-                    onClick={debugSendTestMessage}
-                    aria-label="Diagnóstico: enviar mensagem"
-                    title="Diagnóstico: enviar mensagem"
-                  >
-                    Debug mensagem
-                  </button>
-                  <button
-                    type="button"
-                    className="ml-1 px-2 py-1 text-[11px] rounded bg-white text-blue-700 hover:bg-blue-100"
-                    onClick={debugFetchChat}
-                    aria-label="Diagnóstico: obter chat"
-                    title="Diagnóstico: obter chat"
-                  >
-                    Debug obter chat
-                  </button>
-                </div>
-              )}
-            </div>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              aria-label={t('chat.close')}
+              className="w-6 h-6 p-0 rounded text-white/90 hover:bg-white/15 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/70"
+              title={t('chat.close')}
+            >
+              ✕
+            </button>
           </div>
 
-          {/* Identity */}
-          <div className="px-3 pt-3 pb-2 border-b border-gray-100 grid grid-cols-1 gap-2">
-            <input
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              placeholder={t('chat.namePlaceholder')}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-            <div className="flex gap-2">
-              <input
-                className="flex-1 px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                placeholder={t('chat.emailPlaceholder')}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <input
-                className="w-36 px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                placeholder={t('chat.phonePlaceholder')}
-                value={phone}
-                onChange={(e) => setPhone(e.target.value.replace(/[^\d+ ]/g, ''))}
-              />
-            </div>
-          </div>
+          {/* Identity inputs removed; identity managed automatically from user profile */}
 
           {/* Messages */}
           <div ref={listRef} className="flex-1 overflow-auto p-3 bg-gray-50">
@@ -380,6 +427,11 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
                     <div className="whitespace-pre-wrap text-gray-800">{m.text}</div>
                   </div>
                 ))}
+                {typingAdmin && (
+                  <div className="max-w-[60%] p-2 rounded-xl text-xs bg-white border border-gray-200 italic text-gray-500">
+                    {t('chat.agent')} está a escrever...
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -395,7 +447,7 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
                 className="flex-1 resize-none px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 placeholder={t('chat.messagePlaceholder')}
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
+                onChange={(e) => { setInput(e.target.value); signalTyping(); }}
                 onKeyDown={(e) => {
                   if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
                     e.preventDefault();
@@ -413,6 +465,11 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
               >
                 {sending ? t('chat.sending') : t('chat.send')}
               </button>
+              <button
+                type="button"
+                onClick={() => setSoundEnabled((v) => !v)}
+                className={`px-3 py-2 rounded-lg text-xs font-semibold border ${soundEnabled ? 'bg-green-100 text-green-700 border-green-300' : 'bg-gray-100 text-gray-600 border-gray-300'}`}
+              >{soundEnabled ? '🔔 Som' : '🔕 Mudo'}</button>
             </div>
           </div>
         </div>

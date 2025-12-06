@@ -90,9 +90,13 @@ const resources = {
         submitted: 'Em Processamento',
         quoted: 'Com proposta',
         archived: 'Arquivado'
+      },
+      admin: {
+        inboxPt: 'Inbox Admin',
+        inboxEn: 'Admin Inbox'
       }
-    },
-    mysims: {
+      },
+      mysims: {
       seoTitle: 'As minhas simulações',
       seoDesc: 'Área do utilizador para consultar as simulações submetidas.',
       heading: 'As minhas simulações',
@@ -1049,6 +1053,10 @@ const resources = {
       },
       loading: 'Loading…',
       empty: 'No quotes to display.',
+      admin: {
+        inboxPt: 'Inbox Admin',
+        inboxEn: 'Admin Inbox'
+      },
       pdf: {
         viewCta: 'Open quote here',
         delete: 'Remove PDF attachment',
