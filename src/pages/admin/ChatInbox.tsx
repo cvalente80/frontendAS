@@ -14,7 +14,6 @@ export default function ChatInbox() {
   const { isAdmin, refreshAdminStatus, user } = useAuth();
   const [rows, setRows] = React.useState<Array<{ id: string; last: string; unread?: number; when?: Date | null; userId: string; name?: string | null; email?: string | null; phone?: string | null }>>([]);
   const [error, setError] = React.useState<null | { code?: string; message: string }>(null);
-  const [debugInfo, setDebugInfo] = React.useState<string>('');
   const [seedUid, setSeedUid] = React.useState('');
   const [seeding, setSeeding] = React.useState(false);
 
@@ -32,8 +31,6 @@ export default function ChatInbox() {
           email: (data as any).email ?? null,
           phone: (data as any).phone ?? null,
         })));
-        const ids = items.slice(0, 3).map(i => i.id).join(', ');
-        setDebugInfo(`chats=${items.length}${ids ? ` · first: ${ids}` : ''}`);
       },
       (err) => {
         setError({ code: err?.code, message: String(err?.message || err) });
@@ -45,20 +42,7 @@ export default function ChatInbox() {
   return (
     <div className="container mx-auto px-4 py-6">
       <h1 className="text-2xl font-bold mb-4">Inbox</h1>
-      <div className="mb-4 flex flex-wrap items-center gap-3 text-xs">
-        <span className={`px-2 py-1 rounded ${isAdmin ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>Admin: {isAdmin ? 'sim' : 'não'}</span>
-        {user && (
-          <span className="px-2 py-1 rounded bg-gray-100 text-gray-700">UID: {user.uid.slice(0,8)}…</span>
-        )}
-        {debugInfo && (
-          <span className="px-2 py-1 rounded bg-gray-100 text-gray-700">{debugInfo}</span>
-        )}
-        <button
-          type="button"
-          onClick={() => refreshAdminStatus().catch(() => {})}
-          className="px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-500"
-        >Rever permissões</button>
-      </div>
+      {/* Header stripped of debug/admin badges */}
       {!isAdmin && (
         <div className="mb-3 p-3 rounded border border-yellow-200 bg-yellow-50 text-sm text-yellow-800">
           <div className="font-semibold mb-1">Perfil sem permissões de administrador.</div>
@@ -67,57 +51,7 @@ export default function ChatInbox() {
           </div>
         </div>
       )}
-      {isAdmin && (
-        <div className="mb-4 p-3 rounded border border-gray-200 bg-gray-50 text-sm">
-          <div className="font-semibold mb-2">Semear chat de teste</div>
-          <div className="flex items-end gap-2">
-            <input
-              type="text"
-              placeholder="UID do utilizador (não-admin)"
-              value={seedUid}
-              onChange={(e) => setSeedUid(e.target.value.trim())}
-              className="flex-1 px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-            <button
-              type="button"
-              disabled={!seedUid || seeding}
-              onClick={async () => {
-                if (!seedUid) return;
-                setSeeding(true);
-                try {
-                  const chatRef = doc(db, 'chats', seedUid);
-                  await setDoc(chatRef, {
-                    userId: seedUid,
-                    status: 'open',
-                    createdAt: serverTimestamp(),
-                    unreadForAdmin: 0,
-                    unreadForUser: 0,
-                  }, { merge: true });
-                  const msgCol = collection(db, 'chats', seedUid, 'messages');
-                  await addDoc(msgCol, {
-                    authorId: user?.uid || 'admin',
-                    authorRole: 'admin',
-                    text: 'Mensagem de teste (admin) — validação de Inbox',
-                    createdAt: serverTimestamp(),
-                  });
-                  await updateDoc(chatRef, {
-                    lastMessageAt: serverTimestamp(),
-                    lastMessagePreview: 'Mensagem de teste (admin) — validação de Inbox',
-                    unreadForUser: increment(1),
-                    status: 'open',
-                  });
-                } catch (e) {
-                  console.error('[Inbox] seed chat error', e);
-                } finally {
-                  setSeeding(false);
-                }
-              }}
-              className={`px-3 py-2 rounded bg-blue-600 text-white ${!seedUid || seeding ? 'opacity-60 cursor-not-allowed' : 'hover:bg-blue-500'}`}
-            >Criar chat</button>
-          </div>
-          <div className="text-xs text-gray-600 mt-1">Dica: use o UID do utilizador normal que já existe em \u2018users\u2019.</div>
-        </div>
-      )}
+      {/* Removed seed test section for production cleanliness */}
       {error && (
         <div className="mb-3 p-3 rounded border border-red-200 bg-red-50 text-sm text-red-700">
           <div className="font-semibold mb-1">Não foi possível ler os chats.</div>
