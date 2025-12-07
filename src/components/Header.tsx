@@ -1,8 +1,12 @@
 import React from "react";
+import { Link } from 'react-router-dom';
 import { useAuth } from "../context/AuthContext";
+import { useTranslation } from 'react-i18next';
 
 export default function Header() {
-  const { user, loading, displayName, loginWithGoogle, logout } = useAuth();
+  const { user, loading, displayName, loginWithGoogle, logout, isAdmin } = useAuth();
+  const base = typeof window !== 'undefined' && window.location.pathname.startsWith('/en') ? 'en' : 'pt';
+  const { t } = useTranslation('common');
 
   return (
     <header className="w-full border-b bg-white shadow-sm">
@@ -17,13 +21,22 @@ export default function Header() {
         <div className="flex items-center gap-4">
           {/* O seu seletor de língua pode vir aqui */}
           {/* <LanguageSwitcher /> */}
+          {/* Admin inbox link removed from header; available under profile menu */}
 
           {/* Estado de autenticação */}
           {loading ? (
             <div className="h-6 w-24 animate-pulse rounded-md bg-gray-200" />
           ) : user ? (
             <>
-              <span className="hidden sm:inline text-sm text-gray-700 max-w-[180px] truncate">Olá {displayName}</span>
+              <div className="flex flex-col items-end">
+                <span className="hidden sm:inline text-sm text-gray-700 max-w-[180px] truncate">Olá {displayName}</span>
+                {isAdmin && (
+                  <Link
+                    to={`/${base}/admin/inbox`}
+                    className="mt-1 text-xs rounded-md bg-blue-600 px-2 py-1 font-semibold text-white shadow-sm hover:bg-blue-500"
+                  >{base === 'en' ? t('admin.inboxEn', { defaultValue: 'Admin Inbox' }) : t('admin.inboxPt', { defaultValue: 'Inbox Admin' })}</Link>
+                )}
+              </div>
               <button
                 onClick={logout}
                 className="rounded-md bg-gray-700 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-600"

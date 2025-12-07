@@ -25,6 +25,7 @@ type AuthContextType = {
   login: (email: string, password: string) => Promise<any>;
   register: (email: string, password: string, name?: string) => Promise<any>;
   forgotPassword: (email: string) => Promise<void>;
+  refreshAdminStatus: () => Promise<boolean>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -77,37 +78,56 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(currentUser);
       setLoading(false);
 
-      // Carrega o perfil do utilizador (ex.: isAdmin) de Firestore
+      // Carrega o perfil do utilizador (ex.: isAdmin) sem sobrescrever o campo no DB
       if (currentUser) {
+        const userRef = doc(db, 'users', currentUser.uid);
+        // Garante apenas dados básicos; NÃO tocar em isAdmin aqui
         try {
-          const ref = doc(db, 'users', currentUser.uid);
-          const snap = await getDoc(ref);
-          if (!snap.exists()) {
-            try {
-              await setDoc(ref, {
-                email: currentUser.email ?? null,
-                displayName: currentUser.displayName ?? null,
-                createdAt: serverTimestamp(),
-                isAdmin: false,
-              }, { merge: true });
-            } catch {
-              // ignore
-            }
-            setIsAdmin(false);
+          await setDoc(userRef, {
+            email: currentUser.email ?? null,
+            displayName: currentUser.displayName ?? null,
+            createdAt: serverTimestamp(),
+          }, { merge: true });
+        } catch {
+          // Ignora falhas de escrita (offline)
+        }
+        // Determina isAdmin: prioridade à coleção admins/{uid}; fallback para users/{uid}.isAdmin
+        try {
+          const adminRef = doc(db, 'admins', currentUser.uid);
+          const adminSnap = await getDoc(adminRef);
+          if (adminSnap.exists()) {
+            setIsAdmin(true);
           } else {
-            const data = snap.data() as any;
-            setIsAdmin(Boolean(data?.isAdmin));
+            try {
+              const snap = await getDoc(userRef);
+              if (snap.exists()) {
+                const data = snap.data() as any;
+                setIsAdmin(Boolean(data?.isAdmin));
+              } else {
+                setIsAdmin(false);
+              }
+            } catch {
+              // Sem conectividade: não alterar o estado atual para evitar falsos negativos
+            }
           }
-        } catch (e) {
-          console.warn('[Auth] Falha ao obter perfil do utilizador:', e);
-          setIsAdmin(false);
+        } catch {
+          // Sem conectividade: não alterar o estado atual
         }
       } else {
         setIsAdmin(false);
       }
 
       if (currentUser && location.pathname.includes('/login')) {
-        navigate('/', { replace: true });
+        const params = new URLSearchParams(location.search);
+        const redirect = params.get('redirect');
+        navigate(redirect || '/', { replace: true });
+        try {
+          // Sinalizar ao UI que pode abrir o chat, se havia intenção
+          if (typeof window !== 'undefined' && localStorage.getItem('chat:intentOpen') === '1') {
+            localStorage.removeItem('chat:intentOpen');
+            window.dispatchEvent(new CustomEvent('chat:open'));
+          }
+        } catch {}
       }
     });
 
@@ -156,6 +176,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login: signInWithEmailPassword,
         register: async (email: string, password: string, _name?: string) => registerWithEmailPassword(email, password),
         forgotPassword: resetPassword,
+        refreshAdminStatus: async () => {
+          if (!user) {
+            setIsAdmin(false);
+            return false;
+          }
+          try {
+            const adminRef = doc(db, 'admins', user.uid);
+            const adminSnap = await getDoc(adminRef);
+            if (adminSnap.exists()) {
+              setIsAdmin(true);
+              return true;
+            }
+            const userRef = doc(db, 'users', user.uid);
+            const snap = await getDoc(userRef);
+            const flag = snap.exists() && Boolean((snap.data() as any)?.isAdmin);
+            setIsAdmin(flag);
+            return flag;
+          } catch (e) {
+            console.warn('[Auth] refreshAdminStatus erro', e);
+            return isAdmin;
+          }
+        },
       };
     },
     [user, loading, isAdmin]

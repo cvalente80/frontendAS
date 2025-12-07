@@ -8,7 +8,9 @@
     "build": "vite build --mode devlocal && cp -f dist/index.html dist/404.html",
     "build:gh": "vite build --mode gh && cp -f dist/index.html dist/404.html",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:rules": "node tests/chat-rules-test.mjs"
+    ,"emulators:test:rules": "firebase emulators:exec 'node tests/chat-rules-test.mjs' --only firestore"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
@@ -35,6 +37,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.3.0",
+    "@firebase/rules-unit-testing": "^5.0.0",
     "typescript": "^5.9.2",
     "vite": "^7.1.2"
   }

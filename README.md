@@ -18,6 +18,40 @@ Este projeto pode ser facilmente adaptado para outras empresas e produtos de seg
 	- Importante: como o build usa `base: '/frontendAS/'`, abra a app em `http://localhost:<porta>/frontendAS/pt` (e não apenas `/pt`).
 	- Em desenvolvimento (`npm run dev`), o endereço é `http://localhost:5173/pt`.
 
+## Firebase & Chat em tempo real
+
+- O projeto usa Firebase (Auth, Firestore, Storage) e inclui um chat em tempo real.
+- Regras Firestore estão no ficheiro `firestore.rules` (lembre de fazer deploy das rules).
+- Há uma Cloud Function para notificar o admin no primeiro contacto do chat.
+
+### Permissões do Admin (Chat)
+
+Para que o utilizador admin veja todas as conversas, é necessário marcá-lo como administrador no Firestore. Opções:
+
+- Criar `admins/{uid}` (recomendado) — documento vazio é suficiente; ou
+- Definir `users/{uid}.isAdmin = true`.
+
+Consulte `docs/ADMIN_SETUP.md` para passos detalhados. Se vir um aviso `permission-denied` na Inbox/Thread, a conta ainda não tem perfil de admin.
+
+### Funcionalidades de Chat em Tempo Real
+
+- Indicador de escrita (typing) do utilizador e do admin (expira ~5s após última atividade).
+- Som opcional para novas mensagens (botões "Som/Mudo" em ambos os lados).
+- Exportação da conversa em TXT no ecrã de admin.
+
+Se o indicador de escrita não funcionar, confirme que as rules Firestore incluem os campos `typingUser` e `typingUserAt` na lista de atualização do dono do chat. Depois faça redeploy das rules:
+```zsh
+firebase deploy --only firestore:rules
+```
+
+Emuladores/Deploy (requer Firebase CLI):
+
+1) Configure o projeto Firebase em `.firebaserc` (substitua `YOUR_FIREBASE_PROJECT_ID`).
+2) Veja `functions/README.md` para configurar SMTP/admin e emulação de Functions.
+3) Em produção, faça deploy:
+   - Rules: `firebase deploy --only firestore:rules`
+   - Functions: `cd functions && npm run deploy`
+
 
 ## Gestão de PDFs de simulação (Admin)
 

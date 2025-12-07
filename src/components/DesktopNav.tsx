@@ -9,10 +9,19 @@ export function DesktopNav() {
   const { t } = useTranslation('common');
   const { lang } = useParams();
   const base = lang === 'en' ? 'en' : 'pt';
-  const { user, loading, displayName, loginWithGoogle, logout } = useAuth();
+  const { user, loading, displayName, loginWithGoogle, logout, isAdmin } = useAuth();
   const [authOpen, setAuthOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement | null>(null);
+
+  // Listen for global requests to open auth modal (e.g., from ChatWidget)
+  useEffect(() => {
+    function onAuthOpen() {
+      setAuthOpen(true);
+    }
+    window.addEventListener('auth:open', onAuthOpen);
+    return () => window.removeEventListener('auth:open', onAuthOpen);
+  }, []);
 
   // Close profile menu on outside click or Escape
   useEffect(() => {
@@ -106,6 +115,7 @@ export function DesktopNav() {
         </div>
         <NavLink to={`/${base}/produtos`} className={({ isActive }) => (isActive ? "border-b-2 border-blue-900 text-blue-900 font-bold" : "hover:text-blue-900") + " whitespace-nowrap"}>{t('nav.products')}</NavLink>
         <NavLink to={`/${base}/contato`} className={({ isActive }) => (isActive ? "border-b-2 border-blue-900 text-blue-900 font-bold" : "hover:text-blue-900") + " whitespace-nowrap"}>{t('nav.contact')}</NavLink>
+        {/* Admin inbox link removed from main nav; available under profile menu */}
         {user && (
           <NavLink to={`/${base}/minhas-simulacoes`} className={({ isActive }) => (isActive ? "border-b-2 border-blue-900 text-blue-900 font-bold" : "hover:text-blue-900") + " whitespace-nowrap"}>
             {t('nav.mySimulations')}
@@ -150,6 +160,16 @@ export function DesktopNav() {
                 >
                   {t('nav.mySimulations')}
                 </NavLink>
+                {isAdmin && (
+                  <NavLink
+                    to={`/${base}/admin/inbox`}
+                    onClick={() => setProfileOpen(false)}
+                    className={({ isActive }) => (isActive ? "bg-blue-50 text-blue-900 font-semibold" : "hover:bg-gray-50 hover:text-blue-900") + " rounded px-3 py-2"}
+                  >
+                    {base === 'en' ? t('admin.inboxEn', { defaultValue: 'Admin Inbox' }) : t('admin.inboxPt', { defaultValue: 'Inbox Admin' })}
+                  </NavLink>
+                )}
+                <div className="my-1 h-px bg-gray-200" />
                 <button onClick={() => { setProfileOpen(false); logout(); }} className="text-left rounded px-3 py-2 hover:bg-gray-50 hover:text-blue-900">{t('auth.signOut')}</button>
               </div>
             </div>

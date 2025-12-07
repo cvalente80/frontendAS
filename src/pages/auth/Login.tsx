@@ -1,18 +1,27 @@
 import React from "react";
 import { useAuth } from "../../context/AuthContext";
 import { signInWithGoogle, signOutUser } from "../../firebase";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function Login() {
   const { user, loading } = useAuth();
   const [pending, setPending] = React.useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const redirect = params.get('redirect');
 
   const handleLogin = async () => {
     setPending(true);
     try {
       const logged = await signInWithGoogle(); // popup → user, redirect → null
-      if (logged) navigate("/", { replace: true }); // adjust if your "Início" route differs
+      if (logged) {
+        if (redirect) {
+          navigate(redirect, { replace: true });
+        } else {
+          navigate("/", { replace: true }); // fallback
+        }
+      }
     } finally {
       setPending(false);
     }
