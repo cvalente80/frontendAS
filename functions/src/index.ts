@@ -65,14 +65,10 @@ export const notifyOnFirstUserMessage = onDocumentCreated('chats/{chatId}/messag
         template_id: emailjsCfg.templateId,
         user_id: emailjsCfg.publicKey,
         template_params: {
+          // Template expects {{name}} for subject and body, and {{message}} for content
           to_email: emailjsCfg.adminTo,
-          subjectEmail: subject,
           name,
-          email,
-          phone,
-          text,
-          inboxUrl,
-          chatId,
+          message: `Primeira mensagem: ${text}\n\nAbrir inbox: ${inboxUrl}`,
         },
       } as const;
       const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {

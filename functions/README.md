@@ -34,7 +34,9 @@ export SITE_BASE_URL="https://cvalente80.github.io/frontendAS" # inbox link base
 
 Notes:
 - EMAILJS_PUBLIC_KEY is the EmailJS public key (user_id). You can reuse your existing public key used in the web app.
-- The EmailJS template should expect variables: `subjectEmail`, `to_email`, `name`, `email`, `phone`, `text`, `inboxUrl`, `chatId`.
+- Template variables expected by this function: `to_email`, `name`, `message`.
+  - Subject can be defined in EmailJS as `{{name}}`.
+  - Body can include `{{name}}` and `{{message}}`.
 
 ## Local emulation
 
