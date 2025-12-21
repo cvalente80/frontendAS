@@ -51,7 +51,28 @@ const resources = {
         registerFailed: 'Falha no registo',
         emailSent: 'Email de recuperação enviado.',
         emailSentSpamNote: 'Por favor, verifique também a pasta de spam/lixo caso não encontre o email.',
-        resetFailed: 'Falha ao enviar recuperação'
+        resetFailed: 'Falha ao enviar recuperação',
+        errors: {
+          generic: 'Ocorreu um erro. Tente novamente.',
+          'invalid-credential': 'Email ou password inválidos.',
+          'invalid-email': 'Email inválido.',
+          'user-not-found': 'Não existe conta com este email.',
+          'wrong-password': 'Password incorreta.',
+          'missing-password': 'Indique a password.',
+          'too-many-requests': 'Demasiadas tentativas. Tente novamente mais tarde.',
+          'network-request-failed': 'Sem ligação à internet. Tente novamente.',
+          'email-already-in-use': 'Já existe uma conta com este email.',
+          'weak-password': 'A password deve ter pelo menos 6 caracteres.',
+          'popup-closed-by-user': 'Janela encerrada antes de concluir.',
+          'popup-blocked': 'Popup bloqueado pelo navegador.'
+        },
+        verifyTitle: 'Verificar email',
+        verifyIntro: 'Enviámos um link de verificação para o seu email{{email}}. Confirme para desbloquear todas as funcionalidades.',
+        resendVerification: 'Reenviar email',
+        resending: 'A reenviar…',
+        verificationEmailSent: 'Email de verificação reenviado.',
+        sendResetLink: 'Enviar link de recuperação'
+        , registerSuccess: 'Conta criada. Verifique o seu email para ativar.'
       },
       actions: {
         back: 'Voltar',
@@ -989,7 +1010,28 @@ const resources = {
         registerFailed: 'Registration failed',
         emailSent: 'Recovery email sent.',
         emailSentSpamNote: 'If you don\'t see it, please also check your spam/junk folder.',
-        resetFailed: 'Failed to send recovery email'
+        resetFailed: 'Failed to send recovery email',
+        errors: {
+          generic: 'An error occurred. Please try again.',
+          'invalid-credential': 'Invalid email or password.',
+          'invalid-email': 'Invalid email address.',
+          'user-not-found': 'No account found with this email.',
+          'wrong-password': 'Incorrect password.',
+          'missing-password': 'Please enter your password.',
+          'too-many-requests': 'Too many attempts. Please try again later.',
+          'network-request-failed': 'No internet connection. Please try again.',
+          'email-already-in-use': 'An account with this email already exists.',
+          'weak-password': 'Password must be at least 6 characters.',
+          'popup-closed-by-user': 'Popup window closed before completing.',
+          'popup-blocked': 'Popup blocked by the browser.'
+        },
+        verifyTitle: 'Verify email',
+        verifyIntro: 'We sent a verification link to your email{{email}}. Please confirm to unlock all features.',
+        resendVerification: 'Resend email',
+        resending: 'Resending…',
+        verificationEmailSent: 'Verification email resent.',
+        sendResetLink: 'Send recovery link'
+        , registerSuccess: 'Account created. Check your email to activate.'
       },
       actions: {
         back: 'Back',

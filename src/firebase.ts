@@ -15,6 +15,7 @@ export {
   signInWithEmailPassword,
   registerWithEmailPassword,
   resetPassword,
+  sendVerification,
   db,
   storage,
 } from "../typescript";

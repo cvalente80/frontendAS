@@ -15,6 +15,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
+  sendEmailVerification,
 } from "firebase/auth";
 import { getFirestore, doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
@@ -151,4 +152,11 @@ export async function registerWithEmailPassword(email: string, password: string)
 
 export async function resetPassword(email: string) {
   await sendPasswordResetEmail(auth, email);
+}
+
+// Send verification email to current user
+export async function sendVerification() {
+  const u = auth.currentUser;
+  if (!u) throw { code: 'auth/no-current-user' };
+  await sendEmailVerification(u);
 }
