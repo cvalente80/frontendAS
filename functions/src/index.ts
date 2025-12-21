@@ -8,23 +8,29 @@ if (!admin.apps.length) {
 }
 
 // Helper to read env vars with fallback.
-function env(name: string, fallback = ''): string {
-  return process.env[name] || fallback;
+function envAny(names: string[], fallback = ''): string {
+  for (const n of names) {
+    const v = process.env[n];
+    if (v) return v;
+  }
+  return fallback;
 }
 
 // EmailJS configuration via environment variables
 // Set using CI secrets or Firebase runtime variables:
 //   EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, EMAILJS_PUBLIC_KEY, ADMIN_TO, SITE_BASE_URL
 const emailjsCfg = {
-  serviceId: env('EMAILJS_SERVICE_ID', 'service_4ltybjl'),
-  templateId: env('EMAILJS_TEMPLATE_ID', 'template_k0tx9hp'),
-  publicKey: env('EMAILJS_PUBLIC_KEY', env('EMAILJS_USER_ID')), // allow either var name
-  adminTo: env('ADMIN_TO'),
-  siteBase: env('SITE_BASE_URL', 'https://ansiao.pt'),
+  serviceId: envAny(['EMAILJS_SERVICE_ID'], 'service_4ltybjl'),
+  templateId: envAny(['EMAILJS_TEMPLATE_ID'], 'template_k0tx9hp'),
+  publicKey: envAny(['EMAILJS_PUBLIC_KEY', 'EMAILJS_USER_ID'], ''),
+  adminTo: envAny(['ADMIN_TO'], ''),
+  siteBase: envAny(['SITE_BASE_URL'], 'https://ansiao.pt'),
 };
 
 // Toggle via EMAIL_NOTIFICATIONS_ENABLED (preferred) or legacy MAIL_NOTIFICATIONS_ENABLED
-const notificationsEnabled = (process.env.EMAIL_NOTIFICATIONS_ENABLED || process.env.MAIL_NOTIFICATIONS_ENABLED || 'false') === 'true';
+const notificationsEnabled = (
+  envAny(['EMAIL_NOTIFICATIONS_ENABLED', 'MAIL_NOTIFICATIONS_ENABLED'], 'false')
+) === 'true';
 
 function htmlEscape(s: string) {
   return s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
