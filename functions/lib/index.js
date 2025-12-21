@@ -29,8 +29,9 @@ const notificationsEnabled = (envAny(['EMAIL_NOTIFICATIONS_ENABLED', 'MAIL_NOTIF
 function htmlEscape(s) {
     return s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 }
-// Firestore trigger using v2 API
-export const notifyOnFirstUserMessage = onDocumentCreated('chats/{chatId}/messages/{messageId}', async (event) => {
+// Firestore trigger disabled: client-side handles notifications now.
+// Intentionally not exported to avoid deployment.
+const notifyOnFirstUserMessage = onDocumentCreated('chats/{chatId}/messages/{messageId}', async (event) => {
     const snap = event.data;
     if (!snap)
         return;

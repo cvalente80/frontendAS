@@ -1,4 +1,6 @@
 import { db } from '../firebase';
+import emailjs from '@emailjs/browser';
+import { EMAILJS_SERVICE_ID_CHAT, EMAILJS_TEMPLATE_ID_CHAT, EMAILJS_USER_ID_CHAT } from '../emailjs.config';
 import {
   doc,
   getDoc,
@@ -117,6 +119,36 @@ export async function addUserMessage(chatId: string, userId: string, text: strin
     // do not rethrow; message was created, meta failed
   }
   if (DEBUG) console.log('[chat] addUserMessage:metaUpdated', { chatId });
+
+  // Client-side email notification on first user message
+  try {
+    const chatSnap2 = await getDoc(chatRef);
+    const chatData = chatSnap2.exists() ? (chatSnap2.data() as ChatDoc) : undefined;
+    const alreadyNotified = Boolean(chatData?.firstNotified);
+    if (!alreadyNotified) {
+      const displayName = (chatData?.name || '') || 'Cliente';
+      const origin = typeof window !== 'undefined' ? window.location.origin : 'https://cvalente80.github.io';
+      const base = (typeof import.meta !== 'undefined' && import.meta.env?.BASE_URL) ? String(import.meta.env.BASE_URL) : '/';
+      const currentLang = (typeof window !== 'undefined' && window.location.pathname.startsWith('/en')) ? 'en' : 'pt';
+      const inboxUrl = `${origin}${base}${currentLang}/admin/inbox`;
+      const messageBody = `Primeira mensagem: ${text}\n\nAbrir inbox: ${inboxUrl}`;
+      try {
+        await emailjs.send(
+          EMAILJS_SERVICE_ID_CHAT,
+          EMAILJS_TEMPLATE_ID_CHAT,
+          { name: displayName, message: messageBody },
+          EMAILJS_USER_ID_CHAT
+        );
+        await updateDoc(chatRef, { firstNotified: true });
+        if (DEBUG) console.log('[chat] emailjs:firstMessage:sent', { chatId });
+      } catch (sendErr) {
+        console.error('[chat] emailjs:firstMessage:error', sendErr);
+      }
+    }
+  } catch (e) {
+    // ignore failures; chat will remain without notification flag
+    if (DEBUG) console.warn('[chat] emailjs:firstMessage:check:error', e);
+  }
 }
 
 export function subscribeMessages(

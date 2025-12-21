@@ -18,3 +18,10 @@ export const EMAILJS_USER_ID_GENERIC = "qQ4BV2IFiEIcJ28OA";
 
 // Template para notificação de simulação pronta
 export const EMAILJS_TEMPLATE_ID_NOTIFY = "template_2rab695";
+
+// Serviço específico para notificações de chat (admin)
+// Novo serviço e template indicados pelo cliente
+export const EMAILJS_SERVICE_ID_CHAT = "service_4ltybjl";
+export const EMAILJS_TEMPLATE_ID_CHAT = "template_k0tx9hp";
+// EmailJS usa a chave pública (user_id) para autenticação no frontend
+export const EMAILJS_USER_ID_CHAT = "3T7NZIee-fipd8FqT";
