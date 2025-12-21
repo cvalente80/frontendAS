@@ -17,35 +17,26 @@ cd functions
 npm install
 ```
 
-## Configuration (SMTP + Admin recipient)
+## Configuration (EmailJS + Admin recipient)
 
-This function uses Nodemailer to send email. Configure SMTP and the destination email via Firebase Functions config (recommended) or environment variables when emulating.
+This function uses EmailJS REST API to send email notifications. Configure via environment variables (CI secrets or Firebase runtime vars).
 
-Set config (recommended):
-
-```bash
-# Replace with your SMTP provider values
-firebase functions:config:set \
-  mail.host="smtp.yourhost.com" \
-  mail.port="587" \
-  mail.secure="false" \
-  mail.user="smtp_user" \
-  mail.pass="smtp_password" \
-  mail.from="Ansião Seguros <no-reply@ansiao.pt>"
-
-# Admin email that will receive alerts
-firebase functions:config:set admin.to="admin@ansiao.pt"
-
-# Optional: Base URL used in email link to the inbox
-# The code reads process.env.SITE_BASE_URL; for local emulation you can export it before running.
-# For production you can change the fallback inside the code or set this env var in your CI.
-```
-
-Check stored config:
+Required env vars:
 
 ```bash
-firebase functions:config:get
+export EMAIL_NOTIFICATIONS_ENABLED=true
+export EMAILJS_SERVICE_ID="service_4ltybjl"
+export EMAILJS_TEMPLATE_ID="template_k0tx9hp"
+export EMAILJS_PUBLIC_KEY="<YOUR_EMAILJS_PUBLIC_KEY>" # aka user_id
+export ADMIN_TO="carlos@aurelioseguros.com"
+export SITE_BASE_URL="https://cvalente80.github.io/frontendAS" # inbox link base
 ```
+
+Notes:
+- EMAILJS_PUBLIC_KEY is the EmailJS public key (user_id). You can reuse your existing public key used in the web app.
+- Template variables expected by this function: `to_email`, `name`, `message`.
+  - Subject can be defined in EmailJS as `{{name}}`.
+  - Body can include `{{name}}` and `{{message}}`.
 
 ## Local emulation
 
