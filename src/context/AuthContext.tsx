@@ -26,7 +26,9 @@ type AuthContextType = {
   register: (email: string, password: string, name?: string) => Promise<any>;
   forgotPassword: (email: string) => Promise<void>;
   refreshAdminStatus: () => Promise<boolean>;
+  sendVerification: () => Promise<void>;
 };
+import { sendVerification } from '../firebase';
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -176,6 +178,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login: signInWithEmailPassword,
         register: async (email: string, password: string, _name?: string) => registerWithEmailPassword(email, password),
         forgotPassword: resetPassword,
+        sendVerification,
         refreshAdminStatus: async () => {
           if (!user) {
             setIsAdmin(false);

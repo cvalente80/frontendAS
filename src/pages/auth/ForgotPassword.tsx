@@ -1,6 +1,8 @@
 import { FormEvent, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { formatAuthError } from '../../utils/firebaseAuthErrors';
 
 export default function ForgotPassword() {
   const { resetPassword } = useAuth();
@@ -10,6 +12,7 @@ export default function ForgotPassword() {
   const [pending, setPending] = useState(false);
   const { lang } = useParams();
   const base = lang === 'en' ? 'en' : 'pt';
+  const { t } = useTranslation('common');
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -18,9 +21,12 @@ export default function ForgotPassword() {
     setPending(true);
     try {
       await resetPassword(email);
-      setSuccess('Email de recuperação enviado, verifique sua caixa de entrada.');
+      setSuccess(
+        t('auth.emailSent', 'Email de recuperação enviado.') + ' ' +
+        t('auth.emailSentSpamNote', 'Por favor, verifique também a pasta de spam/lixo caso não encontre o email.')
+      );
     } catch (err: any) {
-      setError(err?.message || 'Falha ao enviar recuperação.');
+      setError(formatAuthError(err, t) || t('auth.resetFailed', 'Falha ao enviar recuperação'));
     } finally {
       setPending(false);
     }
@@ -33,7 +39,7 @@ export default function ForgotPassword() {
       {success && <div className="mb-4 text-green-700 text-sm">{success}</div>}
       <form onSubmit={onSubmit} className="space-y-4">
         <input className="w-full border rounded px-3 py-2" type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
-        <button disabled={pending} className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50">{pending ? 'A enviar…' : 'Enviar link de recuperação'}</button>
+        <button disabled={pending} className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50">{pending ? t('chat.sending', 'A enviar…') : t('auth.sendResetLink', 'Enviar link de recuperação')}</button>
       </form>
       <div className="text-sm mt-4">
         <NavLink className="underline" to={`/${base}/auth/login`}>Voltar ao login</NavLink>

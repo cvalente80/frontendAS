@@ -4,7 +4,8 @@ on:
   push:
     branches:
       - chat_notifications_refactoring # GitHub Pages
-      - main                              # Functions deploy
+      - refactoring_send_email_with_JS # GitHub Pages (current branch)
+      - main                            # (legacy)
   workflow_dispatch:
 
 permissions:
@@ -18,8 +19,8 @@ concurrency:
 
 jobs:
   build:
-    # Only build/upload Pages on chat_notifications_refactoring
-    if: github.ref == 'refs/heads/chat_notifications_refactoring'
+    # Only build/upload Pages on specified branches
+    if: github.ref == 'refs/heads/chat_notifications_refactoring' || github.ref == 'refs/heads/refactoring_send_email_with_JS'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -51,8 +52,8 @@ jobs:
           path: dist
 
   deploy:
-    # Only deploy Pages on chat_notifications_refactoring
-    if: github.ref == 'refs/heads/chat_notifications_refactoring'
+    # Only deploy Pages on specified branches
+    if: github.ref == 'refs/heads/chat_notifications_refactoring' || github.ref == 'refs/heads/refactoring_send_email_with_JS'
     needs: build
     runs-on: ubuntu-latest
     environment:

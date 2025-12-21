@@ -13,6 +13,7 @@ import {
   orderBy,
   updateDoc,
   increment,
+  runTransaction,
 } from 'firebase/firestore';
 
 export type ChatDoc = {
@@ -120,13 +121,21 @@ export async function addUserMessage(chatId: string, userId: string, text: strin
   }
   if (DEBUG) console.log('[chat] addUserMessage:metaUpdated', { chatId });
 
-  // Client-side email notification on first user message
+  // Client-side email notification on first user message (atomic flip via transaction)
   try {
-    const chatSnap2 = await getDoc(chatRef);
-    const chatData = chatSnap2.exists() ? (chatSnap2.data() as ChatDoc) : undefined;
-    const alreadyNotified = Boolean(chatData?.firstNotified);
-    if (!alreadyNotified) {
-      const displayName = (chatData?.name || '') || 'Cliente';
+    let shouldSend = false;
+    await runTransaction(db, async (tx) => {
+      const snap = await tx.get(chatRef);
+      const data = snap.exists() ? (snap.data() as any) : {};
+      if (!data?.firstNotified) {
+        tx.set(chatRef, { firstNotified: true }, { merge: true });
+        shouldSend = true;
+      }
+    });
+    if (shouldSend) {
+      const chatSnap3 = await getDoc(chatRef);
+      const chatData2 = chatSnap3.exists() ? (chatSnap3.data() as ChatDoc) : undefined;
+      const displayName = (chatData2?.name || '') || 'Cliente';
       const origin = typeof window !== 'undefined' ? window.location.origin : 'https://cvalente80.github.io';
       const base = (typeof import.meta !== 'undefined' && import.meta.env?.BASE_URL) ? String(import.meta.env.BASE_URL) : '/';
       const currentLang = (typeof window !== 'undefined' && window.location.pathname.startsWith('/en')) ? 'en' : 'pt';
@@ -139,7 +148,6 @@ export async function addUserMessage(chatId: string, userId: string, text: strin
           { name: displayName, message: messageBody },
           EMAILJS_USER_ID_CHAT
         );
-        await updateDoc(chatRef, { firstNotified: true });
         if (DEBUG) console.log('[chat] emailjs:firstMessage:sent', { chatId });
       } catch (sendErr) {
         console.error('[chat] emailjs:firstMessage:error', sendErr);
@@ -147,7 +155,7 @@ export async function addUserMessage(chatId: string, userId: string, text: strin
     }
   } catch (e) {
     // ignore failures; chat will remain without notification flag
-    if (DEBUG) console.warn('[chat] emailjs:firstMessage:check:error', e);
+    if (DEBUG) console.warn('[chat] emailjs:firstMessage:txn:error', e);
   }
 }
 

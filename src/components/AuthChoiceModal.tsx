@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { updateProfile } from 'firebase/auth';
 import { useTranslation } from 'react-i18next';
 import { signInWithGoogle, signInWithEmailPassword, registerWithEmailPassword, resetPassword } from '../firebase';
+import { formatAuthError } from '../utils/firebaseAuthErrors';
 
 type Props = {
   open: boolean;
@@ -29,7 +30,7 @@ export default function AuthChoiceModal({ open, onClose }: Props) {
       await signInWithGoogle();
       finish();
     } catch (e: any) {
-      setMessage(e?.message || t('auth.googleLoginFailed', 'Falha ao autenticar com Google'));
+      setMessage(formatAuthError(e, t) || t('auth.googleLoginFailed', 'Falha ao autenticar com Google'));
       setMessageType('err');
     } finally {
       setPending(false);
@@ -44,7 +45,7 @@ export default function AuthChoiceModal({ open, onClose }: Props) {
       await signInWithEmailPassword(email, password);
       finish();
     } catch (e: any) {
-      setMessage(e?.message || t('auth.loginFailed', 'Falha no login'));
+      setMessage(formatAuthError(e, t) || t('auth.loginFailed', 'Falha no login'));
       setMessageType('err');
     } finally { setPending(false); }
   }
@@ -67,7 +68,7 @@ export default function AuthChoiceModal({ open, onClose }: Props) {
       }
       finish();
     } catch (e: any) {
-      setMessage(e?.message || t('auth.registerFailed', 'Falha no registo'));
+      setMessage(formatAuthError(e, t) || t('auth.registerFailed', 'Falha no registo'));
       setMessageType('err');
     } finally { setPending(false); }
   }
@@ -85,7 +86,7 @@ export default function AuthChoiceModal({ open, onClose }: Props) {
       );
       setMessageType('ok');
     } catch (e: any) {
-      setMessage(e?.message || t('auth.resetFailed', 'Falha ao enviar recuperação'));
+      setMessage(formatAuthError(e, t) || t('auth.resetFailed', 'Falha ao enviar recuperação'));
       setMessageType('err');
     } finally { setPending(false); }
   }
