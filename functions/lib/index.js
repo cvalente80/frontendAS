@@ -1,7 +1,6 @@
 import * as admin from 'firebase-admin';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { logger } from 'firebase-functions';
-import nodemailer from 'nodemailer';
 // Initialize Admin SDK once
 if (!admin.apps.length) {
     admin.initializeApp();
@@ -10,33 +9,18 @@ if (!admin.apps.length) {
 function env(name, fallback = '') {
     return process.env[name] || fallback;
 }
-// SMTP / notification configuration ONLY from environment variables now.
-// Set using your deployment pipeline or Firebase console (Runtime environment variables / secrets). Example:
-//   firebase functions:config:unset mail  (if migrating away from config())
-//   export MAIL_HOST=smtp.example.com MAIL_PORT=587 MAIL_USER=xxx MAIL_PASS=yyy MAIL_FROM="Ansião Seguros <no-reply@ansiao.pt>" ADMIN_TO=admin@example.com SITE_BASE_URL=https://ansiao.pt
-// For sensitive values (MAIL_PASS), prefer functions secrets or CI secret injection.
-const mailConfig = {
-    host: env('MAIL_HOST'),
-    port: Number(env('MAIL_PORT', '587')),
-    secure: env('MAIL_SECURE') === 'true',
-    auth: {
-        user: env('MAIL_USER'),
-        pass: env('MAIL_PASS'),
-    },
-    from: env('MAIL_FROM', 'Ansião Seguros <no-reply@example.com>'),
+// EmailJS configuration via environment variables
+// Set using CI secrets or Firebase runtime variables:
+//   EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, EMAILJS_PUBLIC_KEY, ADMIN_TO, SITE_BASE_URL
+const emailjsCfg = {
+    serviceId: env('EMAILJS_SERVICE_ID', 'service_4ltybjl'),
+    templateId: env('EMAILJS_TEMPLATE_ID', 'template_k0tx9hp'),
+    publicKey: env('EMAILJS_PUBLIC_KEY', env('EMAILJS_USER_ID')), // allow either var name
     adminTo: env('ADMIN_TO'),
     siteBase: env('SITE_BASE_URL', 'https://ansiao.pt'),
 };
-// Email notifications toggle (disabled by default). Enable by setting MAIL_NOTIFICATIONS_ENABLED=true.
-const notificationsEnabled = (process.env.MAIL_NOTIFICATIONS_ENABLED || 'false') === 'true';
-const transporter = notificationsEnabled
-    ? nodemailer.createTransport({
-        host: mailConfig.host,
-        port: mailConfig.port,
-        secure: mailConfig.secure,
-        auth: mailConfig.auth.user ? mailConfig.auth : undefined,
-    })
-    : null;
+// Toggle via EMAIL_NOTIFICATIONS_ENABLED (preferred) or legacy MAIL_NOTIFICATIONS_ENABLED
+const notificationsEnabled = (process.env.EMAIL_NOTIFICATIONS_ENABLED || process.env.MAIL_NOTIFICATIONS_ENABLED || 'false') === 'true';
 function htmlEscape(s) {
     return s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 }
@@ -62,29 +46,41 @@ export const notifyOnFirstUserMessage = onDocumentCreated('chats/{chatId}/messag
     const phone = chat.phone || '(sem telefone)';
     const text = String(data.text || '');
     const subject = `Novo chat iniciado — ${name}`;
-    const inboxUrl = `${mailConfig.siteBase}/pt/admin/inbox`;
-    const html = `
-      <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;color:#111">
-        <h2 style="margin:0 0 12px 0;color:#0a4">Novo contacto no chat</h2>
-        <p><strong>Utilizador:</strong> ${htmlEscape(name)}</p>
-        <p><strong>Email:</strong> ${htmlEscape(email)}</p>
-        <p><strong>Telefone:</strong> ${htmlEscape(phone)}</p>
-        <hr style="border:none;border-top:1px solid #e5e7eb;margin:12px 0"/>
-        <p><strong>Primeira mensagem:</strong></p>
-        <div style="white-space:pre-wrap;border:1px solid #e5e7eb;padding:8px;border-radius:8px;background:#fafafa">${htmlEscape(text)}</div>
-        <p style="margin-top:12px">Abrir inbox: <a href="${inboxUrl}">${inboxUrl}</a></p>
-      </div>
-    `;
-    // Skip sending emails when notifications are disabled (default) or SMTP config is missing
-    if (!notificationsEnabled || !mailConfig.adminTo || !mailConfig.host) {
-        logger.info('[notifyOnFirstUserMessage] Email notifications disabled or not configured; skipping send.');
+    const inboxUrl = `${emailjsCfg.siteBase}/pt/admin/inbox`;
+    // Send via EmailJS REST API
+    if (!notificationsEnabled || !emailjsCfg.adminTo || !emailjsCfg.serviceId || !emailjsCfg.templateId || !emailjsCfg.publicKey) {
+        logger.info('[notifyOnFirstUserMessage] EmailJS disabled or missing configuration; skipping send.', { enabled: notificationsEnabled });
     }
     else {
         try {
-            await transporter.sendMail({ from: mailConfig.from, to: mailConfig.adminTo, subject, html });
+            const body = {
+                service_id: emailjsCfg.serviceId,
+                template_id: emailjsCfg.templateId,
+                user_id: emailjsCfg.publicKey,
+                template_params: {
+                    to_email: emailjsCfg.adminTo,
+                    subjectEmail: subject,
+                    name,
+                    email,
+                    phone,
+                    text,
+                    inboxUrl,
+                    chatId,
+                },
+            };
+            const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+            if (!res.ok) {
+                const txt = await res.text().catch(() => '');
+                throw new Error(`EmailJS send failed: ${res.status} ${res.statusText} ${txt}`);
+            }
+            logger.info('[notifyOnFirstUserMessage] EmailJS send OK');
         }
         catch (e) {
-            logger.error('[notifyOnFirstUserMessage] sendMail error', e);
+            logger.error('[notifyOnFirstUserMessage] EmailJS send error', e);
         }
     }
     await chatRef.update({ firstNotified: true });

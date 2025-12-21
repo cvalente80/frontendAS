@@ -1,7 +1,7 @@
 import { initializeApp, getApp, getApps } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+import { getAuth, connectAuthEmulator } from "firebase/auth";
+import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
+import { getStorage, connectStorageEmulator } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -20,6 +20,22 @@ export const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
+
+// Optional: connect to local emulators when developing
+if (typeof window !== 'undefined' && import.meta.env.VITE_USE_FIREBASE_EMULATORS === '1') {
+  try {
+    // Firestore emulator (default port 8080)
+    connectFirestoreEmulator(db, '127.0.0.1', Number(import.meta.env.VITE_EMU_FIRESTORE_PORT || 8080));
+  } catch {}
+  try {
+    // Auth emulator (default port 9099)
+    connectAuthEmulator(auth, `http://127.0.0.1:${import.meta.env.VITE_EMU_AUTH_PORT || 9099}`);
+  } catch {}
+  try {
+    // Storage emulator (default port 9199)
+    connectStorageEmulator(storage, '127.0.0.1', Number(import.meta.env.VITE_EMU_STORAGE_PORT || 9199));
+  } catch {}
+}
 
 // Lazy, browser-only Analytics
 export let analyticsPromise:
