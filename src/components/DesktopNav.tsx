@@ -45,14 +45,21 @@ export function DesktopNav() {
       document.removeEventListener('keydown', onKey, true);
     };
   }, [profileOpen]);
+  function resetFloatingWidgets() {
+    try {
+      localStorage.removeItem('chat:hideWhatsApp');
+      localStorage.removeItem('chat:hideChatButton');
+    } catch {}
+    window.dispatchEvent(new CustomEvent('chat:resetFloating'));
+  }
   return (
     <nav className="bg-white py-4 px-8 flex justify-between items-center sticky top-0 z-50 shadow-sm">
-      <NavLink to={`/${base}`} className="flex items-center gap-2 shrink-0">
+      <NavLink to={`/${base}`} className="flex items-center gap-2 shrink-0" onClick={resetFloatingWidgets}>
         <img src={`${import.meta.env.BASE_URL}logo-empresarial.svg`} alt="Logo Ansião Seguros" className="h-10 w-10 xl:h-12 xl:w-12" />
   <span className="text-2xl xl:text-3xl font-bold text-blue-900 hover:text-blue-700 whitespace-nowrap">{t('brand')}</span>
       </NavLink>
       <div className="hidden md:flex items-center gap-4 xl:gap-6 text-blue-700 font-medium text-sm xl:text-base">
-        <NavLink to={`/${base}`} end className={({ isActive }) => (isActive ? "border-b-2 border-blue-900 text-blue-900 font-bold" : "hover:text-blue-900") + " whitespace-nowrap"}>{t('nav.homeLink')}</NavLink>
+        <NavLink to={`/${base}`} end onClick={resetFloatingWidgets} className={({ isActive }) => (isActive ? "border-b-2 border-blue-900 text-blue-900 font-bold" : "hover:text-blue-900") + " whitespace-nowrap"}>{t('nav.homeLink')}</NavLink>
         {/* Dropdown Simulador */}
         <div className="relative group">
           <button className="whitespace-nowrap hover:text-blue-900 inline-flex items-center gap-1 focus:outline-none" aria-haspopup="true">
@@ -121,6 +128,11 @@ export function DesktopNav() {
             {t('nav.mySimulations')}
           </NavLink>
         )}
+        {user && (
+          <NavLink to={`/${base}/minhas-apolices`} className={({ isActive }) => (isActive ? "border-b-2 border-blue-900 text-blue-900 font-bold" : "hover:text-blue-900") + " whitespace-nowrap"}>
+            {t('nav.myPolicies')}
+          </NavLink>
+        )}
         <LanguageSwitcher />
 
         {/* Perfil / Autenticação */}
@@ -159,6 +171,13 @@ export function DesktopNav() {
                   className={({ isActive }) => (isActive ? "bg-blue-50 text-blue-900 font-semibold" : "hover:bg-gray-50 hover:text-blue-900") + " rounded px-3 py-2"}
                 >
                   {t('nav.mySimulations')}
+                </NavLink>
+                <NavLink
+                  to={`/${base}/minhas-apolices`}
+                  onClick={() => setProfileOpen(false)}
+                  className={({ isActive }) => (isActive ? "bg-blue-50 text-blue-900 font-semibold" : "hover:bg-gray-50 hover:text-blue-900") + " rounded px-3 py-2"}
+                >
+                  {t('nav.myPolicies')}
                 </NavLink>
                 {isAdmin && (
                   <NavLink

@@ -35,6 +35,8 @@ import React from "react";
 import Header from "./components/Header";
 import { ProtectedRoute } from './context/AuthContext';
 import MinhasSimulacoes from './pages/MinhasSimulacoes';
+import MinhasApolices from './pages/MinhasApolices';
+import ChatWidget from './components/ChatWidget';
 
 
 function App(): React.ReactElement {
@@ -77,6 +79,7 @@ function App(): React.ReactElement {
           <Route path="auth/verify-email" element={<VerifyEmail />} />
           {/* Área autenticada */}
           <Route path="minhas-simulacoes" element={<ProtectedRoute><MinhasSimulacoes /></ProtectedRoute>} />
+          <Route path="minhas-apolices" element={<ProtectedRoute><MinhasApolices /></ProtectedRoute>} />
           <Route path="simulacao-auto" element={<SimulacaoAuto />} />
           <Route path="simulacao-vida" element={<SimulacaoVida />} />
           <Route path="simulacao-saude" element={<SimulacaoSaude />} />
@@ -168,6 +171,8 @@ function App(): React.ReactElement {
         {/* Fallback: qualquer outra rota vai para /pt */}
         <Route path="*" element={<Navigate to="/pt" replace />} />
       </Routes>
+      {/* Floating Chat/WhatsApp widget visible in all pages */}
+      <ChatWidget phoneNumber={"+351 962 116 764"} whatsappNumber={"351962116764"} />
     </>
   );
 }

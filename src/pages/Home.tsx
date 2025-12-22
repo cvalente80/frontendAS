@@ -7,7 +7,6 @@ import HeroDesktop from "../components/HeroDesktop";
 import HeroMobile from "../components/HeroMobile";
 import { ResponsiveGate } from "../components/ResponsiveGate";
 import { useTranslation } from "react-i18next";
-import ChatWidget from "../components/ChatWidget";
 
 function useHomeProducts() {
 	const { t } = useTranslation('home');
@@ -162,8 +161,6 @@ export default function Home() {
 					</ul>
 				</div>
 			</section>
-			{/* Chat Widget flutuante */}
-			<ChatWidget phoneNumber={"+351 962 116 764"} whatsappNumber={"351962116764"} />
 		</div>
 	);
 }

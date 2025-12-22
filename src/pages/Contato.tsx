@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from "react";
 import Seo from "../components/Seo";
-import ChatWidget from "../components/ChatWidget";
 import emailjs from "@emailjs/browser";
 import { EMAILJS_SERVICE_ID_GENERIC, EMAILJS_TEMPLATE_ID_GENERIC, EMAILJS_USER_ID_GENERIC } from "../emailjs.config";
 import { Trans, useTranslation } from "react-i18next";
@@ -254,8 +253,6 @@ export default function Contato() {
           </div>
         </div>
       </div>
-      {/* Chat/WhatsApp widget flutuante */}
-      <ChatWidget phoneNumber={"+351 962 116 764"} whatsappNumber={"351962116764"} />
     </div>
   );
 }

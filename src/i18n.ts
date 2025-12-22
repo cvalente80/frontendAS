@@ -22,7 +22,8 @@ const resources = {
         businessWork: 'Acidentes de Trabalho (produto)',
         products: 'Produtos',
         contact: 'Contacto',
-        mySimulations: 'As minhas simulações'
+        mySimulations: 'Simulações',
+        myPolicies: 'Apólices'
       },
       auth: {
         hello: 'Olá',
@@ -164,6 +165,83 @@ const resources = {
         loadFailed: 'Falha ao carregar simulações ({{code}}).'
       },
       simulationFallback: 'Simulação'
+    },
+    policies: {
+      seo: { title: 'As minhas apólices', desc: 'Área do utilizador para criar e editar apólices geradas a partir de simulações.' },
+      heading: 'As minhas apólices',
+            statuses: {
+              em_criacao: 'Em Criação',
+              em_validacao: 'Em Validação',
+              em_vigor: 'Em Vigor'
+            },
+            pdf: {
+              viewCta: 'Ver Apólice',
+              delete: 'Remover PDF',
+              uploadLabel: 'Carregar PDF da apólice (apenas admin)',
+              uploading: 'A enviar PDF…',
+              successUpload: 'PDF da apólice carregado. Estado: Em Vigor.',
+              errorUpload: 'Falha ao carregar PDF da apólice.',
+              tooLarge: 'O ficheiro é maior que 2 MB. Não é possível anexar.',
+              successDelete: 'PDF da apólice removido.',
+              errorDelete: 'Falha ao remover o PDF da apólice.'
+            },
+      authRequired: 'É necessário iniciar sessão para ver e editar as suas apólices.',
+      loading: 'A carregar…',
+      empty: 'Ainda não existem apólices.',
+      itemTitle: 'Apólice {{id}}',
+      itemSub: 'Criada a partir da simulação {{sim}}',
+      form: {
+        title: 'Dados para Apólice',
+        holderName: 'Nome completo',
+        nif: 'NIF',
+        citizenCardNumber: 'Nº Cartão de Cidadão',
+        addressStreet: 'Rua e nº',
+        postalCode: 'Código Postal',
+        locality: 'Localidade',
+        phone: 'Contacto telefónico',
+        email: 'Email',
+        paymentFrequency: 'Periodicidade de pagamento',
+        paymentMethod: 'Forma de pagamento',
+        nib: 'NIB (IBAN)',
+        saveCta: 'Guardar',
+        saved: 'Apólice guardada com sucesso.'
+      },
+      placeholders: {
+        holderName: 'Nome completo',
+        nif: '123456789',
+        citizenCardNumber: '00000000 0 ZZ0',
+        addressStreet: 'Rua e nº',
+        postalCode: '____-___',
+        locality: 'Localidade',
+        phone: '912345678',
+        email: 'nome@servidor.pt',
+        nib: 'PT50XXXXXXXXXXXXXXXXXXXXX'
+      },
+      frequencies: {
+        anual: 'Anual',
+        semestral: 'Semestral',
+        trimestral: 'Trimestral',
+        mensal: 'Mensal'
+      },
+      help: { nibFormat: 'Formato: PT50 + 21 dígitos.' },
+      paymentMethods: {
+        multibanco: 'Multibanco',
+        debito_direto: 'Débito direto'
+      },
+      errors: {
+        invalidForm: 'Por favor, preencha todos os campos válidos.',
+        saveFailed: 'Falha ao guardar apólice.',
+        loadFailed: 'Falha ao carregar apólices.',
+        invalidEmail: 'Email inválido.',
+        invalidPhone: 'Telefone deve ter 9 dígitos.',
+        invalidNif: 'NIF deve ter 9 dígitos.',
+        invalidNib: 'IBAN inválido (PT50 + 21 dígitos).',
+        invalidCitizenCard: 'Nº Cartão de Cidadão inválido. Use o formato 00000000 0 ZZ0.',
+        nameRequired: 'Indique o nome completo (mín. 3 caracteres).',
+        addressStreetRequired: 'Indique a rua e nº.',
+        postalCodeInvalid: 'Código postal inválido. Formato XXXX-XXX.',
+        localityRequired: 'Indique a localidade.'
+      }
     },
     sim_vida: {
       title: 'Simulação Seguro Vida',
@@ -981,7 +1059,8 @@ const resources = {
         businessWork: 'Workers’ Compensation (info)',
         products: 'Products',
         contact: 'Contact',
-        mySimulations: 'My quotes'
+        mySimulations: 'My quotes',
+        myPolicies: 'My policies'
       },
       auth: {
         hello: 'Hello',
@@ -1121,6 +1200,72 @@ const resources = {
         loadFailed: 'Failed to load quotes ({{code}}).'
       },
       simulationFallback: 'Quote'
+    },
+    policies: {
+      seo: { title: 'My policies', desc: 'User area to create and edit policies generated from quotes.' },
+      heading: 'My policies',
+            statuses: {
+              em_criacao: 'Draft',
+              em_validacao: 'Under Review',
+              em_vigor: 'Active'
+            },
+            pdf: {
+              viewCta: 'View Policy',
+              delete: 'Remove PDF',
+              uploadLabel: 'Upload policy PDF (admins only)',
+              uploading: 'Uploading PDF…',
+              successUpload: 'Policy PDF uploaded. Status: Active.',
+              errorUpload: 'Failed to upload policy PDF.',
+              tooLarge: 'File is larger than 2 MB. Cannot attach.',
+              successDelete: 'Policy PDF removed.',
+              errorDelete: 'Failed to remove policy PDF.'
+            },
+      authRequired: 'You need to sign in to view and edit your policies.',
+      loading: 'Loading…',
+      empty: 'No policies yet.',
+      itemTitle: 'Policy {{id}}',
+      itemSub: 'Created from quote {{sim}}',
+      form: {
+        title: 'Policy Details',
+        holderName: 'Full name',
+        nif: 'Tax ID',
+        citizenCardNumber: 'Citizen Card Nº',
+        address: 'Full address',
+        phone: 'Phone',
+        email: 'Email',
+        paymentFrequency: 'Payment frequency',
+        nib: 'IBAN',
+        saveCta: 'Save',
+        saved: 'Policy saved successfully.'
+      },
+      placeholders: {
+        holderName: 'Full name',
+        nif: '123456789',
+        citizenCardNumber: '00000000 0 ZZ0',
+        address: 'Street, number, postal code, city',
+        phone: '912345678',
+        email: 'name@server.com',
+        nib: 'PT50XXXXXXXXXXXXXXXXXXXXX'
+      },
+      frequencies: {
+        anual: 'Annual',
+        semestral: 'Semiannual',
+        trimestral: 'Quarterly',
+        mensal: 'Monthly'
+      },
+      help: { nibFormat: 'Format: PT50 + 21 digits.' },
+      errors: {
+        invalidForm: 'Please fill all valid fields.',
+        saveFailed: 'Failed to save policy.',
+        loadFailed: 'Failed to load policies.',
+        invalidEmail: 'Invalid email.',
+        invalidPhone: 'Phone must have 9 digits.',
+        invalidNif: 'Tax ID must have 9 digits.',
+        invalidNib: 'Invalid IBAN (PT50 + 21 digits).',
+        invalidCitizenCard: 'Invalid Citizen Card Nº. Use format 00000000 0 ZZ0.',
+        nameRequired: 'Provide full name (min 3 characters).',
+        addressRequired: 'Provide full address.'
+      }
     },
     sim_saude: {
       title: 'Health Insurance Quote',

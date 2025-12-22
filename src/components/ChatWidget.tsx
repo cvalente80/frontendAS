@@ -41,6 +41,12 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
   const metaUnsubRef = useRef<null | (() => void)>(null);
   const stopTypingTimerRef = useRef<any>(null);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [hideWhatsApp, setHideWhatsApp] = useState<boolean>(() => {
+    try { return localStorage.getItem('chat:hideWhatsApp') === '1'; } catch { return false; }
+  });
+  const [hideChatButton, setHideChatButton] = useState<boolean>(() => {
+    try { return localStorage.getItem('chat:hideChatButton') === '1'; } catch { return false; }
+  });
   const [pos, setPos] = useState<{ left: number; top: number }>(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -64,9 +70,19 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
     function onDown() { setOnline(false); }
     window.addEventListener('online', onUp);
     window.addEventListener('offline', onDown);
+    function onResetFloating() {
+      setHideWhatsApp(false);
+      setHideChatButton(false);
+      try {
+        localStorage.removeItem('chat:hideWhatsApp');
+        localStorage.removeItem('chat:hideChatButton');
+      } catch {}
+    }
+    window.addEventListener('chat:resetFloating', onResetFloating as any);
     return () => {
       window.removeEventListener('online', onUp);
       window.removeEventListener('offline', onDown);
+      window.removeEventListener('chat:resetFloating', onResetFloating as any);
     };
   }, []);
 
@@ -329,17 +345,31 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
       {/* Floating Button */}
       {!open && (
         <div className="flex flex-col items-end gap-2">
-          {whatsappNumber && (
-            <a
-              href={whatsHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-[#25D366] text-white shadow-lg hover:bg-[#1fb256] transition"
-              aria-label={t('chat.whatsappNow')}
-            >
-              <WhatsAppIcon className="w-5 h-5 text-white" />
-              <span className="font-semibold text-sm">{t('chat.whatsappNow')}</span>
-            </a>
+          {whatsappNumber && !hideWhatsApp && (
+            <div className="relative">
+              <a
+                href={whatsHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-[#25D366] text-white shadow-lg hover:bg-[#1fb256] transition"
+                aria-label={t('chat.whatsappNow')}
+              >
+                <WhatsAppIcon className="w-5 h-5 text-white" />
+                <span className="font-semibold text-sm">{t('chat.whatsappNow')}</span>
+              </a>
+              <button
+                type="button"
+                aria-label={t('chat.close')}
+                title={t('chat.close') as string}
+                onClick={() => {
+                  setHideWhatsApp(true);
+                  try { localStorage.setItem('chat:hideWhatsApp', '1'); } catch {}
+                }}
+                className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-black/40 text-white text-xs leading-none flex items-center justify-center hover:bg-black/55"
+              >
+                ✕
+              </button>
+            </div>
           )}
           <a
             href={telHref}
@@ -349,27 +379,43 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
             <PhoneIcon className="w-5 h-5 text-white" />
             <span className="font-semibold text-sm">{t('chat.callNow')}</span>
           </a>
-          <button
-            type="button"
-            onClick={() => {
-              if (!user) {
-                try {
-                  // Guarda intenção de abrir chat após login
-                  localStorage.setItem('chat:intentOpen', '1');
-                } catch {}
-                // Abre o mesmo modal de autenticação usado no botão Entrar
-                window.dispatchEvent(new CustomEvent('auth:open'));
-                return;
-              }
-              setOpen(true);
-            }}
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-500 transition"
-            aria-expanded={open}
-            aria-controls="chat-panel"
-          >
-            <ChatIcon className="w-5 h-5 text-white" />
-            <span className="font-semibold text-sm">{t('chat.talkNow')}</span>
-          </button>
+          {!hideChatButton && (
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  if (!user) {
+                    try {
+                      // Guarda intenção de abrir chat após login
+                      localStorage.setItem('chat:intentOpen', '1');
+                    } catch {}
+                    // Abre o mesmo modal de autenticação usado no botão Entrar
+                    window.dispatchEvent(new CustomEvent('auth:open'));
+                    return;
+                  }
+                  setOpen(true);
+                }}
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-500 transition"
+                aria-expanded={open}
+                aria-controls="chat-panel"
+              >
+                <ChatIcon className="w-5 h-5 text-white" />
+                <span className="font-semibold text-sm">{t('chat.talkNow')}</span>
+              </button>
+              <button
+                type="button"
+                aria-label={t('chat.close')}
+                title={t('chat.close') as string}
+                onClick={() => {
+                  setHideChatButton(true);
+                  try { localStorage.setItem('chat:hideChatButton', '1'); } catch {}
+                }}
+                className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-black/40 text-white text-xs leading-none flex items-center justify-center hover:bg-black/55"
+              >
+                ✕
+              </button>
+            </div>
+          )}
         </div>
       )}
 
