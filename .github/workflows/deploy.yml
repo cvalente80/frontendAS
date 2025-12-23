@@ -18,7 +18,7 @@ concurrency:
 jobs:
   build:
     # Only build/upload Pages on specified branches
-    if: github.ref == 'refs/heads/chat_notifications_refactoring' || github.ref == 'refs/heads/refactoring_send_email_with_JS'
+    if: github.ref == 'refs/heads/criacao-de-apolice' || github.ref == 'refs/heads/chat_notifications_refactoring' || github.ref == 'refs/heads/refactoring_send_email_with_JS'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -51,7 +51,7 @@ jobs:
 
   deploy:
     # Only deploy Pages on specified branches
-    if: github.ref == 'refs/heads/chat_notifications_refactoring' || github.ref == 'refs/heads/refactoring_send_email_with_JS'
+    if: github.ref == 'refs/heads/criacao-de-apolice' || github.ref == 'refs/heads/chat_notifications_refactoring' || github.ref == 'refs/heads/refactoring_send_email_with_JS'
     needs: build
     runs-on: ubuntu-latest
     environment:
