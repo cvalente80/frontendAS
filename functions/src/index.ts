@@ -1,11 +1,13 @@
-import * as admin from 'firebase-admin';
-import { onDocumentCreated } from 'firebase-functions/v2/firestore';
+import { initializeApp, getApps } from 'firebase-admin/app';
+import { getAuth } from 'firebase-admin/auth';
+import { getFirestore } from 'firebase-admin/firestore';
+import { onDocumentCreated, onDocumentDeleted, onDocumentUpdated } from 'firebase-functions/v2/firestore';
 import { onRequest } from 'firebase-functions/v2/https';
 import { logger } from 'firebase-functions';
 
 // Initialize Admin SDK once
-if (!admin.apps.length) {
-  admin.initializeApp();
+if (getApps().length === 0) {
+  initializeApp();
 }
 
 // Helper to read env vars with fallback.
@@ -47,7 +49,7 @@ const notifyOnFirstUserMessage = onDocumentCreated('chats/{chatId}/messages/{mes
 
   if (!data || data.authorRole !== 'user') return;
 
-  const db = admin.firestore();
+  const db = getFirestore();
   const chatRef = db.doc(`chats/${chatId}`);
   const chatSnap = await chatRef.get();
   if (!chatSnap.exists) return;
@@ -133,6 +135,75 @@ export const sendContactEmail = onRequest({ cors: true }, async (req, res) => {
     res.status(200).json({ ok: true });
   } catch (e: any) {
     logger.error('[sendContactEmail] Unexpected error', e);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// --- Admin claims management ---
+// Set or revoke the custom claim 'admin' based on Firestore documents.
+async function setAdminClaim(uid: string, isAdmin: boolean) {
+  try {
+    const user = await getAuth().getUser(uid);
+    const existing = user.customClaims || {};
+    const nextClaims = { ...existing } as Record<string, any>;
+    if (isAdmin) {
+      nextClaims.admin = true;
+    } else {
+      // Remove claim if present
+      if (nextClaims.admin) delete nextClaims.admin;
+    }
+    await getAuth().setCustomUserClaims(uid, nextClaims);
+    logger.info('[setAdminClaim] Updated claims', { uid, isAdmin });
+  } catch (e) {
+    logger.error('[setAdminClaim] Failed to update claims', { uid, isAdmin, error: e });
+    throw e;
+  }
+}
+
+// When an admin doc is created, grant admin claim
+export const onAdminDocCreated = onDocumentCreated('admins/{uid}', async (event) => {
+  const uid = event.params.uid as string;
+  await setAdminClaim(uid, true);
+});
+
+// When an admin doc is deleted, revoke admin claim
+export const onAdminDocDeleted = onDocumentDeleted('admins/{uid}', async (event) => {
+  const uid = event.params.uid as string;
+  await setAdminClaim(uid, false);
+});
+
+// If users/{uid}.isAdmin is toggled, sync claim accordingly
+export const onUserIsAdminUpdated = onDocumentUpdated('users/{uid}', async (event) => {
+  const uid = event.params.uid as string;
+  const before = (event.data?.before?.data() || {}) as any;
+  const after = (event.data?.after?.data() || {}) as any;
+  const prev = !!before.isAdmin;
+  const next = !!after.isAdmin;
+  if (prev !== next) {
+    await setAdminClaim(uid, next);
+  }
+});
+
+// HTTPS endpoint to sync admin claim for current user
+export const syncAdminClaims = onRequest({ cors: true }, async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization || '';
+    const m = authHeader.match(/^Bearer\s+(.*)$/i);
+    if (!m) {
+      res.status(401).json({ error: 'Missing Authorization: Bearer <ID_TOKEN>' });
+      return;
+    }
+    const idToken = m[1];
+    const decoded = await getAuth().verifyIdToken(idToken);
+    const uid = decoded.uid;
+    const db = getFirestore();
+    const adminDoc = await db.doc(`admins/${uid}`).get();
+    const userDoc = await db.doc(`users/${uid}`).get();
+    const isAdmin = adminDoc.exists || !!(userDoc.exists && (userDoc.data() as any).isAdmin === true);
+    await setAdminClaim(uid, isAdmin);
+    res.status(200).json({ ok: true, uid, isAdmin });
+  } catch (e: any) {
+    logger.error('[syncAdminClaims] error', e);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });

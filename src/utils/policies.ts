@@ -27,6 +27,7 @@ export type PolicyRecord = {
   policyPdfUrl?: string; // Apólice
   receiptPdfUrl?: string; // Recibo
   conditionsPdfUrl?: string; // Condições particulares
+  greenCardPdfUrl?: string; // Carta Verde (auto)
   createdAt?: any;
   updatedAt?: any;
 };

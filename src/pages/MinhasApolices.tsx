@@ -330,11 +330,11 @@ export default function MinhasApolices(): React.ReactElement {
                   </div>
                 )}
                 {/* Policy PDF actions */}
-                <div className="mt-3 space-y-2">
+                <div className="mt-3 grid grid-cols-[max-content,1fr] gap-x-4 gap-y-3 items-center">
                   {/* Apólice */}
+                  <span className="text-sm text-blue-900 font-medium whitespace-nowrap">Apólice:</span>
                   {it.policyPdfUrl ? (
                     <div className="flex items-center gap-3">
-                      <span className="text-sm text-blue-900 font-medium">Apólice:</span>
                       <a href={it.policyPdfUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-blue-700 hover:text-blue-800">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="w-10 h-10" aria-hidden>
                           <rect x="4" y="4" width="40" height="40" rx="6" fill="#10B981" />
@@ -373,9 +373,10 @@ export default function MinhasApolices(): React.ReactElement {
                     </div>
                   ) : (
                     isAdmin && normalizeStatus(it.status) !== 'em_criacao' && (
-                      <div>
-                        <label className="text-xs text-blue-800 block mb-1">Apólice — {t('policies:pdf.uploadLabel')}</label>
+                      <div className="flex flex-col">
                         <input
+                          aria-label="Upload Apólice"
+                          className="max-w-xs"
                           type="file"
                           accept="application/pdf"
                           disabled={uploadingId === it.id}
@@ -390,7 +391,6 @@ export default function MinhasApolices(): React.ReactElement {
                               await uploadBytes(sref, f, { contentType: 'application/pdf' });
                               const url = await getDownloadURL(sref);
                               await savePolicy(it.ownerUid, it.id!, { policyPdfUrl: url, status: 'em_vigor' });
-                              // Optimistically update local state to reflect PDF and status change
                               setItems((prev) => prev.map((p) => (p.id === it.id ? { ...p, policyPdfUrl: url, status: 'em_vigor' } : p)));
                               showToast(t('policies:pdf.successUpload'), 'success');
                             } catch (err) {
@@ -411,10 +411,11 @@ export default function MinhasApolices(): React.ReactElement {
                       </div>
                     )
                   )}
+
                   {/* Recibo */}
+                  <span className="text-sm text-blue-900 font-medium whitespace-nowrap">Recibo:</span>
                   {it.receiptPdfUrl ? (
                     <div className="flex items-center gap-3">
-                      <span className="text-sm text-blue-900 font-medium">Recibo:</span>
                       <a href={it.receiptPdfUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-blue-700 hover:text-blue-800">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="w-10 h-10" aria-hidden>
                           <rect x="4" y="4" width="40" height="40" rx="6" fill="#10B981" />
@@ -453,9 +454,10 @@ export default function MinhasApolices(): React.ReactElement {
                     </div>
                   ) : (
                     isAdmin && normalizeStatus(it.status) !== 'em_criacao' && (
-                      <div>
-                        <label className="text-xs text-blue-800 block mb-1">Recibo — {t('policies:pdf.uploadLabel')}</label>
+                      <div className="flex flex-col">
                         <input
+                          aria-label="Upload Recibo"
+                          className="max-w-xs"
                           type="file"
                           accept="application/pdf"
                           disabled={uploadingId === it.id}
@@ -490,10 +492,11 @@ export default function MinhasApolices(): React.ReactElement {
                       </div>
                     )
                   )}
+
                   {/* Condições particulares */}
+                  <span className="text-sm text-blue-900 font-medium whitespace-nowrap">Condições Particulares:</span>
                   {it.conditionsPdfUrl ? (
                     <div className="flex items-center gap-3">
-                      <span className="text-sm text-blue-900 font-medium">Condições Particulares:</span>
                       <a href={it.conditionsPdfUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-blue-700 hover:text-blue-800">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="w-10 h-10" aria-hidden>
                           <rect x="4" y="4" width="40" height="40" rx="6" fill="#10B981" />
@@ -532,9 +535,10 @@ export default function MinhasApolices(): React.ReactElement {
                     </div>
                   ) : (
                     isAdmin && normalizeStatus(it.status) !== 'em_criacao' && (
-                      <div>
-                        <label className="text-xs text-blue-800 block mb-1">Condições Particulares — {t('policies:pdf.uploadLabel')}</label>
+                      <div className="flex flex-col">
                         <input
+                          aria-label="Upload Condições Particulares"
+                          className="max-w-xs"
                           type="file"
                           accept="application/pdf"
                           disabled={uploadingId === it.id}
@@ -567,6 +571,90 @@ export default function MinhasApolices(): React.ReactElement {
                           </div>
                         )}
                       </div>
+                    )
+                  )}
+
+                  {/* Carta Verde (auto) */}
+                  <span className="text-sm text-blue-900 font-medium whitespace-nowrap">Carta Verde:</span>
+                  {it.type === 'auto' && (
+                    it.greenCardPdfUrl ? (
+                      <div className="flex items-center gap-3">
+                        <a href={it.greenCardPdfUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-blue-700 hover:text-blue-800">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="w-10 h-10" aria-hidden>
+                            <rect x="4" y="4" width="40" height="40" rx="6" fill="#10B981" />
+                            <text x="50%" y="62%" textAnchor="middle" fontFamily="ui-sans-serif, system-ui" fontWeight="700" fontSize="14" fill="#FFFFFF">PDF</text>
+                          </svg>
+                          <span className="text-sm font-medium underline">{t('policies:pdf.viewGreenCard', { defaultValue: 'Ver Carta Verde' })}</span>
+                        </a>
+                        {isAdmin && normalizeStatus(it.status) !== 'em_criacao' && (
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              try {
+                                setDeletingId(it.id!);
+                                const pdfRef = storageRef(storage, `policies/${it.ownerUid}/${it.id}/green-card.pdf`);
+                                try { await deleteObject(pdfRef); } catch {}
+                                const ref = doc(db, 'users', it.ownerUid, 'policies', it.id!);
+                                await updateDoc(ref, { greenCardPdfUrl: null });
+                                showToast(t('policies:pdf.successDelete'), 'success');
+                                setItems((prev) => prev.map((p) => (p.id === it.id ? { ...p, greenCardPdfUrl: undefined } : p)));
+                              } catch (e) {
+                                console.error(e);
+                                showToast(t('policies:pdf.errorDelete'), 'error');
+                              } finally {
+                                setDeletingId(null);
+                              }
+                            }}
+                            className={`inline-flex items-center text-red-600 hover:text-red-700 ${deletingId === it.id ? 'opacity-60 cursor-not-allowed' : ''}`}
+                            aria-label={t('policies:pdf.delete')}
+                            title={t('policies:pdf.delete')}
+                            disabled={deletingId === it.id}
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 6h18M8 6v-2a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m5 4v6m4-6v6" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    ) : (
+                      isAdmin && normalizeStatus(it.status) !== 'em_criacao' && (
+                        <div className="flex flex-col">
+                          <input
+                            aria-label="Upload Carta Verde"
+                            className="max-w-xs"
+                            type="file"
+                            accept="application/pdf"
+                            disabled={uploadingId === it.id}
+                            onChange={async (e) => {
+                              const f = e.target.files?.[0];
+                              if (!f || f.type !== 'application/pdf') return;
+                              const MAX_BYTES = 2 * 1024 * 1024;
+                              if (f.size > MAX_BYTES) { showToast(t('policies:pdf.tooLarge'), 'error'); e.currentTarget.value = ''; return; }
+                              try {
+                                setUploadingId(it.id!);
+                                const sref = storageRef(storage, `policies/${it.ownerUid}/${it.id}/green-card.pdf`);
+                                await uploadBytes(sref, f, { contentType: 'application/pdf' });
+                                const url = await getDownloadURL(sref);
+                                await savePolicy(it.ownerUid, it.id!, { greenCardPdfUrl: url });
+                                setItems((prev) => prev.map((p) => (p.id === it.id ? { ...p, greenCardPdfUrl: url } : p)));
+                                showToast(t('policies:pdf.successUpload'), 'success');
+                              } catch (err) {
+                                console.error(err);
+                                showToast(t('policies:pdf.errorUpload'), 'error');
+                              } finally {
+                                setUploadingId(null);
+                                e.currentTarget.value = '';
+                              }
+                            }}
+                          />
+                          {uploadingId === it.id && (
+                            <div className="mt-1 text-xs text-blue-700 flex items-center gap-2">
+                              <span className="w-3 h-3 inline-block border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                              {t('policies:pdf.uploading')}
+                            </div>
+                          )}
+                        </div>
+                      )
                     )
                   )}
                 </div>
