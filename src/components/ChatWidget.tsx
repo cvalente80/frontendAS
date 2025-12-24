@@ -371,14 +371,7 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
               </button>
             </div>
           )}
-          <a
-            href={telHref}
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-green-500 text-white shadow-lg hover:bg-green-600 transition md:hidden"
-            aria-label={t('chat.callNow')}
-          >
-            <PhoneIcon className="w-5 h-5 text-white" />
-            <span className="font-semibold text-sm">{t('chat.callNow')}</span>
-          </a>
+          {/* Mobile "Ligar agora" removed as requested */}
           {!hideChatButton && (
             <div className="relative">
               <button

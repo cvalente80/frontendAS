@@ -1,0 +1,21 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Allow authenticated users to upload/view policy-related PDFs.
+    // Path structure: policies/{ownerUid}/{policyId}/{fileName}
+    // Allowed file names: policy.pdf, receipt.pdf, conditions.pdf
+    match /policies/{ownerUid}/{policyId}/{fileName} {
+      // Read via download URLs works regardless, but allow reads for authenticated users too.
+      allow read: if request.auth != null;
+      // Allow writes (upload/overwrite/delete) for authenticated users.
+      // Note: This is permissive to enable admin uploads from client.
+      // Consider hardening later with custom claims.
+      allow write: if request.auth != null && (fileName == 'policy.pdf' || fileName == 'receipt.pdf' || fileName == 'conditions.pdf');
+    }
+
+    // Deny other paths by default.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

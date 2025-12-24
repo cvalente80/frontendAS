@@ -7,11 +7,12 @@ export type PolicyFormProps = {
   policyId: string;
   initial?: Partial<PolicyRecord> | null;
   onSaved?: (data: Partial<PolicyRecord>) => void;
+  submitLabel?: string;
 };
 
 const freqOptions: PaymentFrequency[] = ['anual', 'semestral', 'trimestral', 'mensal'];
 
-export default function PolicyForm({ uid, policyId, initial, onSaved }: PolicyFormProps): React.ReactElement {
+export default function PolicyForm({ uid, policyId, initial, onSaved, submitLabel }: PolicyFormProps): React.ReactElement {
   const { t } = useTranslation(['policies', 'common']);
   const [holderName, setHolderName] = useState(initial?.holderName || '');
   const [nif, setNif] = useState(initial?.nif || '');
@@ -269,7 +270,7 @@ export default function PolicyForm({ uid, policyId, initial, onSaved }: PolicyFo
       <div className="mt-3">
         <button type="button" onClick={handleSave} disabled={!canSave || saving} className={`inline-flex items-center gap-2 px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700 ${(!canSave || saving) ? 'opacity-60 cursor-not-allowed' : ''}`}>
           {saving && <span className="w-3 h-3 inline-block border-2 border-white border-t-transparent rounded-full animate-spin" />}
-          {t('policies:form.saveCta')}
+          {submitLabel || t('policies:form.saveCta')}
         </button>
       </div>
     </div>

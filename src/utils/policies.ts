@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, getDocs, query, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, query, setDoc, updateDoc, serverTimestamp, collectionGroup } from 'firebase/firestore';
 import { db } from '../firebase';
 import type { SimulationType } from './simulations';
 
@@ -23,7 +23,10 @@ export type PolicyRecord = {
   paymentMethod?: 'multibanco' | 'debito_direto' | string;
   paymentFrequency?: PaymentFrequency;
   nib?: string; // Format: PT50 + 21 digits
-  policyPdfUrl?: string;
+  // Document URLs
+  policyPdfUrl?: string; // Apólice
+  receiptPdfUrl?: string; // Recibo
+  conditionsPdfUrl?: string; // Condições particulares
   createdAt?: any;
   updatedAt?: any;
 };
@@ -62,4 +65,15 @@ export async function listPolicies(uid: string): Promise<PolicyRecord[]> {
   const q = query(colRef);
   const snap = await getDocs(q);
   return snap.docs.map((d) => ({ id: d.id, ...(d.data() as PolicyRecord) }));
+}
+
+/** Admin: list all policies across all users (requires rules allowing collectionGroup). */
+export async function listAllPolicies(): Promise<Array<PolicyRecord & { ownerUid: string }>> {
+  const cg = collectionGroup(db, 'policies');
+  const snap = await getDocs(cg);
+  return snap.docs.map((d) => {
+    const ownerUid = d.ref.parent.parent?.id || '';
+    const data = d.data() as PolicyRecord;
+    return { id: d.id, ...data, ownerUid };
+  });
 }

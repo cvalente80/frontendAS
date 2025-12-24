@@ -176,6 +176,9 @@ const resources = {
             },
             pdf: {
               viewCta: 'Ver Apólice',
+              viewPolicy: 'Ver Apólice',
+              viewReceipt: 'Ver Recibo',
+              viewConditions: 'Ver Condições Particulares',
               delete: 'Remover PDF',
               uploadLabel: 'Carregar PDF da apólice (apenas admin)',
               uploading: 'A enviar PDF…',
@@ -190,6 +193,8 @@ const resources = {
       empty: 'Ainda não existem apólices.',
       itemTitle: 'Apólice {{id}}',
       itemSub: 'Criada a partir da simulação {{sim}}',
+      fillPrompt: 'Por favor, preencha o formulário da apólice para avançar.',
+      fillPromptType: 'Por favor, preencha os dados da apólice de {{type}} para avançar.',
       form: {
         title: 'Dados para Apólice',
         holderName: 'Nome completo',
@@ -204,6 +209,9 @@ const resources = {
         paymentMethod: 'Forma de pagamento',
         nib: 'NIB (IBAN)',
         saveCta: 'Guardar',
+        createCta: 'Criar',
+        resendCta: 'Reenviar',
+        requestChangeCta: 'Pedir Alteração',
         saved: 'Apólice guardada com sucesso.'
       },
       placeholders: {
@@ -546,6 +554,7 @@ const resources = {
         info: 'Pedido de informação',
         adhoc: 'Pedido de simulação ad hoc',
         contact: 'Pedido de contacto',
+        change: 'Pedido de alteração',
         other: 'Outro'
       },
       productInterest: {
@@ -1211,6 +1220,9 @@ const resources = {
             },
             pdf: {
               viewCta: 'View Policy',
+              viewPolicy: 'View Policy',
+              viewReceipt: 'View Receipt',
+              viewConditions: 'View Particular Conditions',
               delete: 'Remove PDF',
               uploadLabel: 'Upload policy PDF (admins only)',
               uploading: 'Uploading PDF…',
@@ -1225,6 +1237,8 @@ const resources = {
       empty: 'No policies yet.',
       itemTitle: 'Policy {{id}}',
       itemSub: 'Created from quote {{sim}}',
+      fillPrompt: 'Please fill out the policy form to proceed.',
+      fillPromptType: 'Please fill out the {{type}} policy details to proceed.',
       form: {
         title: 'Policy Details',
         holderName: 'Full name',
@@ -1236,6 +1250,9 @@ const resources = {
         paymentFrequency: 'Payment frequency',
         nib: 'IBAN',
         saveCta: 'Save',
+        createCta: 'Create',
+        resendCta: 'Resend',
+        requestChangeCta: 'Request Change',
         saved: 'Policy saved successfully.'
       },
       placeholders: {
@@ -1570,6 +1587,7 @@ const resources = {
         info: 'Information request',
         adhoc: 'Ad‑hoc quote request',
         contact: 'Callback request',
+        change: 'Change request',
         other: 'Other'
       },
       productInterest: {

@@ -1,5 +1,6 @@
 import * as admin from 'firebase-admin';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
+import { onRequest } from 'firebase-functions/v2/https';
 import { logger } from 'firebase-functions';
 
 // Initialize Admin SDK once
@@ -94,4 +95,44 @@ const notifyOnFirstUserMessage = onDocumentCreated('chats/{chatId}/messages/{mes
   }
 
   await chatRef.update({ firstNotified: true });
+});
+
+// HTTPS proxy to send EmailJS from server side to avoid client-side 412 errors (domain restrictions).
+// Expects JSON body: { service_id, template_id, user_id, template_params }
+export const sendContactEmail = onRequest({ cors: true }, async (req, res) => {
+  if (req.method !== 'POST') {
+    res.status(405).send('Method Not Allowed');
+    return;
+  }
+
+  try {
+    const { service_id, template_id, user_id, template_params } = req.body ?? {};
+    if (!service_id || !template_id || !user_id || !template_params || typeof template_params !== 'object') {
+      res.status(400).json({ error: 'Missing required fields' });
+      return;
+    }
+
+    const body = {
+      service_id,
+      template_id,
+      user_id,
+      template_params,
+    } as const;
+
+    const r = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const txt = await r.text().catch(() => '');
+    if (!r.ok) {
+      logger.error('[sendContactEmail] EmailJS error', { status: r.status, statusText: r.statusText, body: txt });
+      res.status(r.status).send(txt || r.statusText);
+      return;
+    }
+    res.status(200).json({ ok: true });
+  } catch (e: any) {
+    logger.error('[sendContactEmail] Unexpected error', e);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
