@@ -277,7 +277,7 @@ export default function MinhasSimulacoes(): React.ReactElement {
               >
                 <option value="all">{t('mysims:filters.all')}</option>
                 <option value="em_processamento">{t('mysims:statuses.em_processamento')}</option>
-                <option value="simulacao_enviada">{t('mysims:statuses.simulacao_enviada')}</option>
+                <option value="simulacao_enviada">{t(isAdmin ? 'mysims:statuses.simulacao_enviada' : 'mysims:statuses.simulacao_recebida')}</option>
               </select>
             </div>
           </div>
@@ -323,7 +323,7 @@ export default function MinhasSimulacoes(): React.ReactElement {
                   className: 'bg-red-100 border border-red-300 text-red-800',
                 },
                 simulacao_enviada: {
-                  label: t('mysims:statuses.simulacao_enviada'),
+                  label: t(isAdmin ? 'mysims:statuses.simulacao_enviada' : 'mysims:statuses.simulacao_recebida'),
                   className: 'bg-green-100 border border-green-300 text-green-800',
                 },
               };

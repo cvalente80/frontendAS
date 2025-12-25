@@ -139,7 +139,8 @@ const resources = {
       },
       statuses: {
         em_processamento: 'Em processamento',
-        simulacao_enviada: 'Simulação enviada'
+        simulacao_enviada: 'Simulação enviada',
+        simulacao_recebida: 'Simulação recebida'
       },
       loading: 'A carregar…',
       empty: 'Sem simulações para mostrar.',
@@ -1194,7 +1195,8 @@ const resources = {
       },
       statuses: {
         em_processamento: 'Processing',
-        simulacao_enviada: 'Quote sent'
+        simulacao_enviada: 'Quote sent',
+        simulacao_recebida: 'Quote received'
       },
       loading: 'Loading…',
       empty: 'No quotes to display.',
