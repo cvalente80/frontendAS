@@ -3,9 +3,8 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - criacao-de-apolice # GitHub Pages                           # (legacy)
+      - REFACTORING-SIMULAÇOES # GitHub Pages                           # (legacy)
   workflow_dispatch:
-
 permissions:
   contents: read
   pages: write
@@ -17,8 +16,8 @@ concurrency:
 
 jobs:
   build:
-    # Only build/upload Pages on specified branches
-    if: github.ref == 'refs/heads/criacao-de-apolice' || github.ref == 'refs/heads/chat_notifications_refactoring' || github.ref == 'refs/heads/refactoring_send_email_with_JS'
+    # Only build/upload Pages on specified branches ON push
+    if: github.ref == 'refs/heads/REFACTORING-SIMULAÇOES'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -51,7 +50,7 @@ jobs:
 
   deploy:
     # Only deploy Pages on specified branches
-    if: github.ref == 'refs/heads/criacao-de-apolice' || github.ref == 'refs/heads/chat_notifications_refactoring' || github.ref == 'refs/heads/refactoring_send_email_with_JS'
+    if: github.ref == 'refs/heads/REFACTORING-SIMULAÇOES'    
     needs: build
     runs-on: ubuntu-latest
     environment:

@@ -59,7 +59,6 @@ export function DesktopNav() {
   <span className="text-2xl xl:text-3xl font-bold text-blue-900 hover:text-blue-700 whitespace-nowrap">{t('brand')}</span>
       </NavLink>
       <div className="hidden md:flex items-center gap-4 xl:gap-6 text-blue-700 font-medium text-sm xl:text-base">
-        <NavLink to={`/${base}`} end onClick={resetFloatingWidgets} className={({ isActive }) => (isActive ? "border-b-2 border-blue-900 text-blue-900 font-bold" : "hover:text-blue-900") + " whitespace-nowrap"}>{t('nav.homeLink')}</NavLink>
         {/* Dropdown Simulador */}
         <div className="relative group">
           <button className="whitespace-nowrap hover:text-blue-900 inline-flex items-center gap-1 focus:outline-none" aria-haspopup="true">
@@ -124,12 +123,38 @@ export function DesktopNav() {
         <NavLink to={`/${base}/contato`} className={({ isActive }) => (isActive ? "border-b-2 border-blue-900 text-blue-900 font-bold" : "hover:text-blue-900") + " whitespace-nowrap"}>{t('nav.contact')}</NavLink>
         {/* Admin inbox link removed from main nav; available under profile menu */}
         {user && (
-          <NavLink to={`/${base}/minhas-simulacoes`} className={({ isActive }) => (isActive ? "border-b-2 border-blue-900 text-blue-900 font-bold" : "hover:text-blue-900") + " whitespace-nowrap"}>
+          <NavLink
+            to={`/${base}/minhas-simulacoes`}
+            className={({ isActive }) =>
+              (isActive
+                ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                : "bg-blue-50 text-blue-900 border-blue-200 hover:bg-blue-100") +
+              " whitespace-nowrap inline-flex items-center gap-2 rounded-full border px-3 py-1.5 transition-colors"
+            }
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+              <path d="M9 3h6v4H9z"/>
+              <path d="M9 12h6"/>
+              <path d="M9 16h6"/>
+            </svg>
             {t('nav.mySimulations')}
           </NavLink>
         )}
         {user && (
-          <NavLink to={`/${base}/minhas-apolices`} className={({ isActive }) => (isActive ? "border-b-2 border-blue-900 text-blue-900 font-bold" : "hover:text-blue-900") + " whitespace-nowrap"}>
+          <NavLink
+            to={`/${base}/minhas-apolices`}
+            className={({ isActive }) =>
+              (isActive
+                ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                : "bg-blue-50 text-blue-900 border-blue-200 hover:bg-blue-100") +
+              " whitespace-nowrap inline-flex items-center gap-2 rounded-full border px-3 py-1.5 transition-colors"
+            }
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <path d="M9.5 12.5l1.5 1.5 3.5-3.5"/>
+            </svg>
             {t('nav.myPolicies')}
           </NavLink>
         )}
