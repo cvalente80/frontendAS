@@ -13,6 +13,13 @@ export default function MobileNav() {
   const { lang } = useParams();
   const base = lang === 'en' ? 'en' : 'pt';
   const { user, loading, displayName, loginWithGoogle, logout, isAdmin } = useAuth();
+  function resetFloatingWidgets() {
+    try {
+      localStorage.removeItem('chat:hideWhatsApp');
+      localStorage.removeItem('chat:hideChatButton');
+    } catch {}
+    window.dispatchEvent(new CustomEvent('chat:resetFloating'));
+  }
 
   // Close menu on route change
   useEffect(() => {
@@ -29,7 +36,7 @@ export default function MobileNav() {
   return (
     <header className="bg-white sticky top-0 z-50 shadow-sm md:hidden">
       <div className="py-4 px-4 flex justify-between items-center">
-        <NavLink to={`/${base}`} className="flex items-center gap-2" onClick={() => setOpen(false)}>
+        <NavLink to={`/${base}`} className="flex items-center gap-2" onClick={() => { setOpen(false); resetFloatingWidgets(); }}>
           <img src={`${import.meta.env.BASE_URL}logo-empresarial.svg`} alt="Logo Ansião Seguros" className="h-8 w-8" />
           <span className="text-lg font-semibold text-blue-900 tracking-tight">{t('brand')}</span>
         </NavLink>
@@ -82,23 +89,23 @@ export default function MobileNav() {
             </div>
           )}
           <ul className="flex flex-col gap-3 text-blue-800 font-medium">
-            <li><NavLink to={`/${base}`} end onClick={() => setOpen(false)} className={({ isActive }) => isActive ? "font-bold text-blue-900" : "hover:text-blue-900"}>{t('nav.homeLink')}</NavLink></li>
+            <li><NavLink to={`/${base}`} end onClick={() => { setOpen(false); resetFloatingWidgets(); }} className={({ isActive }) => isActive ? "font-bold text-blue-900" : "hover:text-blue-900"}>{t('nav.homeLink')}</NavLink></li>
             {/* Simulador collapsible */}
             <li>
               <details className="group">
-                <summary className="cursor-pointer select-none flex items-center justify-between">
+                <summary className="cursor-pointer select-none flex items-center justify-center gap-2">
                   {t('nav.simulator')}
                   <svg className="w-4 h-4 transition-transform group-open:rotate-180" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clipRule="evenodd"/></svg>
                 </summary>
                 <div className="mt-2 ml-3">
-                  <div className="text-[11px] uppercase tracking-wide text-blue-400 mb-1">{t('nav.individuals')}</div>
+                  <div className="text-base font-semibold text-blue-800 mb-3">{t('nav.individuals')}</div>
                   <ul className="flex flex-col gap-2 mb-3">
                     <li><NavLink to={`/${base}/simulacao-auto`} onClick={() => setOpen(false)} className={({ isActive }) => isActive ? "font-bold text-blue-900" : "hover:text-blue-900"}>{t('nav.auto')}</NavLink></li>
                     <li><NavLink to={`/${base}/simulacao-vida`} onClick={() => setOpen(false)} className={({ isActive }) => isActive ? "font-bold text-blue-900" : "hover:text-blue-900"}>{t('nav.life')}</NavLink></li>
                     <li><NavLink to={`/${base}/simulacao-saude`} onClick={() => setOpen(false)} className={({ isActive }) => isActive ? "font-bold text-blue-900" : "hover:text-blue-900"}>{t('nav.health')}</NavLink></li>
                     <li><NavLink to={`/${base}/simulacao-habitacao`} onClick={() => setOpen(false)} className={({ isActive }) => isActive ? "font-bold text-blue-900" : "hover:text-blue-900"}>{t('nav.homeInsurance')}</NavLink></li>
                   </ul>
-                  <div className="text-[11px] uppercase tracking-wide text-blue-400 mb-1">{t('nav.business')}</div>
+                  <div className="text-base font-semibold text-blue-800 mb-3">{t('nav.business')}</div>
                   <ul className="flex flex-col gap-2">
                     <li><NavLink to={`/${base}/simulacao-rc-profissional`} onClick={() => setOpen(false)} className={({ isActive }) => isActive ? "font-bold text-blue-900" : "hover:text-blue-900"}>{t('nav.businessRcp')}</NavLink></li>
                     <li><NavLink to={`/${base}/simulacao-condominio`} onClick={() => setOpen(false)} className={({ isActive }) => isActive ? "font-bold text-blue-900" : "hover:text-blue-900"}>{t('nav.businessCondo')}</NavLink></li>
@@ -116,6 +123,13 @@ export default function MobileNav() {
               <li>
                 <NavLink to={`/${base}/minhas-simulacoes`} onClick={() => setOpen(false)} className={({ isActive }) => isActive ? "font-bold text-blue-900" : "hover:text-blue-900"}>
                   {t('nav.mySimulations')}
+                </NavLink>
+              </li>
+            )}
+            {user && (
+              <li>
+                <NavLink to={`/${base}/minhas-apolices`} onClick={() => setOpen(false)} className={({ isActive }) => isActive ? "font-bold text-blue-900" : "hover:text-blue-900"}>
+                  {t('nav.myPolicies')}
                 </NavLink>
               </li>
             )}

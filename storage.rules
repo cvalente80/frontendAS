@@ -1,0 +1,31 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Allow authenticated users to upload/view policy-related PDFs.
+    // Path structure: policies/{ownerUid}/{policyId}/{fileName}
+    // Allowed file names: policy.pdf, receipt.pdf, conditions.pdf, green-card.pdf
+    match /policies/{ownerUid}/{policyId}/{fileName} {
+      // Read via download URLs works regardless, but allow reads for authenticated users too.
+      allow read: if request.auth != null;
+      // TEMPORARY: Allow writes (upload/overwrite/delete) for any authenticated user
+      // to unblock admin uploads while IAM/Functions are fixed.
+      // NOTE: Revert to admin-only (request.auth.token.admin == true) after fixing IAM.
+      allow write: if request.auth != null
+                   && (fileName == 'policy.pdf' || fileName == 'receipt.pdf' || fileName == 'conditions.pdf' || fileName == 'green-card.pdf');
+    }
+
+    // Simulations PDF quote upload: simulations/{ownerUid}/{simulationId}/quote.pdf
+    match /simulations/{ownerUid}/{simulationId}/{fileName} {
+      // Allow reads for authenticated users.
+      allow read: if request.auth != null;
+      // TEMPORARY: Allow writes for any authenticated user to unblock admin uploads.
+      // NOTE: Re-harden to admin-only with request.auth.token.admin == true when IAM/claims are fixed.
+      allow write: if request.auth != null && fileName == 'quote.pdf';
+    }
+
+    // Deny other paths by default.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

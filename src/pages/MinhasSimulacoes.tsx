@@ -8,6 +8,8 @@ import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'fi
 import { useTranslation } from 'react-i18next';
 import emailjs from '@emailjs/browser';
 import { EMAILJS_SERVICE_ID_GENERIC, EMAILJS_TEMPLATE_ID_NOTIFY, EMAILJS_USER_ID_GENERIC } from '../emailjs.config';
+import PolicyForm from '../components/PolicyForm';
+import { createOrGetPolicyForSimulation } from '../utils/policies';
 
 type SimulationDoc = {
   id: string;
@@ -34,6 +36,8 @@ export default function MinhasSimulacoes(): React.ReactElement {
   const [uploadingId, setUploadingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [toast, setToast] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+  const [openPolicyForSimId, setOpenPolicyForSimId] = useState<string | null>(null);
+  const [policyInitialBySim, setPolicyInitialBySim] = useState<Record<string, any>>({});
   const app = typeof window !== 'undefined' ? getApp() : undefined;
   const firebaseCfg = (app && (app.options as any)) || {};
   const diagnostics = useMemo(() => {
@@ -397,7 +401,39 @@ export default function MinhasSimulacoes(): React.ReactElement {
                         </svg>
                         <span className="text-sm md:text-base font-medium underline">{t('mysims:pdf.viewCta')}</span>
                       </a>
+                      {!isAdmin && uid && (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              const { data } = await createOrGetPolicyForSimulation(uid, it.id, it.type);
+                              // Prefill with any known payload fields
+                              const prefill = {
+                                holderName: (it as any)?.payload?.nome || undefined,
+                                nif: (it as any)?.payload?.nif || undefined,
+                                email: (it as any)?.payload?.email || undefined,
+                                phone: (it as any)?.payload?.telefone || undefined,
+                                // Prefill split address: put full morada in street field; leave others blank
+                                addressStreet: (it as any)?.payload?.morada || undefined,
+                                addressPostalCode: undefined,
+                                addressLocality: undefined,
+                              };
+                              setPolicyInitialBySim((prev) => ({ ...prev, [it.id]: { ...data, ...prefill } }));
+                              setOpenPolicyForSimId(it.id);
+                            } catch (e) {
+                              console.error('[MinhasSimulacoes] create policy error', e);
+                              showToast('Falha ao preparar apólice', 'error');
+                            }
+                          }}
+                          className="inline-flex items-center gap-2 px-3 py-1.5 rounded bg-green-600 text-white hover:bg-green-700"
+                        >
+                          Avançar para Apólice
+                        </button>
+                      )}
                     </div>
+                  )}
+                  {openPolicyForSimId === it.id && uid && (
+                    <PolicyForm uid={uid} policyId={it.id} initial={policyInitialBySim[it.id]} onSaved={() => showToast('Apólice guardada com sucesso', 'success')} />
                   )}
                   {isAdmin && !hasPdf && (
                     <div className="mt-2">

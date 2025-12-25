@@ -2,6 +2,38 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isAuthed() {
+      return request.auth != null;
+    }
+    function isAdmin() {
+      return isAuthed() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true
+      );
+    }
+    function isOwner(uid) {
+      return isAuthed() && request.auth.uid == uid;
+    }
+    function isOwnerOrAdmin(uid) {
+      return isOwner(uid) || isAdmin();
+    }
+
+    // Hardened rules for policy documents; owner or admins can read/update.
+    // Admins list via collection group are supported by this per-document rule.
+    match /users/{uid}/policies/{policyId} {
+      allow read: if isOwnerOrAdmin(uid);
+      allow create: if isOwner(uid);
+      allow update: if isOwnerOrAdmin(uid);
+      allow delete: if isAdmin();
+    }
+
+    // Rules for simulation documents; owner or admins can read/update pdfUrl.
+    match /users/{uid}/simulations/{simulationId} {
+      allow read: if isOwnerOrAdmin(uid);
+      allow create: if isOwner(uid);
+      allow update: if isOwnerOrAdmin(uid);
+      allow delete: if isAdmin();
+    }
 
     // This rule allows anyone with your Firestore database reference to view, edit,
     // and delete all data in your Firestore database. It is useful for getting

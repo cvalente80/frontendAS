@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from "react";
 import Seo from "../components/Seo";
-import ChatWidget from "../components/ChatWidget";
 import emailjs from "@emailjs/browser";
 import { EMAILJS_SERVICE_ID_GENERIC, EMAILJS_TEMPLATE_ID_GENERIC, EMAILJS_USER_ID_GENERIC } from "../emailjs.config";
 import { Trans, useTranslation } from "react-i18next";
@@ -132,10 +131,41 @@ export default function Contato() {
         setMensagemTipo('sucesso');
         setForm({ nome: '', email: '', telefone: '', tipoPedido: t('requestType.info'), produtoInteresse: '', assunto: '', mensagem: '', aceitaRgpd: false });
       })
-      .catch((err) => {
+      .catch(async (err) => {
         console.error('[EmailJS][Contato] send error:', err);
-        setMensagem(t('messages.error'));
-        setMensagemTipo('erro');
+        const status = (err && typeof err === 'object' && 'status' in err) ? (err as any).status : undefined;
+        const shouldFallback = status === 412 || (err && String(err).includes('412'));
+        if (shouldFallback) {
+          try {
+            const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID;
+            const region = import.meta.env.VITE_FIREBASE_FUNCTIONS_REGION || 'us-central1';
+            const url = `https://${region}-${projectId}.cloudfunctions.net/sendContactEmail`;
+            const resp = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                service_id: EMAILJS_SERVICE_ID_GENERIC,
+                template_id: EMAILJS_TEMPLATE_ID_GENERIC,
+                user_id: EMAILJS_USER_ID_GENERIC,
+                template_params: templateParams,
+              }),
+            });
+            if (!resp.ok) {
+              const txt = await resp.text().catch(() => '');
+              throw new Error(`Fallback failed: ${resp.status} ${resp.statusText} ${txt}`);
+            }
+            setMensagem(t('messages.success'));
+            setMensagemTipo('sucesso');
+            setForm({ nome: '', email: '', telefone: '', tipoPedido: t('requestType.info'), produtoInteresse: '', assunto: '', mensagem: '', aceitaRgpd: false });
+          } catch (e) {
+            console.error('[EmailJS][Contato] fallback send error:', e);
+            setMensagem(t('messages.error'));
+            setMensagemTipo('erro');
+          }
+        } else {
+          setMensagem(t('messages.error'));
+          setMensagemTipo('erro');
+        }
       })
       .finally(() => setEnviando(false));
   };
@@ -200,6 +230,7 @@ export default function Contato() {
                 <option>{t('requestType.info')}</option>
                 <option>{t('requestType.adhoc')}</option>
                 <option>{t('requestType.contact')}</option>
+                <option>{t('requestType.change')}</option>
                 <option>{t('requestType.other')}</option>
               </select>
               <select name="produtoInteresse" value={form.produtoInteresse} onChange={handleChange} className="w-full p-3 border border-blue-300 rounded-lg">
@@ -254,8 +285,6 @@ export default function Contato() {
           </div>
         </div>
       </div>
-      {/* Chat/WhatsApp widget flutuante */}
-      <ChatWidget phoneNumber={"+351 962 116 764"} whatsappNumber={"351962116764"} />
     </div>
   );
 }
