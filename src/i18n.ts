@@ -139,10 +139,26 @@ const resources = {
       },
       statuses: {
         em_processamento: 'Em processamento',
-        simulacao_enviada: 'Simulação enviada'
+        simulacao_enviada: 'Simulação enviada',
+        simulacao_recebida: 'Simulação recebida'
       },
       loading: 'A carregar…',
       empty: 'Sem simulações para mostrar.',
+      detail: {
+        simTitle: 'Simulação',
+        brand: 'Marca',
+        model: 'Modelo',
+        version: 'Versão',
+        year: 'Ano',
+        insuranceType: 'Tipo de seguro',
+        holderTitle: 'Dados do Tomador',
+        nif: 'NIF',
+        birth: 'Nascimento',
+        licenseDate: 'Data Carta',
+        postalCode: 'Código Postal',
+        coverages: 'Coberturas',
+        others: 'Outros pedidos'
+      },
       pdf: {
         viewCta: 'Consultar simulação aqui',
         delete: 'Remover anexo PDF',
@@ -1179,10 +1195,26 @@ const resources = {
       },
       statuses: {
         em_processamento: 'Processing',
-        simulacao_enviada: 'Quote sent'
+        simulacao_enviada: 'Quote sent',
+        simulacao_recebida: 'Quote received'
       },
       loading: 'Loading…',
       empty: 'No quotes to display.',
+      detail: {
+        simTitle: 'Quote',
+        brand: 'Make',
+        model: 'Model',
+        version: 'Version',
+        year: 'Year',
+        insuranceType: 'Insurance type',
+        holderTitle: 'Policyholder details',
+        nif: 'NIF',
+        birth: 'Date of birth',
+        licenseDate: 'Driving licence date',
+        postalCode: 'Postcode',
+        coverages: 'Cover',
+        others: 'Other requests'
+      },
       admin: {
         inboxPt: 'Inbox Admin',
         inboxEn: 'Admin Inbox'

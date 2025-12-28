@@ -83,7 +83,26 @@ export default function SimulacaoAuto() {
         return { ...prev, coberturas };
       });
     } else {
-      setForm({ ...form, [name]: value });
+      if (name === 'tipoSeguro') {
+        const thirdParty = t('typeThirdParty');
+        const ownDamage = t('typeOwnDamage');
+        if (value === thirdParty) {
+          // Pré-selecionar Ocupantes, Vidros e Assistência em Viagem
+          const defaults = [
+            t('coverageLabels.occupants'),
+            t('coverageLabels.glass'),
+            t('coverageLabels.assistance'),
+          ];
+          setForm(prev => ({ ...prev, tipoSeguro: value, coberturas: defaults }));
+        } else if (value === ownDamage) {
+          // Sem pré-seleção para Danos Próprios
+          setForm(prev => ({ ...prev, tipoSeguro: value, coberturas: [] }));
+        } else {
+          setForm(prev => ({ ...prev, tipoSeguro: value }));
+        }
+      } else {
+        setForm({ ...form, [name]: value });
+      }
     }
   }
 

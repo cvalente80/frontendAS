@@ -89,7 +89,48 @@ export default function MobileNav() {
             </div>
           )}
           <ul className="flex flex-col gap-3 text-blue-800 font-medium">
-            <li><NavLink to={`/${base}`} end onClick={() => { setOpen(false); resetFloatingWidgets(); }} className={({ isActive }) => isActive ? "font-bold text-blue-900" : "hover:text-blue-900"}>{t('nav.homeLink')}</NavLink></li>
+            {user && (
+              <li>
+                <NavLink
+                  to={`/${base}/minhas-simulacoes`}
+                  onClick={() => setOpen(false)}
+                  className={({ isActive }) =>
+                    (isActive
+                      ? "bg-blue-600 text-white border-blue-600"
+                      : "bg-blue-50 text-blue-900 border-blue-200") +
+                    " inline-flex items-center gap-2 rounded-full border px-3 py-1.5"
+                  }
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+                    <path d="M9 3h6v4H9z"/>
+                    <path d="M9 12h6"/>
+                    <path d="M9 16h6"/>
+                  </svg>
+                  {t('nav.mySimulations')}
+                </NavLink>
+              </li>
+            )}
+            {user && (
+              <li>
+                <NavLink
+                  to={`/${base}/minhas-apolices`}
+                  onClick={() => setOpen(false)}
+                  className={({ isActive }) =>
+                    (isActive
+                      ? "bg-blue-600 text-white border-blue-600"
+                      : "bg-blue-50 text-blue-900 border-blue-200") +
+                    " inline-flex items-center gap-2 rounded-full border px-3 py-1.5"
+                  }
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <path d="M9.5 12.5l1.5 1.5 3.5-3.5"/>
+                  </svg>
+                  {t('nav.myPolicies')}
+                </NavLink>
+              </li>
+            )}
             {/* Simulador collapsible */}
             <li>
               <details className="group">
@@ -119,20 +160,6 @@ export default function MobileNav() {
             <li><NavLink to={`/${base}/produtos`} onClick={() => setOpen(false)} className={({ isActive }) => isActive ? "font-bold text-blue-900" : "hover:text-blue-900"}>{t('nav.products')}</NavLink></li>
             <li><NavLink to={`/${base}/contato`} onClick={() => setOpen(false)} className={({ isActive }) => isActive ? "font-bold text-blue-900" : "hover:text-blue-900"}>{t('nav.contact')}</NavLink></li>
             {/* Admin inbox link removed from mobile main nav; available under profile */}
-            {user && (
-              <li>
-                <NavLink to={`/${base}/minhas-simulacoes`} onClick={() => setOpen(false)} className={({ isActive }) => isActive ? "font-bold text-blue-900" : "hover:text-blue-900"}>
-                  {t('nav.mySimulations')}
-                </NavLink>
-              </li>
-            )}
-            {user && (
-              <li>
-                <NavLink to={`/${base}/minhas-apolices`} onClick={() => setOpen(false)} className={({ isActive }) => isActive ? "font-bold text-blue-900" : "hover:text-blue-900"}>
-                  {t('nav.myPolicies')}
-                </NavLink>
-              </li>
-            )}
             {user && isAdmin && (
               <li>
                 <NavLink to={`/${base}/admin/inbox`} onClick={() => setOpen(false)} className={({ isActive }) => isActive ? "font-bold text-blue-900" : "hover:text-blue-900"}>

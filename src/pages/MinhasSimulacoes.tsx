@@ -277,7 +277,7 @@ export default function MinhasSimulacoes(): React.ReactElement {
               >
                 <option value="all">{t('mysims:filters.all')}</option>
                 <option value="em_processamento">{t('mysims:statuses.em_processamento')}</option>
-                <option value="simulacao_enviada">{t('mysims:statuses.simulacao_enviada')}</option>
+                <option value="simulacao_enviada">{t(isAdmin ? 'mysims:statuses.simulacao_enviada' : 'mysims:statuses.simulacao_recebida')}</option>
               </select>
             </div>
           </div>
@@ -323,7 +323,7 @@ export default function MinhasSimulacoes(): React.ReactElement {
                   className: 'bg-red-100 border border-red-300 text-red-800',
                 },
                 simulacao_enviada: {
-                  label: t('mysims:statuses.simulacao_enviada'),
+                  label: t(isAdmin ? 'mysims:statuses.simulacao_enviada' : 'mysims:statuses.simulacao_recebida'),
                   className: 'bg-green-100 border border-green-300 text-green-800',
                 },
               };
@@ -348,7 +348,42 @@ export default function MinhasSimulacoes(): React.ReactElement {
                     </div>
                   </div>
                   {date && <p className="text-xs text-blue-700">{date}</p>}
-                  {it.summary && <p className="text-sm text-blue-800">{it.summary}</p>}
+                  {/* Detalhe estruturado para Auto; fallback para summary multi-linha */}
+                  {it.type === 'auto' ? (
+                    (() => {
+                      const p = (it as any).payload || {};
+                      const fmtDate = (raw?: string) => {
+                        if (!raw) return '-';
+                        const m = String(raw).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+                        if (m) return `${m[3]}-${m[2]}-${m[1]}`;
+                        return String(raw);
+                      };
+                      const cob = Array.isArray(p.coberturas) ? p.coberturas.join(', ') : (p.coberturas || '');
+                      const outros = (p.outrosPedidos || '').toString().trim() || '-';
+                      const nif = p.contribuinte || p.nif || '-';
+                      return (
+                        <div className="text-sm text-blue-800 space-y-1">
+                          <div className="font-semibold">{t('mysims:detail.simTitle')}</div>
+                          <div>{t('mysims:detail.brand')}: {p.marca || '-'}</div>
+                          <div>{t('mysims:detail.model')}: {p.modelo || '-'}</div>
+                          <div>{t('mysims:detail.version')}: {p.versao?.trim() || '-'}</div>
+                          <div>{t('mysims:detail.year')}: {p.ano || '-'}</div>
+                          <div>{t('mysims:detail.insuranceType')}: {p.tipoSeguro || '-'}</div>
+                          <div className="mt-2 font-semibold">{t('mysims:detail.holderTitle')}</div>
+                          <div>{t('mysims:detail.nif')}: {nif}</div>
+                          <div>{t('mysims:detail.birth')}: {fmtDate(p.dataNascimento)}</div>
+                          <div>{t('mysims:detail.licenseDate')}: {fmtDate(p.dataCartaConducao)}</div>
+                          <div>{t('mysims:detail.postalCode')}: {p.codigoPostal || '-'}</div>
+                          <div className="mt-2">{t('mysims:detail.coverages')}: {cob || '-'}</div>
+                          <div>{t('mysims:detail.others')}: {outros}</div>
+                        </div>
+                      );
+                    })()
+                  ) : (
+                    it.summary ? (
+                      <p className="text-sm text-blue-800 whitespace-pre-line">{it.summary}</p>
+                    ) : null
+                  )}
                   {/* PDF actions */}
                   {(it as any)?.pdfUrl && (
                     <div className="flex items-center gap-3">
