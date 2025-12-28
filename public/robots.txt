@@ -1,5 +1,5 @@
-# robots.txt for Ansião Seguros
+# robots.txt for Aurelio Seguros
 User-agent: *
 Allow: /
 
-Sitemap: https://cvalente80.github.io/frontendAS/sitemap.xml
+Sitemap: https://aurelioseguros.com/sitemap.xml
