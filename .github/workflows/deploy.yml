@@ -3,7 +3,8 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - REFACTORING-SIMULAÇOES # GitHub Pages                           # (legacy)
+      - main
+  pull_request:
   workflow_dispatch:
 permissions:
   contents: read
@@ -16,8 +17,6 @@ concurrency:
 
 jobs:
   build:
-    # Only build/upload Pages on specified branches ON push
-    if: github.ref == 'refs/heads/REFACTORING-SIMULAÇOES'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -32,8 +31,8 @@ jobs:
       - name: Install deps
         run: npm ci || npm i
 
-      - name: Build (with Firebase env)
-        run: npm run build:gh
+      - name: Build (custom domain base '/')
+        run: npm run build
         env:
           VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
           VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
@@ -49,8 +48,7 @@ jobs:
           path: dist
 
   deploy:
-    # Only deploy Pages on specified branches
-    if: github.ref == 'refs/heads/REFACTORING-SIMULAÇOES'    
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     environment:
@@ -60,3 +58,17 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  deploy-preview:
+    if: github.event_name == 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy Preview to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          preview: true
