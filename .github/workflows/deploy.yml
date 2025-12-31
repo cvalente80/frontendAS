@@ -3,7 +3,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main
+      - REFACTORING-SIMULAÇOES
   pull_request:
   workflow_dispatch:
 permissions:
@@ -49,7 +49,7 @@ jobs:
           path: dist
 
   deploy:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/REFACTORING-SIMULAÇOES'
     needs: build
     runs-on: ubuntu-latest
     environment:
