@@ -10,6 +10,7 @@ type SimRow = {
   title?: string;
   createdAt?: any;
   pdfUrl?: string;
+  status?: string;
 };
 
 export default function AdminSimulations(): React.ReactElement {
@@ -22,6 +23,8 @@ export default function AdminSimulations(): React.ReactElement {
   const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
+  const [search, setSearch] = useState<string>('');
+  const [sortKey, setSortKey] = useState<string>('dateDesc');
 
   const baseRef = useMemo(() => collectionGroup(db, 'simulations'), []);
 
@@ -41,7 +44,7 @@ export default function AdminSimulations(): React.ReactElement {
             const i = segments.indexOf('users');
             if (i >= 0 && segments[i + 1]) ownerUid = segments[i + 1];
           } catch {}
-          return { id: d.id, ownerUid, type: data?.type, title: data?.title, createdAt: data?.createdAt, pdfUrl: data?.pdfUrl } as SimRow;
+          return { id: d.id, ownerUid, type: data?.type, title: data?.title, createdAt: data?.createdAt, pdfUrl: data?.pdfUrl, status: data?.status } as SimRow;
         });
         setItems(rows);
         const last = snap.docs.length ? snap.docs[snap.docs.length - 1] : null;
@@ -64,7 +67,7 @@ export default function AdminSimulations(): React.ReactElement {
                 const i = segments.indexOf('users');
                 if (i >= 0 && segments[i + 1]) ownerUid = segments[i + 1];
               } catch {}
-              return { id: d.id, ownerUid, type: data?.type, title: data?.title, createdAt: data?.createdAt, pdfUrl: data?.pdfUrl } as SimRow;
+              return { id: d.id, ownerUid, type: data?.type, title: data?.title, createdAt: data?.createdAt, pdfUrl: data?.pdfUrl, status: data?.status } as SimRow;
             });
             setItems(rows);
             const last = one.docs.length ? one.docs[one.docs.length - 1] : null;
@@ -96,7 +99,7 @@ export default function AdminSimulations(): React.ReactElement {
           const i = segments.indexOf('users');
           if (i >= 0 && segments[i + 1]) ownerUid = segments[i + 1];
         } catch {}
-        return { id: d.id, ownerUid, type: data?.type, title: data?.title, createdAt: data?.createdAt, pdfUrl: data?.pdfUrl } as SimRow;
+        return { id: d.id, ownerUid, type: data?.type, title: data?.title, createdAt: data?.createdAt, pdfUrl: data?.pdfUrl, status: data?.status } as SimRow;
       });
       setItems((prev) => [...prev, ...rows]);
       const last = snap.docs.length ? snap.docs[snap.docs.length - 1] : null;
@@ -137,6 +140,25 @@ export default function AdminSimulations(): React.ReactElement {
             <option value="archived">archived (doc)</option>
           </select>
         </div>
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-blue-800">Ordenar</label>
+          <select className="border border-blue-200 rounded px-2 py-1 text-sm" value={sortKey} onChange={(e) => setSortKey(e.target.value)}>
+            <option value="dateDesc">Data ↓</option>
+            <option value="dateAsc">Data ↑</option>
+            <option value="typeAsc">Tipo A-Z</option>
+            <option value="pdfFirst">PDF primeiro</option>
+          </select>
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-blue-800">Pesquisar</label>
+          <input
+            type="text"
+            className="border border-blue-200 rounded px-2 py-1 text-sm"
+            placeholder="UID, ID, título, tipo"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
         <div className="text-sm text-blue-700">Total: {items.length}</div>
       </div>
       {loading && <div className="p-4 border border-blue-100 rounded bg-white shadow-sm">A carregar…</div>}
@@ -161,12 +183,25 @@ export default function AdminSimulations(): React.ReactElement {
                 const typeOk = typeFilter === 'all' || (r.type || '') === typeFilter;
                 const hasPdf = Boolean(r.pdfUrl);
                 const computedStatus = hasPdf ? 'simulacao_enviada' : 'em_processamento';
-                const docStatus = (r as any).status || undefined;
+                const docStatus = r.status || undefined;
                 const statusOk =
                   statusFilter === 'all' ||
                   statusFilter === computedStatus ||
                   statusFilter === docStatus;
-                return typeOk && statusOk;
+                const q = search.trim().toLowerCase();
+                const searchOk = !q || [r.ownerUid, r.id, r.title || '', r.type || ''].some((v) => (v || '').toLowerCase().includes(q));
+                return typeOk && statusOk && searchOk;
+              })
+              .sort((a, b) => {
+                const aPdf = Boolean(a.pdfUrl);
+                const bPdf = Boolean(b.pdfUrl);
+                const aDate = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+                const bDate = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+                if (sortKey === 'dateAsc') return aDate - bDate;
+                if (sortKey === 'typeAsc') return (a.type || '').localeCompare(b.type || '');
+                if (sortKey === 'pdfFirst') return (bPdf ? 1 : 0) - (aPdf ? 1 : 0);
+                // default: dateDesc
+                return bDate - aDate;
               })
               .map((r) => {
               const dateStr = r.createdAt?.toDate ? r.createdAt.toDate().toLocaleString() : '';
@@ -188,7 +223,7 @@ export default function AdminSimulations(): React.ReactElement {
                     {(() => {
                       const hasPdf = Boolean(r.pdfUrl);
                       const computedStatus = hasPdf ? 'simulacao_enviada' : 'em_processamento';
-                      const docStatus = (r as any).status || undefined;
+                      const docStatus = r.status || undefined;
                       return docStatus ? `${computedStatus} / ${docStatus}` : computedStatus;
                     })()}
                   </td>
