@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from '
 import { User, onAuthStateChanged } from 'firebase/auth';
 import { auth, handleAuthRedirect, signInWithGoogle, signOutUser, db, signInWithEmailPassword, registerWithEmailPassword, resetPassword } from '../firebase';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 
 // Helper para obter o nome mais fiável do utilizador
 function getDisplayName(u: User | null): string {
@@ -219,7 +219,13 @@ export function useAuth() {
 
 export function ProtectedRoute({ children }: { children: React.ReactElement }) {
   const { user, loading } = useAuth();
+  const location = useLocation();
+  const path = location.pathname || '/pt';
+  const lang = path.startsWith('/en') ? 'en' : 'pt';
   if (loading) return <div className="p-4 text-center">A carregar…</div>;
-  if (!user) return <div className="p-6 text-center">Acesso restrito. É necessário autenticação.</div>;
+  if (!user) {
+    const redirect = encodeURIComponent(location.pathname || `/${lang}`);
+    return <Navigate to={`/${lang}/auth/login?redirect=${redirect}`} replace />;
+  }
   return children;
 }

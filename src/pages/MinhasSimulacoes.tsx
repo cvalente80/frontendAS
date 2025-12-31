@@ -57,10 +57,12 @@ export default function MinhasSimulacoes(): React.ReactElement {
 
   const uid = user?.uid;
 
+  // Scope strictly to the current user's simulations to avoid
+  // permission issues with collectionGroup when not truly admin.
   const baseRef = useMemo(() => {
     if (!uid) return null;
-    return isAdmin ? collectionGroup(db, 'simulations') : collection(db, 'users', uid, 'simulations');
-  }, [uid, isAdmin]);
+    return collection(db, 'users', uid, 'simulations');
+  }, [uid]);
 
   function showToast(message: string, type: 'success' | 'error' | 'info' = 'info') {
     setToast({ message, type });
