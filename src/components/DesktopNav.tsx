@@ -124,7 +124,7 @@ export function DesktopNav() {
         {/* Admin inbox link removed from main nav; available under profile menu */}
         {user && (
           <NavLink
-            to={`/${base}/minhas-simulacoes`}
+            to={`/${base}/${isAdmin ? 'admin/simulacoes' : 'minhas-simulacoes'}`}
             className={({ isActive }) =>
               (isActive
                 ? "bg-blue-600 text-white border-blue-600 shadow-sm"
@@ -139,6 +139,23 @@ export function DesktopNav() {
               <path d="M9 16h6"/>
             </svg>
             {t('nav.mySimulations')}
+          </NavLink>
+        )}
+        {user && isAdmin && (
+          <NavLink
+            to={`/${base}/admin/inbox`}
+            className={({ isActive }) =>
+              (isActive
+                ? "bg-green-600 text-white border-green-600 shadow-sm"
+                : "bg-green-50 text-green-900 border-green-200 hover:bg-green-100") +
+              " whitespace-nowrap inline-flex items-center gap-2 rounded-full border px-3 py-1.5 transition-colors"
+            }
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M4 4h16v12H4z"/>
+              <path d="M2 20h20"/>
+            </svg>
+            {base === 'en' ? t('admin.inboxEn', { defaultValue: 'Admin Inbox' }) : t('admin.inboxPt', { defaultValue: 'Inbox Admin' })}
           </NavLink>
         )}
         {user && (
@@ -191,7 +208,7 @@ export function DesktopNav() {
             >
               <div className="flex flex-col text-blue-800">
                 <NavLink
-                  to={`/${base}/minhas-simulacoes`}
+                  to={`/${base}/${isAdmin ? 'admin/simulacoes' : 'minhas-simulacoes'}`}
                   onClick={() => setProfileOpen(false)}
                   className={({ isActive }) => (isActive ? "bg-blue-50 text-blue-900 font-semibold" : "hover:bg-gray-50 hover:text-blue-900") + " rounded px-3 py-2"}
                 >
