@@ -92,7 +92,7 @@ export default function MobileNav() {
             {user && (
               <li>
                 <NavLink
-                  to={`/${base}/${isAdmin ? 'admin/simulacoes' : 'minhas-simulacoes'}`}
+                  to={`/${base}/minhas-simulacoes`}
                   onClick={() => setOpen(false)}
                   className={({ isActive }) =>
                     (isActive

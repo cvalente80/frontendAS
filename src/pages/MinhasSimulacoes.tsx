@@ -61,8 +61,8 @@ export default function MinhasSimulacoes(): React.ReactElement {
   // permission issues with collectionGroup when not truly admin.
   const baseRef = useMemo(() => {
     if (!uid) return null;
-    return collection(db, 'users', uid, 'simulations');
-  }, [uid]);
+    return isAdmin ? (collectionGroup(db, 'simulations') as any) : collection(db, 'users', uid, 'simulations');
+  }, [uid, isAdmin]);
 
   function showToast(message: string, type: 'success' | 'error' | 'info' = 'info') {
     setToast({ message, type });

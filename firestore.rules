@@ -27,14 +27,6 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // Rules for simulation documents; owner or admins can read/update pdfUrl.
-    match /users/{uid}/simulations/{simulationId} {
-      allow read: if isOwnerOrAdmin(uid);
-      allow create: if isOwner(uid);
-      allow update: if isOwnerOrAdmin(uid);
-      allow delete: if isAdmin();
-    }
-
     // This rule allows anyone with your Firestore database reference to view, edit,
     // and delete all data in your Firestore database. It is useful for getting
     // started, but it is configured to expire after 30 days because it
@@ -44,6 +36,8 @@ service cloud.firestore {
     // Make sure to write security rules for your app before that time, or else
     // all client requests to your Firestore database will be denied until you Update
     // your rules
-    // Remove permissive catch-all; rely on scoped rules above.
+    match /{document=**} {
+      allow read, write: if request.time < timestamp.date(2026, 12, 31);
+    }
   }
 }

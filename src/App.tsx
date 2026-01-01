@@ -26,7 +26,6 @@ import PoliticaRGPD from "./pages/PoliticaRGPD";
 import './App.css';
 import ChatInbox from './pages/admin/ChatInbox';
 import ChatThread from './pages/admin/ChatThread';
-import AdminSimulations from './pages/admin/AdminSimulations';
 import { useAuth } from './context/AuthContext';
 const Login = lazy(() => import('./pages/auth/Login'));
 const Register = lazy(() => import('./pages/auth/Register'));
@@ -101,7 +100,6 @@ function App(): React.ReactElement {
           <Route path="politica-rgpd" element={<PoliticaRGPD />} />
     {/* Admin chat (guarded) */}
     <Route path="admin/inbox" element={<AdminRoute><ChatInbox /></AdminRoute>} />
-    <Route path="admin/simulacoes" element={<AdminRoute><AdminSimulations /></AdminRoute>} />
     <Route path="admin/chat/:chatId" element={<AdminRoute><ChatThread /></AdminRoute>} />
           {/* Not found inside lang: redirect to index within the same lang */}
           <Route path="*" element={<Navigate to={`/${base}`} replace />} />
