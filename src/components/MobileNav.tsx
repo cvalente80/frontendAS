@@ -92,7 +92,7 @@ export default function MobileNav() {
             {user && (
               <li>
                 <NavLink
-                  to={`/${base}/minhas-simulacoes`}
+                  to={`/${base}/${isAdmin ? 'admin/simulacoes' : 'minhas-simulacoes'}`}
                   onClick={() => setOpen(false)}
                   className={({ isActive }) =>
                     (isActive
@@ -159,7 +159,7 @@ export default function MobileNav() {
             </li>
             <li><NavLink to={`/${base}/produtos`} onClick={() => setOpen(false)} className={({ isActive }) => isActive ? "font-bold text-blue-900" : "hover:text-blue-900"}>{t('nav.products')}</NavLink></li>
             <li><NavLink to={`/${base}/contato`} onClick={() => setOpen(false)} className={({ isActive }) => isActive ? "font-bold text-blue-900" : "hover:text-blue-900"}>{t('nav.contact')}</NavLink></li>
-            {/* Admin inbox link removed from mobile main nav; available under profile */}
+            {/* Admin links for administrators */}
             {user && isAdmin && (
               <li>
                 <NavLink to={`/${base}/admin/inbox`} onClick={() => setOpen(false)} className={({ isActive }) => isActive ? "font-bold text-blue-900" : "hover:text-blue-900"}>
