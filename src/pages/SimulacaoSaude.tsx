@@ -118,7 +118,7 @@ export default function SimulacaoSaude() {
 		const pessoasSeguras = segurados
 			.map((s, i) => `${t('emailSummary.person')} ${i + 1}: ${t('emailSummary.name')} ${s.nome}, ${t('emailSummary.birth')} ${s.nascimentoManual}, ${t('emailSummary.nif')} ${s.contribuinte}`)
 			.join(' | ');
-		const templateParams = { nome, time, opcao, pessoasSeguras };
+		const templateParams = { nome, time, opcao, pessoasSeguras, email };
 
 		// Dry-run in dev or when explicitly requested via env
 		const dryRun = (import.meta as any)?.env?.DEV || (import.meta as any)?.env?.VITE_EMAIL_DRY_RUN === 'true';
