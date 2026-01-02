@@ -102,11 +102,13 @@ export default function MinhasSimulacoes(): React.ReactElement {
           showToast(t('mysims:pdf.emailSending'), 'info');
           const subject = t('mysims:pdf.emailSubject') as string;
           const nameForEmail = simData?.payload?.nome || user.displayName || 'Cliente';
-          // Force GH Pages absolute base for email links
-          const ghBase = 'https://cvalente80.github.io/frontendAS/';
+          // Construir base dinâmica: domínio atual + BASE_URL (Vite)
+          const origin = typeof window !== 'undefined' ? window.location.origin : 'https://cvalente80.github.io';
+          const rawBase = (import.meta as any).env?.BASE_URL ?? '/';
+          const baseUrl = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
           const currentLang = (typeof window !== 'undefined' && window.location.pathname.startsWith('/en')) ? 'en' : 'pt';
           const mysimsPath = currentLang === 'en' ? 'en/minhas-simulacoes' : 'pt/minhas-simulacoes';
-          const mysimsLink = ghBase + mysimsPath;
+          const mysimsLink = `${origin}${baseUrl}${mysimsPath}`;
           const pdfLink = url;
           const body = t('mysims:pdf.emailBody', { pdfLink, mysimsLink });
           const templateParams: Record<string, any> = {
