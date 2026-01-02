@@ -170,11 +170,11 @@ const resources = {
         confirmDelete: 'Remover o anexo PDF desta simulação?',
         successDelete: 'Anexo PDF removido.',
         errorDelete: 'Falha ao remover anexo PDF.'
-        , emailSuccess: 'Email enviado ao utilizador a informar da simulação pronta.',
-        emailError: 'PDF anexado, mas falhou o envio de email ao utilizador.'
-        , emailSending: 'A enviar email de notificação…'
-  , emailBody: 'A sua simulação está pronta. Pode aceder ao PDF diretamente aqui: {{pdfLink}} ou visualizar dentro do site em "As minhas simulações": {{mysimsLink}}.'
-        , emailSubject: 'Simulação pronta — Ansião Seguros'
+          , emailSuccess: 'Email enviado ao utilizador a informar da simulação pronta.',
+          emailError: 'PDF anexado, mas falhou o envio de email ao utilizador.'
+          , emailSending: 'A enviar email de notificação…'
+        , emailBody: 'A sua simulação está pronta.\n\nPode consultar de duas formas:\n- Ver o PDF diretamente aqui: {{pdfLink}}\n- Aceder à área "As minhas simulações": {{mysimsLink}}.'
+          , emailSubject: 'Simulação pronta — Ansião Seguros'
       },
       errors: {
         listenFallbackNote: 'Sem atualização em tempo real (listen falhou). A mostrar resultados atuais apenas uma vez.',
@@ -1054,7 +1054,7 @@ const resources = {
         mreb: { name: 'Seguro Multirriscos Empresarial', desc: 'Cobertura para as suas instalações e bens empresariais.' },
         condo: { name: 'Seguro Condomínio', desc: 'Proteção completa para edifícios e áreas comuns.' }
       },
-      benefitsTitle: 'Por que escolher a Ansião Seguros?',
+      benefitsTitle: 'Por que escolher Ansião Seguros?',
       benefits: [
         'Atendimento personalizado e consultoria especializada',
         'Simulação rápida e automática realizada pelos nossos sistemas inteligentes.',
