@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { updateProfile } from 'firebase/auth';
 import { useTranslation } from 'react-i18next';
 import { signInWithGoogle, signInWithEmailPassword, registerWithEmailPassword, resetPassword } from '../firebase';
@@ -21,6 +21,19 @@ export default function AuthChoiceModal({ open, onClose }: Props) {
   const [messageType, setMessageType] = useState<'ok'|'err'|null>(null);
 
   if (!open) return null;
+
+  // Permitir fechar com tecla Escape
+  useEffect(() => {
+    if (!open) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [open, onClose]);
 
   const finish = () => { setEmail(''); setPassword(''); setMode('choice'); onClose(); };
 
