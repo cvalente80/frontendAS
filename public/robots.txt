@@ -1,5 +1,5 @@
-# robots.txt for Aurelio Seguros
+# robots.txt for Ansião Seguros
 User-agent: *
 Allow: /
 
-Sitemap: https://aurelioseguros.com/sitemap.xml
+Sitemap: https://ansiaoseguros.pt/sitemap.xml
