@@ -116,6 +116,8 @@ export default function MinhasSimulacoes(): React.ReactElement {
             name: nameForEmail,
             body,
             email: recipientEmail,
+            pdfLink,
+            mysimsLink,
           };
           try {
             await emailjs.send(
