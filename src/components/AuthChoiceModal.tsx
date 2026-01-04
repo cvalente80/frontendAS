@@ -19,10 +19,7 @@ export default function AuthChoiceModal({ open, onClose }: Props) {
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [messageType, setMessageType] = useState<'ok'|'err'|null>(null);
-
-  if (!open) return null;
-
-  // Permitir fechar com tecla Escape
+  // Permitir fechar com tecla Escape (hook sempre chamado, mas só ativo quando open=true)
   useEffect(() => {
     if (!open) return;
     function handleKeyDown(e: KeyboardEvent) {
@@ -34,6 +31,8 @@ export default function AuthChoiceModal({ open, onClose }: Props) {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [open, onClose]);
+
+  if (!open) return null;
 
   const finish = () => { setEmail(''); setPassword(''); setMode('choice'); onClose(); };
 

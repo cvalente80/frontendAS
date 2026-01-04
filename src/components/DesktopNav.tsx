@@ -2,26 +2,17 @@ import React, { useEffect, useRef, useState } from 'react';
 import { NavLink, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
-import AuthChoiceModal from './AuthChoiceModal';
 import { useAuth } from '../context/AuthContext';
+import { useAuthUX } from '../context/AuthUXContext';
 
 export function DesktopNav() {
   const { t } = useTranslation('common');
   const { lang } = useParams();
   const base = lang === 'en' ? 'en' : 'pt';
   const { user, loading, displayName, loginWithGoogle, logout, isAdmin } = useAuth();
-  const [authOpen, setAuthOpen] = useState(false);
+  const { openAuth } = useAuthUX();
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement | null>(null);
-
-  // Listen for global requests to open auth modal (e.g., from ChatWidget)
-  useEffect(() => {
-    function onAuthOpen() {
-      setAuthOpen(true);
-    }
-    window.addEventListener('auth:open', onAuthOpen);
-    return () => window.removeEventListener('auth:open', onAuthOpen);
-  }, []);
 
   // Close profile menu on outside click or Escape
   useEffect(() => {
@@ -221,7 +212,7 @@ export function DesktopNav() {
           </div>
         ) : (
           <button
-            onClick={() => setAuthOpen(true)}
+            onClick={openAuth}
             className="flex items-center gap-2 rounded-full border border-blue-200 bg-white px-3 py-1.5 text-blue-900 hover:bg-blue-50 focus:outline-none"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -231,7 +222,6 @@ export function DesktopNav() {
             <span className="hidden xl:inline">{t('auth.loginCta')}</span>
           </button>
         )}
-      <AuthChoiceModal open={authOpen} onClose={() => setAuthOpen(false)} />
       </div>
     </nav>
   );
