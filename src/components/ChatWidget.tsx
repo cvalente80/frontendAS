@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { ensureChatForUser, addUserMessage, subscribeMessages, markUserOpened, updateChatIdentity, getChat, subscribeChatDoc, setUserTyping } from '../lib/chat';
 import { db } from '../firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { useAuthUX } from '../context/AuthUXContext';
 
 type ChatMessage = { id: string; who: 'user' | 'agent'; text: string; at: number };
 
@@ -17,6 +18,7 @@ export type ChatWidgetProps = {
 export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = false }: ChatWidgetProps) {
   const { t } = useTranslation('common');
   const { user } = useAuth();
+  const { openAuth } = useAuthUX();
   const navigate = useNavigate();
   const location = useLocation();
   const { lang } = useParams();
@@ -240,7 +242,7 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
     if (!input.trim()) return;
     if (!user) {
       try { localStorage.setItem('chat:intentOpen', '1'); } catch {}
-      window.dispatchEvent(new CustomEvent('auth:open'));
+      openAuth();
       return;
     }
     // Optimistic send: avoid awaiting network when SDK flags offline
@@ -382,8 +384,8 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
                       // Guarda intenção de abrir chat após login
                       localStorage.setItem('chat:intentOpen', '1');
                     } catch {}
-                    // Abre o mesmo modal de autenticação usado no botão Entrar
-                    window.dispatchEvent(new CustomEvent('auth:open'));
+                    // Abre o modal de autenticação centralizado
+                    openAuth();
                     return;
                   }
                   setOpen(true);

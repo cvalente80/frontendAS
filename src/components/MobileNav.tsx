@@ -3,16 +3,16 @@ import { NavLink, useLocation, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useAuth } from '../context/AuthContext';
-import AuthChoiceModal from './AuthChoiceModal';
+import { useAuthUX } from '../context/AuthUXContext';
 
 export default function MobileNav() {
   const [open, setOpen] = useState(false);
-  const [authOpen, setAuthOpen] = useState(false);
   const location = useLocation();
   const { t } = useTranslation('common');
   const { lang } = useParams();
   const base = lang === 'en' ? 'en' : 'pt';
   const { user, loading, displayName, loginWithGoogle, logout, isAdmin } = useAuth();
+  const { openAuth } = useAuthUX();
   function resetFloatingWidgets() {
     try {
       localStorage.removeItem('chat:hideWhatsApp');
@@ -25,14 +25,6 @@ export default function MobileNav() {
   useEffect(() => {
     setOpen(false);
   }, [location.pathname]);
-  // Listen for global auth open requests (e.g., from ChatWidget)
-  useEffect(() => {
-    function onAuthOpen() {
-      setAuthOpen(true);
-    }
-    window.addEventListener('auth:open', onAuthOpen);
-    return () => window.removeEventListener('auth:open', onAuthOpen);
-  }, []);
   return (
     <header className="bg-white sticky top-0 z-50 shadow-sm md:hidden">
       <div className="py-4 px-4 flex justify-between items-center">
@@ -62,7 +54,7 @@ export default function MobileNav() {
               </button>
             </div>
           ) : (
-            <button aria-label={t('auth.signIn')} className="p-2 rounded-full border border-blue-200" onClick={() => setAuthOpen(true)}>
+            <button aria-label={t('auth.signIn')} className="p-2 rounded-full border border-blue-200" onClick={openAuth}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1e3a8a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                 <circle cx="12" cy="7" r="4"/>
@@ -178,7 +170,6 @@ export default function MobileNav() {
           </ul>
         </nav>
       )}
-      <AuthChoiceModal open={authOpen} onClose={() => setAuthOpen(false)} />
     </header>
   );
 }
