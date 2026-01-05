@@ -13,6 +13,10 @@ export function DesktopNav() {
   const { openAuth } = useAuthUX();
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement | null>(null);
+  const brandName =
+    typeof window !== 'undefined' && window.location.hostname.includes('aurelio')
+      ? 'Aurélio Seguros'
+      : 'Ansião Seguros';
 
   // Close profile menu on outside click or Escape
   useEffect(() => {
@@ -47,7 +51,7 @@ export function DesktopNav() {
     <nav className="bg-white py-4 px-8 flex justify-between items-center sticky top-0 z-50 shadow-sm">
       <NavLink to={`/${base}`} className="flex items-center gap-2 shrink-0" onClick={resetFloatingWidgets}>
         <img src={`${import.meta.env.BASE_URL}logo-empresarial.svg`} alt="Logo Ansião Seguros" className="h-10 w-10 xl:h-12 xl:w-12" />
-  <span className="text-2xl xl:text-3xl font-bold text-blue-900 hover:text-blue-700 whitespace-nowrap">{t('brand')}</span>
+  <span className="text-2xl xl:text-3xl font-bold text-blue-900 hover:text-blue-700 whitespace-nowrap">{brandName}</span>
       </NavLink>
       <div className="hidden md:flex items-center gap-4 xl:gap-6 text-blue-700 font-medium text-sm xl:text-base">
         {/* Dropdown Simulador */}
