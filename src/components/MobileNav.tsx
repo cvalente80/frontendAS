@@ -13,6 +13,10 @@ export default function MobileNav() {
   const base = lang === 'en' ? 'en' : 'pt';
   const { user, loading, displayName, loginWithGoogle, logout, isAdmin } = useAuth();
   const { openAuth } = useAuthUX();
+  const brandName =
+    typeof window !== 'undefined' && window.location.hostname.includes('aurelio')
+      ? 'Aurélio Seguros'
+      : 'Ansião Seguros';
   function resetFloatingWidgets() {
     try {
       localStorage.removeItem('chat:hideWhatsApp');
@@ -30,7 +34,7 @@ export default function MobileNav() {
       <div className="py-4 px-4 flex justify-between items-center">
         <NavLink to={`/${base}`} className="flex items-center gap-2" onClick={() => { setOpen(false); resetFloatingWidgets(); }}>
           <img src={`${import.meta.env.BASE_URL}logo-empresarial.svg`} alt="Logo Ansião Seguros" className="h-8 w-8" />
-          <span className="text-lg font-semibold text-blue-900 tracking-tight">{t('brand')}</span>
+          <span className="text-lg font-semibold text-blue-900 tracking-tight">{brandName}</span>
         </NavLink>
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
