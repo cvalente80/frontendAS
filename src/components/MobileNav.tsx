@@ -13,10 +13,10 @@ export default function MobileNav() {
   const base = lang === 'en' ? 'en' : 'pt';
   const { user, loading, displayName, loginWithGoogle, logout, isAdmin } = useAuth();
   const { openAuth } = useAuthUX();
-  const brandName =
-    typeof window !== 'undefined' && window.location.hostname.includes('aurelio')
-      ? 'Aurélio Seguros'
-      : 'Ansião Seguros';
+  const host = typeof window !== 'undefined' ? window.location.hostname : '';
+  let brandName = 'Ansião Seguros';
+  if (host.includes('aurelio')) brandName = 'Aurélio Seguros';
+  else if (host.includes('povoa')) brandName = 'Póvoa Seguros';
   function resetFloatingWidgets() {
     try {
       localStorage.removeItem('chat:hideWhatsApp');
