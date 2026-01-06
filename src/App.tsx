@@ -44,6 +44,10 @@ function App(): React.ReactElement {
   function LangScopedRoutes() {
     const { lang } = useParams();
     const base = lang === 'en' ? 'en' : (lang === 'pt' ? 'pt' : 'pt');
+    const host = typeof window !== 'undefined' ? window.location.hostname : '';
+    let brandName = 'Ansião Seguros';
+    if (host.includes('aurelio')) brandName = 'Aurélio Seguros';
+    else if (host.includes('povoa')) brandName = 'Póvoa Seguros';
     // Force i18n language to follow URL param (robust on first load / GH Pages)
     useEffect(() => {
       if (lang === 'pt' || lang === 'en') {
@@ -108,7 +112,7 @@ function App(): React.ReactElement {
         {/* Footer com link para RGPD */}
         <footer className="bg-blue-900 text-blue-100 py-6 mt-12 text-center w-full">
           <div className="container mx-auto flex flex-col md:flex-row justify-between items-center px-4 gap-2">
-            <span className="text-sm">© {new Date().getFullYear()} Ansião Seguros. Todos os direitos reservados.</span>
+            <span className="text-sm">© {new Date().getFullYear()} {brandName}. Todos os direitos reservados.</span>
             <div className="flex gap-4 items-center">
               <NavLink to={`/${base}/contato`} className="text-blue-200 underline hover:text-white text-sm">Contacto</NavLink>
               <span className="hidden md:inline-block">|</span>
