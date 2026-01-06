@@ -33,6 +33,11 @@ export default function Contato() {
   const { t } = useTranslation('contact');
   const { lang } = useParams();
   const base = lang === 'en' ? 'en' : 'pt';
+  const host = typeof window !== 'undefined' ? window.location.hostname : '';
+  const isPovoa = host.includes('povoa');
+  const mapQuery = isPovoa ? 'Póvoa de Santa Iria, Portugal' : 'Ansião, Leiria, Portugal';
+  const mapSrc = `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&hl=${base === 'en' ? 'en' : 'pt-PT'}&z=13&output=embed`;
+  const mapLink = `https://maps.google.com/?q=${encodeURIComponent(mapQuery)}`;
   const [form, setForm] = useState<FormState>({
     nome: "",
     email: "",
@@ -269,11 +274,13 @@ export default function Contato() {
           {/* Mapa */}
           <div>
             <h3 className="text-xl font-semibold text-blue-900 mb-3">{t('map.whereTitle')}</h3>
-            <p className="text-blue-700 mb-3">{t('map.whereDesc')}</p>
+            <p className="text-blue-700 mb-3">
+              {isPovoa ? 'Póvoa de Santa Iria, concelho de Vila Franca de Xira.' : t('map.whereDesc')}
+            </p>
             <div className="rounded-xl overflow-hidden shadow border border-blue-200">
               <iframe
                 title={t('map.iframeTitle')}
-                src={`https://www.google.com/maps?q=Ansião,Leiria,Portugal&hl=${base === 'en' ? 'en' : 'pt-PT'}&z=13&output=embed`}
+                src={mapSrc}
                 width="100%"
                 height="360"
                 style={{ border: 0 }}
@@ -281,7 +288,7 @@ export default function Contato() {
                 referrerPolicy="no-referrer-when-downgrade"
               />
             </div>
-            <a className="text-blue-700 underline mt-2 inline-block" href="https://maps.google.com/?q=Ansião,Leiria,Portugal" target="_blank" rel="noreferrer">{t('map.openInMaps')}</a>
+            <a className="text-blue-700 underline mt-2 inline-block" href={mapLink} target="_blank" rel="noreferrer">{t('map.openInMaps')}</a>
           </div>
         </div>
       </div>
