@@ -274,7 +274,9 @@ export default function Contato() {
           {/* Mapa */}
           <div>
             <h3 className="text-xl font-semibold text-blue-900 mb-3">{t('map.whereTitle')}</h3>
-            <p className="text-blue-700 mb-3">{t('map.whereDesc')}</p>
+            <p className="text-blue-700 mb-3">
+              {isPovoa ? 'Póvoa de Santa Iria, concelho de Vila Franca de Xira.' : t('map.whereDesc')}
+            </p>
             <div className="rounded-xl overflow-hidden shadow border border-blue-200">
               <iframe
                 title={t('map.iframeTitle')}
