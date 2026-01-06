@@ -47,19 +47,12 @@ jobs:
         run: echo "${{ vars.CUSTOM_DOMAIN }}" > dist/CNAME
 
       - name: Update SEO meta tags in built index.html
+        env:
+          SEO_SITE_NAME: ${{ vars.SEO_SITE_NAME }}
+          SEO_CITY_DESC: ${{ vars.SEO_CITY_DESC }}
         run: |
-          INDEX_FILE="dist/index.html"
-          SITE_NAME="${{ vars.SEO_SITE_NAME }}"
-          CITY_DESC="${{ vars.SEO_CITY_DESC }}"
-          FULL_DESC="$SITE_NAME — Seguros Auto, Vida, Saúde, Habitação e soluções empresariais em $CITY_DESC. Simulações e propostas personalizadas."
-
-          sed -i "s|<title>.*</title>|<title>$SITE_NAME</title>|" "$INDEX_FILE"
-          sed -i "s|<meta name=\"description\"[^"]*content=\".*\"|<meta name=\"description\" content=\"$FULL_DESC\"|" "$INDEX_FILE"
-          sed -i "s|<meta property=\"og:site_name\" content=\".*\"|<meta property=\"og:site_name\" content=\"$SITE_NAME\"|" "$INDEX_FILE"
-          sed -i "s|<meta property=\"og:title\" content=\".*\"|<meta property=\"og:title\" content=\"$SITE_NAME\"|" "$INDEX_FILE"
-          sed -i "s|<meta property=\"og:description\"[^"]*content=\".*\"|<meta property=\"og:description\" content=\"$FULL_DESC\"|" "$INDEX_FILE"
-          sed -i "s|<meta name=\"twitter:title\" content=\".*\"|<meta name=\"twitter:title\" content=\"$SITE_NAME\"|" "$INDEX_FILE"
-          sed -i "s|<meta name=\"twitter:description\"[^"]*content=\".*\"|<meta name=\"twitter:description\" content=\"$FULL_DESC\"|" "$INDEX_FILE"
+          chmod +x scripts/update-seo-meta.sh
+          ./scripts/update-seo-meta.sh dist/index.html
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
