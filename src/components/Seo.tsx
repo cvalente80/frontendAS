@@ -10,8 +10,6 @@ type SeoProps = {
   structuredData?: object | object[];
 };
 
-const DEFAULT_TITLE = 'Ansião Seguros';
-const DEFAULT_DESC = 'Ansião Seguros — Seguros Auto, Vida, Saúde, Habitação e soluções empresariais em Ansião (Leiria). Simulações e propostas personalizadas.';
 const DEFAULT_IMAGE = `${import.meta.env.BASE_URL}logo-empresarial.svg`;
 
 function siteBase(): string | null {
@@ -64,9 +62,27 @@ export default function Seo({ title, description, image, canonicalPath, noIndex,
     const lang = i18n.language === 'en' ? 'en' : 'pt';
     document.documentElement.lang = lang;
 
+    // Brand and location by domain
+    const host = typeof window !== 'undefined' ? window.location.hostname.toLowerCase() : '';
+    let brandName = 'Ansião Seguros';
+    let cityDesc = 'Ansião (Leiria)';
+    let addressLocality = 'Ansião';
+    let addressRegion = 'Leiria';
+    if (host.includes('aurelio')) {
+      brandName = 'Aurélio Seguros';
+      cityDesc = 'Ansião (Leiria)';
+      addressLocality = 'Ansião';
+      addressRegion = 'Leiria';
+    } else if (host.includes('povoaseg') || host.includes('povoa')) {
+      brandName = 'Póvoa Seguros';
+      cityDesc = 'Póvoa de Santa Iria (Vila Franca de Xira)';
+      addressLocality = 'Póvoa de Santa Iria';
+      addressRegion = 'Lisboa';
+    }
+
     const base = siteBase();
-    const resolvedTitle = title ? `${DEFAULT_TITLE} | ${title}` : DEFAULT_TITLE;
-    const desc = description || DEFAULT_DESC;
+    const resolvedTitle = title ? `${brandName} | ${title}` : brandName;
+    const desc = description || `${brandName} — Seguros Auto, Vida, Saúde, Habitação e soluções empresariais em ${cityDesc}. Simulações e propostas personalizadas.`;
     const img = image || DEFAULT_IMAGE;
     const url = (() => {
       if (!base) return undefined;
@@ -103,8 +119,8 @@ export default function Seo({ title, description, image, canonicalPath, noIndex,
     // Open Graph
     if (url) upsertMetaByProp('og:url', url);
     upsertMetaByProp('og:type', 'website');
-    upsertMetaByProp('og:site_name', 'Ansião Seguros');
-  upsertMetaByProp('og:locale', lang === 'en' ? 'en_GB' : 'pt_PT');
+    upsertMetaByProp('og:site_name', brandName);
+    upsertMetaByProp('og:locale', lang === 'en' ? 'en_GB' : 'pt_PT');
     upsertMetaByProp('og:locale:alternate', lang === 'en' ? 'pt_PT' : 'en_GB');
     upsertMetaByProp('og:title', resolvedTitle);
     upsertMetaByProp('og:description', desc);
@@ -146,20 +162,20 @@ export default function Seo({ title, description, image, canonicalPath, noIndex,
         {
           "@context": "https://schema.org",
           "@type": "Organization",
-          name: "Ansião Seguros",
+          name: brandName,
           url: base,
           logo: `${import.meta.env.BASE_URL}logo-empresarial.svg`,
           address: {
             "@type": "PostalAddress",
-            addressLocality: "Ansião",
-            addressRegion: "Leiria",
+            addressLocality,
+            addressRegion,
             addressCountry: "PT"
           }
         },
         {
           "@context": "https://schema.org",
           "@type": "WebSite",
-          name: "Ansião Seguros",
+          name: brandName,
           url: base,
           inLanguage: lang === 'en' ? 'en-GB' : 'pt-PT',
           potentialAction: {
