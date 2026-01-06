@@ -25,8 +25,45 @@
   <!-- Verificação AurelioSeguros -->
   <meta name="google-site-verification" content="26sjfZ_wDpyaL88DBbl_fw94ihTVoIfm_kGIv34aHSo" />
 
-  <!-- Verificação AnsiaoSeguros -->
+  <!-- Verificação Povoa Seguros-->
+<meta name="google-site-verification" content="xY6Tgbja6gzShlHE3BnOVlUZuARSzsyxaZ8L2UDajuE" />
+
+  <!-- Verificação Ansiao -->
   <meta name="google-site-verification" content="11mOxsrS8M7sp7oADcO3cJJQm_0l_Xs5V47Gnkh25uI" />
+
+  <script>
+    (function () {
+      try {
+        var host = window.location.hostname || '';
+        var siteName = 'Ansião Seguros';
+        var cityDesc = 'Ansião (Leiria)';
+        if (host.indexOf('aurelio') !== -1) {
+          siteName = 'Aurélio Seguros';
+          cityDesc = 'Ansião (Leiria)';
+        } else if (host.indexOf('povoa') !== -1) {
+          siteName = 'Póvoa Seguros';
+          cityDesc = 'Póvoa de Santa Iria (Vila Franca de Xira)';
+        }
+
+        var fullDesc = siteName + ' — Seguros Auto, Vida, Saúde, Habitação e soluções empresariais em ' + cityDesc + '. Simulações e propostas personalizadas.';
+
+        function setMeta(selector, attr, value) {
+          var el = document.querySelector(selector);
+          if (el) el.setAttribute(attr, value);
+        }
+
+        document.title = siteName;
+        setMeta('meta[name="description"]', 'content', fullDesc);
+        setMeta('meta[property="og:site_name"]', 'content', siteName);
+        setMeta('meta[property="og:title"]', 'content', siteName);
+        setMeta('meta[property="og:description"]', 'content', fullDesc);
+        setMeta('meta[name="twitter:title"]', 'content', siteName);
+        setMeta('meta[name="twitter:description"]', 'content', fullDesc);
+      } catch (e) {
+        // ignore
+      }
+    })();
+  </script>
 </head>
 
 <body>
