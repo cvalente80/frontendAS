@@ -34,13 +34,13 @@
   <script>
     (function () {
       try {
-        var host = window.location.hostname || '';
+        var host = (window.location.hostname || '').toLowerCase();
         var siteName = 'Ansião Seguros';
         var cityDesc = 'Ansião (Leiria)';
         if (host.indexOf('aurelio') !== -1) {
           siteName = 'Aurélio Seguros';
           cityDesc = 'Ansião (Leiria)';
-        } else if (host.indexOf('povoa') !== -1) {
+        } else if (host.indexOf('povoaseg') !== -1 || host.indexOf('povoa') !== -1) {
           siteName = 'Póvoa Seguros';
           cityDesc = 'Póvoa de Santa Iria (Vila Franca de Xira)';
         }
