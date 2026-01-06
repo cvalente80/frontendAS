@@ -13,10 +13,10 @@ export function DesktopNav() {
   const { openAuth } = useAuthUX();
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement | null>(null);
-  const brandName =
-    typeof window !== 'undefined' && window.location.hostname.includes('aurelio')
-      ? 'Aurélio Seguros'
-      : 'Ansião Seguros';
+  const host = typeof window !== 'undefined' ? window.location.hostname : '';
+  let brandName = 'Ansião Seguros';
+  if (host.includes('aurelio')) brandName = 'Aurélio Seguros';
+  else if (host.includes('povoa')) brandName = 'Póvoa Seguros';
 
   // Close profile menu on outside click or Escape
   useEffect(() => {
