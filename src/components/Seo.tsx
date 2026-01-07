@@ -81,8 +81,17 @@ export default function Seo({ title, description, image, canonicalPath, noIndex,
     }
 
     const base = siteBase();
-    const resolvedTitle = title ? `${brandName} | ${title}` : brandName;
-    const desc = description || `${brandName} — Seguros Auto, Vida, Saúde, Habitação e soluções empresariais em ${cityDesc}. Simulações e propostas personalizadas.`;
+    let resolvedTitle = title ? `${brandName} | ${title}` : brandName;
+    // Normalizar cidade dentro do título caso a tradução ainda refira Ansião
+    resolvedTitle = resolvedTitle
+      .replace(/Ansião \(Leiria\)/g, cityDesc)
+      .replace(/Ansião/g, cityDesc);
+
+    const rawDesc = description || `${brandName} — Seguros Auto, Vida, Saúde, Habitação e soluções empresariais em ${cityDesc}. Simulações e propostas personalizadas.`;
+    const desc = rawDesc
+      .replace(/Ansião Seguros/g, brandName)
+      .replace(/Ansião \(Leiria\)/g, cityDesc)
+      .replace(/Ansião/g, cityDesc);
     const img = image || DEFAULT_IMAGE;
     const url = (() => {
       if (!base) return undefined;

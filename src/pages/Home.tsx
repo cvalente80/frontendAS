@@ -85,19 +85,9 @@ export default function Home() {
 		<div className="min-h-screen bg-white flex flex-col relative">
 			<Seo
 				title={t('heroTitle')}
-				description={t('heroDesc')}
 				image={`${import.meta.env.BASE_URL}logo-empresarial.svg`}
 				canonicalPath={`/${base}`}
-				structuredData={[
-					{
-						"@context": "https://schema.org",
-						"@type": "Organization",
-						name: "Ansião Seguros",
-						url: typeof window !== 'undefined' ? window.location.origin + (import.meta.env.BASE_URL || '/') : undefined,
-						logo: `${import.meta.env.BASE_URL}logo-empresarial.svg`,
-						address: { "@type": "PostalAddress", addressLocality: "Ansião", addressRegion: "Leiria", addressCountry: "PT" },
-					},
-				]}
+				}
 			/>
 			{/* Hero responsivo */}
 			<ResponsiveGate mobile={<HeroMobile />} desktop={<HeroDesktop />} />
