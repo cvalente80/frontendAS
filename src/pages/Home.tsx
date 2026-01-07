@@ -87,7 +87,6 @@ export default function Home() {
 				title={t('heroTitle')}
 				image={`${import.meta.env.BASE_URL}logo-empresarial.svg`}
 				canonicalPath={`/${base}`}
-				}
 			/>
 			{/* Hero responsivo */}
 			<ResponsiveGate mobile={<HeroMobile />} desktop={<HeroDesktop />} />
