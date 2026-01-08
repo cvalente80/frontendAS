@@ -78,6 +78,11 @@ export default function Seo({ title, description, image, canonicalPath, noIndex,
       cityDesc = 'Póvoa de Santa Iria (Vila Franca de Xira)';
       addressLocality = 'Póvoa de Santa Iria';
       addressRegion = 'Lisboa';
+    } else if (host.includes('lisboaseg') || host.includes('lisboa')) {
+      brandName = 'Lisboa Seguros';
+      cityDesc = 'Lisboa';
+      addressLocality = 'Lisboa';
+      addressRegion = 'Lisboa';
     }
 
     const base = siteBase();

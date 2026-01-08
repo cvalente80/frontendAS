@@ -33,9 +33,14 @@ export default function Contato() {
   const { t } = useTranslation('contact');
   const { lang } = useParams();
   const base = lang === 'en' ? 'en' : 'pt';
-  const host = typeof window !== 'undefined' ? window.location.hostname : '';
-  const isPovoa = host.includes('povoa');
-  const mapQuery = isPovoa ? 'Póvoa de Santa Iria, Portugal' : 'Ansião, Leiria, Portugal';
+  const host = typeof window !== 'undefined' ? window.location.hostname.toLowerCase() : '';
+  const isPovoa = host.includes('povoaseg') || host.includes('povoa');
+  const isLisboa = host.includes('lisboaseg') || host.includes('lisboa');
+  const mapQuery = isLisboa
+    ? 'Lisboa, Portugal'
+    : isPovoa
+      ? 'Póvoa de Santa Iria, Portugal'
+      : 'Ansião, Leiria, Portugal';
   const mapSrc = `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&hl=${base === 'en' ? 'en' : 'pt-PT'}&z=13&output=embed`;
   const mapLink = `https://maps.google.com/?q=${encodeURIComponent(mapQuery)}`;
   const [form, setForm] = useState<FormState>({
@@ -275,7 +280,11 @@ export default function Contato() {
           <div>
             <h3 className="text-xl font-semibold text-blue-900 mb-3">{t('map.whereTitle')}</h3>
             <p className="text-blue-700 mb-3">
-              {isPovoa ? 'Póvoa de Santa Iria, concelho de Vila Franca de Xira.' : t('map.whereDesc')}
+              {isLisboa
+                ? 'Lisboa, Portugal.'
+                : isPovoa
+                  ? 'Póvoa de Santa Iria, concelho de Vila Franca de Xira.'
+                  : t('map.whereDesc')}
             </p>
             <div className="rounded-xl overflow-hidden shadow border border-blue-200">
               <iframe
