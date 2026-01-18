@@ -23,6 +23,7 @@ import ProdutoMultirriscosEmpresarial from "./pages/ProdutoMultirriscosEmpresari
 import ProdutoCondominio from "./pages/ProdutoCondominio";
 import SimulacaoCondominio from "./pages/SimulacaoCondominio";
 import PoliticaRGPD from "./pages/PoliticaRGPD";
+import Noticias from "./pages/Noticias";
 import './App.css';
 import ChatInbox from './pages/admin/ChatInbox';
 import ChatThread from './pages/admin/ChatThread';
@@ -44,10 +45,12 @@ function App(): React.ReactElement {
   function LangScopedRoutes() {
     const { lang } = useParams();
     const base = lang === 'en' ? 'en' : (lang === 'pt' ? 'pt' : 'pt');
-    const host = typeof window !== 'undefined' ? window.location.hostname : '';
+    const host = typeof window !== 'undefined' ? window.location.hostname.toLowerCase() : '';
     let brandName = 'Ansião Seguros';
     if (host.includes('aurelio')) brandName = 'Aurélio Seguros';
-    else if (host.includes('povoa')) brandName = 'Póvoa Seguros';
+    else if (host.includes('povoaseg') || host.includes('povoa')) brandName = 'Póvoa Seguros';
+    else if (host.includes('lisboaseg') || host.includes('lisboa')) brandName = 'Lisboa Seguros';
+    else if (host.includes('portoseg') || host.includes('porto')) brandName = 'Porto Seguros';
     // Force i18n language to follow URL param (robust on first load / GH Pages)
     useEffect(() => {
       if (lang === 'pt' || lang === 'en') {
@@ -102,6 +105,7 @@ function App(): React.ReactElement {
           <Route path="produto-condominio" element={<ProdutoCondominio />} />
           <Route path="simulacao-condominio" element={<SimulacaoCondominio />} />
           <Route path="politica-rgpd" element={<PoliticaRGPD />} />
+          <Route path="noticias" element={<Noticias />} />
     {/* Admin chat (guarded) */}
     <Route path="admin/inbox" element={<AdminRoute><ChatInbox /></AdminRoute>} />
     <Route path="admin/chat/:chatId" element={<AdminRoute><ChatThread /></AdminRoute>} />
