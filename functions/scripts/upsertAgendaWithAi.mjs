@@ -24,6 +24,53 @@ function env(name, fallback = '') {
   return process.env[name] || fallback;
 }
 
+// Tenta descobrir automaticamente o URL da agenda para a região/mês atuais.
+// Prioridade:
+// 1) URL explícito passado por argumento (sourceUrlArg)
+// 2) Variável de ambiente AGENDA_URL_<REGIÃO>
+// 3) Pesquisa Web (ex.: Bing Search API) se SEARCH_API_KEY estiver configurada
+async function discoverAgendaUrl(region, monthLabel, explicitUrl) {
+  if (explicitUrl) return explicitUrl;
+
+  const envKey = `AGENDA_URL_${String(region || '').toUpperCase()}`;
+  const configured = env(envKey, '');
+  if (configured) return configured;
+
+  const searchKey = env('SEARCH_API_KEY', '');
+  const searchEndpoint = env('SEARCH_API_ENDPOINT', 'https://api.bing.microsoft.com/v7.0/search');
+  if (!searchKey) return '';
+
+  const regionNames = {
+    ansiao: 'Ansião',
+    povoa: 'Póvoa de Santa Iria',
+    lisboa: 'Lisboa',
+    porto: 'Porto',
+  };
+  const humanRegion = regionNames[region] || region;
+
+  const query = `agenda de eventos ${monthLabel} ${humanRegion} Câmara Municipal`;
+
+  try {
+    const url = `${searchEndpoint}?q=${encodeURIComponent(query)}&mkt=pt-PT`;
+    const resp = await fetch(url, {
+      headers: {
+        'Ocp-Apim-Subscription-Key': searchKey,
+      },
+    });
+    if (!resp.ok) {
+      return '';
+    }
+    const data = await resp.json().catch(() => ({}));
+    const first = data && data.webPages && Array.isArray(data.webPages.value)
+      ? data.webPages.value[0]
+      : null;
+    const foundUrl = first && typeof first.url === 'string' ? first.url : '';
+    return foundUrl || '';
+  } catch {
+    return '';
+  }
+}
+
 function getCurrentMonthKey() {
   const now = new Date();
   const year = now.getFullYear();
@@ -69,7 +116,6 @@ async function main() {
     process.exit(1);
   }
   const region = regionArg; // ansiao|povoa|lisboa|porto
-  const sourceUrl = sourceUrlArg || '';
   const monthKey = monthKeyArg || getCurrentMonthKey();
 
   const openaiKey = env('OPENAI_API_KEY');
@@ -77,6 +123,9 @@ async function main() {
 
   const now = new Date();
   const monthLabel = `${monthLabelPt(now)} de ${now.getFullYear()}`;
+
+  // Determinar o URL efetivo a usar: argumento → env → pesquisa
+  const sourceUrl = await discoverAgendaUrl(region, monthLabel, sourceUrlArg || '');
 
   let title = '';
   let intro = '';
