@@ -37,7 +37,7 @@ async function discoverAgendaUrl(region, monthLabel, explicitUrl) {
   if (configured) return configured;
 
   const searchKey = env('SEARCH_API_KEY', '');
-  const searchEndpoint = env('SEARCH_API_ENDPOINT', 'https://api.bing.microsoft.com/v7.0/search');
+  const searchEndpoint = env('SEARCH_API_ENDPOINT', 'https://searchserviceansiaoseguros.search.windows.net');
   if (!searchKey) return '';
 
   const regionNames = {
