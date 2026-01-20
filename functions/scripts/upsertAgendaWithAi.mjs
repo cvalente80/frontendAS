@@ -38,7 +38,8 @@ async function discoverAgendaUrl(region, monthLabel, explicitUrl) {
 
   const searchKey = env('SEARCH_API_KEY', '');
   const searchEndpoint = env('SEARCH_API_ENDPOINT', 'https://searchserviceansiaoseguros.search.windows.net');
-  if (!searchKey) return '';
+  const indexName = env('SEARCH_INDEX_NAME', '');
+  if (!searchKey || !searchEndpoint || !indexName) return '';
 
   const regionNames = {
     ansiao: 'Ansião',
@@ -51,18 +52,19 @@ async function discoverAgendaUrl(region, monthLabel, explicitUrl) {
   const query = `agenda de eventos ${monthLabel} ${humanRegion} Câmara Municipal`;
 
   try {
-    const url = `${searchEndpoint}?q=${encodeURIComponent(query)}&mkt=pt-PT`;
+    const url = `${searchEndpoint.replace(/\/$/, '')}/indexes/${encodeURIComponent(indexName)}/docs?api-version=2023-11-01&search=${encodeURIComponent(query)}&$top=1`;
     const resp = await fetch(url, {
       headers: {
-        'Ocp-Apim-Subscription-Key': searchKey,
+        'api-key': searchKey,
+        'Content-Type': 'application/json',
       },
     });
     if (!resp.ok) {
       return '';
     }
     const data = await resp.json().catch(() => ({}));
-    const first = data && data.webPages && Array.isArray(data.webPages.value)
-      ? data.webPages.value[0]
+    const first = data && Array.isArray(data.value)
+      ? data.value[0]
       : null;
     const foundUrl = first && typeof first.url === 'string' ? first.url : '';
     return foundUrl || '';
