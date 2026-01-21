@@ -24,6 +24,55 @@ function env(name, fallback = '') {
   return process.env[name] || fallback;
 }
 
+// Tenta descobrir automaticamente o URL da agenda para a região/mês atuais.
+// Prioridade:
+// 1) URL explícito passado por argumento (sourceUrlArg)
+// 2) Variável de ambiente AGENDA_URL_<REGIÃO>
+// 3) Pesquisa Web (ex.: Bing Search API) se SEARCH_API_KEY estiver configurada
+async function discoverAgendaUrl(region, monthLabel, explicitUrl) {
+  if (explicitUrl) return explicitUrl;
+
+  const envKey = `AGENDA_URL_${String(region || '').toUpperCase()}`;
+  const configured = env(envKey, '');
+  if (configured) return configured;
+
+  const searchKey = env('SEARCH_API_KEY', '');
+  const searchEndpoint = env('SEARCH_API_ENDPOINT', 'https://searchserviceansiaoseguros.search.windows.net');
+  const indexName = env('SEARCH_INDEX_NAME', '');
+  if (!searchKey || !searchEndpoint || !indexName) return '';
+
+  const regionNames = {
+    ansiao: 'Ansião',
+    povoa: 'Póvoa de Santa Iria',
+    lisboa: 'Lisboa',
+    porto: 'Porto',
+  };
+  const humanRegion = regionNames[region] || region;
+
+  const query = `agenda de eventos ${monthLabel} ${humanRegion} Câmara Municipal`;
+
+  try {
+    const url = `${searchEndpoint.replace(/\/$/, '')}/indexes/${encodeURIComponent(indexName)}/docs?api-version=2023-11-01&search=${encodeURIComponent(query)}&$top=1`;
+    const resp = await fetch(url, {
+      headers: {
+        'api-key': searchKey,
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!resp.ok) {
+      return '';
+    }
+    const data = await resp.json().catch(() => ({}));
+    const first = data && Array.isArray(data.value)
+      ? data.value[0]
+      : null;
+    const foundUrl = first && typeof first.url === 'string' ? first.url : '';
+    return foundUrl || '';
+  } catch {
+    return '';
+  }
+}
+
 function getCurrentMonthKey() {
   const now = new Date();
   const year = now.getFullYear();
@@ -69,7 +118,6 @@ async function main() {
     process.exit(1);
   }
   const region = regionArg; // ansiao|povoa|lisboa|porto
-  const sourceUrl = sourceUrlArg || '';
   const monthKey = monthKeyArg || getCurrentMonthKey();
 
   const openaiKey = env('OPENAI_API_KEY');
@@ -77,6 +125,9 @@ async function main() {
 
   const now = new Date();
   const monthLabel = `${monthLabelPt(now)} de ${now.getFullYear()}`;
+
+  // Determinar o URL efetivo a usar: argumento → env → pesquisa
+  const sourceUrl = await discoverAgendaUrl(region, monthLabel, sourceUrlArg || '');
 
   let title = '';
   let intro = '';
@@ -101,65 +152,71 @@ async function main() {
       (sourceUrl ? `URL principal: ${sourceUrl}.\n` : '') +
       (srcText ? `Texto/HTML resumido:\n${srcText}` : 'Texto/HTML não disponível; se não tiveres dados, devolve apenas uma intro genérica e events vazio.');
 
-    const resp = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${openaiKey}`,
-      },
-      body: JSON.stringify({
-        model: openaiModel,
-        messages: [
-          {
-            role: 'system',
-            content:
-              'Escreves sempre em português de Portugal e respondes apenas com JSON válido com propriedades "title", "intro" e "events".',
-          },
-          { role: 'user', content: prompt },
-        ],
-        temperature: 0.3,
-      }),
-    });
-    if (!resp.ok) {
-      const txt = await resp.text().catch(() => '');
-      throw new Error(`OpenAI error: ${resp.status} ${resp.statusText} ${txt}`);
-    }
-    const data = await resp.json().catch(() => ({}));
-    const firstChoice = data && Array.isArray(data.choices) ? data.choices[0] : undefined;
-    let content = firstChoice && firstChoice.message && typeof firstChoice.message.content === 'string'
-      ? firstChoice.message.content
-      : '';
-
-    // Remover ```json ... ``` se o modelo devolver bloco de código
-    const fenceMatch = content.match(/```[a-zA-Z]*[\s\S]*?```/);
-    if (fenceMatch) {
-      content = fenceMatch[0]
-        .replace(/^```[a-zA-Z]*\s*/i, '')
-        .replace(/```\s*$/i, '')
-        .trim();
-    }
-
     try {
-      const parsed = JSON.parse(content);
-      if (parsed && typeof parsed.title === 'string') {
-        title = parsed.title.trim();
+      const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${openaiKey}`,
+        },
+        body: JSON.stringify({
+          model: openaiModel,
+          messages: [
+            {
+              role: 'system',
+              content:
+                'Escreves sempre em português de Portugal e respondes apenas com JSON válido com propriedades "title", "intro" e "events".',
+            },
+            { role: 'user', content: prompt },
+          ],
+          temperature: 0.3,
+        }),
+      });
+      if (!resp.ok) {
+        const txt = await resp.text().catch(() => '');
+        console.error(`OpenAI error: ${resp.status} ${resp.statusText} ${txt}`);
+      } else {
+        const data = await resp.json().catch(() => ({}));
+        const firstChoice = data && Array.isArray(data.choices) ? data.choices[0] : undefined;
+        let content = firstChoice && firstChoice.message && typeof firstChoice.message.content === 'string'
+          ? firstChoice.message.content
+          : '';
+
+        // Remover ```json ... ``` se o modelo devolver bloco de código
+        const fenceMatch = content.match(/```[a-zA-Z]*[\s\S]*?```/);
+        if (fenceMatch) {
+          content = fenceMatch[0]
+            .replace(/^```[a-zA-Z]*\s*/i, '')
+            .replace(/```\s*$/i, '')
+            .trim();
+        }
+
+        try {
+          const parsed = JSON.parse(content);
+          if (parsed && typeof parsed.title === 'string') {
+            title = parsed.title.trim();
+          }
+          if (parsed && typeof parsed.intro === 'string') {
+            intro = parsed.intro.trim();
+          }
+          if (Array.isArray(parsed.events)) {
+            events = parsed.events.map((e) => ({
+              dateLabel: String(e.dateLabel || '').trim(),
+              title: String(e.title || '').trim(),
+              description: e.description ? String(e.description).trim() : '',
+              sourceLabel: e.sourceLabel ? String(e.sourceLabel).trim() : '',
+            })).filter((e) => e.dateLabel && e.title);
+          }
+        } catch {
+          // Fallback: agenda vazia com intro genérica
+          title = title || `Eventos previstos em ${monthLabel}`;
+          intro = intro || `Agenda mensal de eventos em ${monthLabel}.`;
+          events = [];
+        }
       }
-      if (parsed && typeof parsed.intro === 'string') {
-        intro = parsed.intro.trim();
-      }
-      if (Array.isArray(parsed.events)) {
-        events = parsed.events.map((e) => ({
-          dateLabel: String(e.dateLabel || '').trim(),
-          title: String(e.title || '').trim(),
-          description: e.description ? String(e.description).trim() : '',
-          sourceLabel: e.sourceLabel ? String(e.sourceLabel).trim() : '',
-        })).filter((e) => e.dateLabel && e.title);
-      }
-    } catch {
-      // Fallback: agenda vazia com intro genérica
-      title = title || `Eventos previstos em ${monthLabel}`;
-      intro = intro || `Agenda mensal de eventos em ${monthLabel}.`;
-      events = [];
+    } catch (err) {
+      console.error('Erro ao chamar OpenAI:', err);
+      // Mantém title/intro/events vazios para usar o fallback mais abaixo
     }
   }
 
