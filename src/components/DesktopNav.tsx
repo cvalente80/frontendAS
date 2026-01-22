@@ -21,7 +21,7 @@ export function DesktopNav() {
   else if (host.includes('lisboaseg') || host.includes('lisboa')) brandName = 'Lisboa Seguros';
   else if (host.includes('portoseg') || host.includes('porto')) brandName = 'Porto Seguros';
 
-  // Close profile menu on outside click or Escape cvalente
+  // Close profile menu on outside click or Escape cvalente eduardo
   useEffect(() => {
     function onDocPointer(e: MouseEvent | TouchEvent) {
       if (!profileOpen) return;
