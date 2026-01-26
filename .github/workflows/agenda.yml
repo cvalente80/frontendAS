@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       region:
-        description: 'Region (ansiao|povoa|lisboa|porto)'
+        description: 'Region (ansiao|povoa|lisboa|porto|sintra)'
         required: true
         default: 'ansiao'
       source_url:
