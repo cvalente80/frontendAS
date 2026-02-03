@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-label="Póvoa placeholder background">
+  <rect width="1600" height="900" fill="transparent"/>
+  <g fill="#000">
+    <!-- Wave bands -->
+    <path d="M0 640c180-60 360-60 540 0s360 60 540 0 360-60 520 0v70H0z" opacity="0.45"/>
+    <path d="M0 720c200-50 380-50 560 0s360 50 560 0 360-50 480 0v80H0z" opacity="0.35"/>
+    <!-- Simple lighthouse -->
+    <path d="M1240 740V360h80v380h-80z" opacity="0.55"/>
+    <path d="M1220 360l60-80 60 80h-120z" opacity="0.45"/>
+    <path d="M1200 430h160v26h-160z" opacity="0.65"/>
+  </g>
+  <text x="80" y="160" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="120" fill="#000" opacity="0.55">PÓVOA</text>
+</svg>
