@@ -22,13 +22,31 @@ const siteUrl =
   normalizeSiteUrl(process.env.VITE_SITE_URL) ||
   'https://ansiaoseguros.pt';
 
+function brandNameForHost(hostname) {
+  const host = String(hostname || '').toLowerCase();
+  if (host.includes('aurelio')) return 'Aurélio Seguros';
+  if (host.includes('sintraseg') || host.includes('sintra')) return 'Sintra Seguros';
+  if (host.includes('pombalseg') || host.includes('pombal')) return 'Pombal Seguros';
+  if (host.includes('povoaseg') || host.includes('povoa')) return 'Póvoa Seguros';
+  if (host.includes('lisboaseg') || host.includes('lisboa')) return 'Lisboa Seguros';
+  if (host.includes('portoseg') || host.includes('porto')) return 'Porto Seguros';
+  return 'Ansião Seguros';
+}
+
+let brandName = 'Ansião Seguros';
+try {
+  brandName = brandNameForHost(new URL(siteUrl).hostname);
+} catch {
+  // keep default
+}
+
 const ogImagePath = '/imagens/insurance-background.jpg';
 const ogImageAbs = `${siteUrl}${ogImagePath}`;
 
 const routes = [
   {
     outDir: 'pt/kristin',
-    title: 'Ansião Seguros | Depressão Kristin — Multirriscos Habitação',
+    title: `${brandName} | Depressão Kristin — Multirriscos Habitação`,
     description:
       'Apoio rápido, orientação e simulação de Multirriscos Habitação para reforçar a proteção do seu lar.',
     canonical: `${siteUrl}/pt/kristin`,
@@ -37,7 +55,7 @@ const routes = [
   },
   {
     outDir: 'pt/kristin-guia',
-    title: 'Ansião Seguros | Guia pós-tempestade — Depressão Kristin',
+    title: `${brandName} | Guia pós-tempestade — Depressão Kristin`,
     description:
       'Checklist rápido para agir após danos e preparar o contacto com a seguradora.',
     canonical: `${siteUrl}/pt/kristin-guia`,
@@ -46,7 +64,7 @@ const routes = [
   },
   {
     outDir: 'en/kristin',
-    title: 'Ansião Seguros | Storm Kristin — Home Insurance',
+    title: `${brandName} | Storm Kristin — Home Insurance`,
     description:
       'Fast support, guidance and a home insurance quote to strengthen protection for your home.',
     canonical: `${siteUrl}/en/kristin`,
@@ -55,7 +73,7 @@ const routes = [
   },
   {
     outDir: 'en/kristin-guia',
-    title: 'Ansião Seguros | Post-storm guide — Storm Kristin',
+    title: `${brandName} | Post-storm guide — Storm Kristin`,
     description: 'Quick checklist to act after damage and prepare your insurer contact.',
     canonical: `${siteUrl}/en/kristin-guia`,
     locale: 'en_GB',
@@ -120,7 +138,7 @@ async function main() {
     html = injectOrReplaceMeta(html, 'description', r.description, false);
 
     // Open Graph
-    html = injectOrReplaceMeta(html, 'og:site_name', 'Ansião Seguros', true);
+    html = injectOrReplaceMeta(html, 'og:site_name', brandName, true);
     html = injectOrReplaceMeta(html, 'og:type', 'website', true);
     html = injectOrReplaceMeta(html, 'og:url', r.canonical, true);
     html = injectOrReplaceMeta(html, 'og:title', r.title, true);
