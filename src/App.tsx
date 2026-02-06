@@ -116,8 +116,11 @@ function App(): React.ReactElement {
           <Route path="simulacao-saude" element={<SimulacaoSaude />} />
           <Route path="simulacao-habitacao" element={<SimulacaoHabitacao />} />
           {/* Campaign landing pages (shareable URLs) */}
-          <Route path="kristina" element={<LandingKristina />} />
-          <Route path="kristina-guia" element={<LandingKristinaGuia />} />
+          <Route path="kristin" element={<LandingKristina />} />
+          <Route path="kristin-guia" element={<LandingKristinaGuia />} />
+          {/* Backwards-compatible redirects */}
+          <Route path="kristina" element={<Navigate to={`/${base}/kristin`} replace />} />
+          <Route path="kristina-guia" element={<Navigate to={`/${base}/kristin-guia`} replace />} />
           <Route path="produtos" element={<Produtos />} />
           <Route path="contato" element={<Contato />} />
           <Route path="produto-auto" element={<ProdutoAuto />} />

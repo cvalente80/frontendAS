@@ -823,10 +823,10 @@ const resources = {
     },
     landing_kristina: {
       kristina: {
-        seoTitle: 'Depressão Kristina — Multirriscos Habitação',
+        seoTitle: 'Depressão Kristin — Multirriscos Habitação',
         seoDesc: 'Apoio rápido, orientação e simulação de Multirriscos Habitação para reforçar a proteção do seu lar.',
         heroAlt: 'Seguro Habitação — proteção do lar',
-        heroTitle: 'Depressão Kristina: proteja a sua casa',
+        heroTitle: 'Depressão Kristin: proteja a sua casa',
         heroSubtitle: 'Se teve danos ou quer reforçar a proteção, ajudamos a encontrar um Multirriscos Habitação ajustado ao seu risco.',
         ctaQuote: 'Simular Multirriscos Habitação',
         ctaContact: 'Falar connosco',
@@ -857,10 +857,10 @@ const resources = {
         ctaQuoteSecondary: 'Fazer simulação'
       },
       guia: {
-        seoTitle: 'Guia pós-tempestade — Depressão Kristina',
+        seoTitle: 'Guia pós-tempestade — Depressão Kristin',
         seoDesc: 'Checklist rápido para agir após danos e preparar o contacto com a seguradora.',
         title: 'Guia rápido pós-tempestade',
-        subtitle: 'Checklist para organizar informação e pedir apoio após a Depressão Kristina.',
+        subtitle: 'Checklist para organizar informação e pedir apoio após a Depressão Kristin.',
         ctaContact: 'Pedir apoio',
         ctaQuote: 'Simular seguro',
         stepsTitle: 'Checklist',
@@ -1972,10 +1972,10 @@ const resources = {
     },
     landing_kristina: {
       kristina: {
-        seoTitle: 'Storm Kristina — Home Insurance',
+        seoTitle: 'Storm Kristin — Home Insurance',
         seoDesc: 'Fast support, guidance and a home insurance quote to strengthen protection for your home.',
         heroAlt: 'Home insurance — home protection',
-        heroTitle: 'Storm Kristina: protect your home',
+        heroTitle: 'Storm Kristin: protect your home',
         heroSubtitle: 'If you had damage or want better protection, we help you find cover that fits your risk.',
         ctaQuote: 'Get a home insurance quote',
         ctaContact: 'Contact us',
@@ -2006,10 +2006,10 @@ const resources = {
         ctaQuoteSecondary: 'Get a quote'
       },
       guia: {
-        seoTitle: 'Post-storm guide — Storm Kristina',
+        seoTitle: 'Post-storm guide — Storm Kristin',
         seoDesc: 'Quick checklist to act after damage and prepare your insurer contact.',
         title: 'Post-storm quick guide',
-        subtitle: 'Checklist to organise information and ask for support after Storm Kristina.',
+        subtitle: 'Checklist to organise information and ask for support after Storm Kristin.',
         ctaContact: 'Get support',
         ctaQuote: 'Get a quote',
         stepsTitle: 'Checklist',

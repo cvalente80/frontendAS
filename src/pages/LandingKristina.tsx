@@ -17,7 +17,7 @@ export default function LandingKristina() {
         title={t("kristina.seoTitle")}
         description={t("kristina.seoDesc")}
         image={ogImage}
-        canonicalPath={`/${base}/kristina`}
+        canonicalPath={`/${base}/kristin`}
       />
 
       <div className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl p-0 overflow-hidden">
@@ -92,7 +92,7 @@ export default function LandingKristina() {
             </ol>
             <div className="mt-6 flex flex-col sm:flex-row gap-3">
               <Link
-                to={`/${base}/kristina-guia${search}`}
+                to={`/${base}/kristin-guia${search}`}
                 className="inline-block px-6 py-3 bg-blue-900 text-white font-bold rounded-full shadow hover:bg-blue-800 transition text-center"
               >
                 {t("kristina.ctaGuide")}
