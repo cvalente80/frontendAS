@@ -27,37 +27,37 @@ const ogImageAbs = `${siteUrl}${ogImagePath}`;
 
 const routes = [
   {
-    outDir: 'pt/kristina',
-    title: 'Ansião Seguros | Depressão Kristina — Multirriscos Habitação',
+    outDir: 'pt/kristin',
+    title: 'Ansião Seguros | Depressão Kristin — Multirriscos Habitação',
     description:
       'Apoio rápido, orientação e simulação de Multirriscos Habitação para reforçar a proteção do seu lar.',
-    canonical: `${siteUrl}/pt/kristina`,
+    canonical: `${siteUrl}/pt/kristin`,
     locale: 'pt_PT',
     localeAlt: 'en_GB'
   },
   {
-    outDir: 'pt/kristina-guia',
-    title: 'Ansião Seguros | Guia pós-tempestade — Depressão Kristina',
+    outDir: 'pt/kristin-guia',
+    title: 'Ansião Seguros | Guia pós-tempestade — Depressão Kristin',
     description:
       'Checklist rápido para agir após danos e preparar o contacto com a seguradora.',
-    canonical: `${siteUrl}/pt/kristina-guia`,
+    canonical: `${siteUrl}/pt/kristin-guia`,
     locale: 'pt_PT',
     localeAlt: 'en_GB'
   },
   {
-    outDir: 'en/kristina',
-    title: 'Ansião Seguros | Storm Kristina — Home Insurance',
+    outDir: 'en/kristin',
+    title: 'Ansião Seguros | Storm Kristin — Home Insurance',
     description:
       'Fast support, guidance and a home insurance quote to strengthen protection for your home.',
-    canonical: `${siteUrl}/en/kristina`,
+    canonical: `${siteUrl}/en/kristin`,
     locale: 'en_GB',
     localeAlt: 'pt_PT'
   },
   {
-    outDir: 'en/kristina-guia',
-    title: 'Ansião Seguros | Post-storm guide — Storm Kristina',
+    outDir: 'en/kristin-guia',
+    title: 'Ansião Seguros | Post-storm guide — Storm Kristin',
     description: 'Quick checklist to act after damage and prepare your insurer contact.',
-    canonical: `${siteUrl}/en/kristina-guia`,
+    canonical: `${siteUrl}/en/kristin-guia`,
     locale: 'en_GB',
     localeAlt: 'pt_PT'
   }
