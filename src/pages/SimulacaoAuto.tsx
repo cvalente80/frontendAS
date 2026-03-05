@@ -12,6 +12,7 @@ import { useAuth } from '../context/AuthContext';
 import { useAuthUX } from '../context/AuthUXContext';
 import { auth } from '../firebase';
 import { saveSimulation } from '../utils/simulations';
+import { enqueueSimulationTransferJob } from '../utils/simulationTransferJobs';
 registerLocale("pt", pt);
 registerLocale("en", enGB);
 
@@ -68,6 +69,7 @@ export default function SimulacaoAuto() {
   const [mensagemTipo, setMensagemTipo] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const busyRef = useRef(false);
+  const transferTargetUrl = 'https://myzurich.zurich.com.pt/';
 
   // Determina a "marca" do site actual (para assinatura dinâmica no email)
   const host = typeof window !== 'undefined' ? window.location.hostname.toLowerCase() : '';
@@ -224,20 +226,46 @@ export default function SimulacaoAuto() {
       // Usado no template EmailJS como {{siteURL}} Seguros
       siteURL: siteBrand,
     };
+
+    try {
+      const bridgePayload = {
+        nome: form.nome,
+        email: form.email,
+        contribuinte: form.contribuinte,
+        dataNascimento: form.dataNascimento,
+        dataCartaConducao: form.dataCartaConducao,
+        codigoPostal: form.codigoPostal,
+        marca: form.marca,
+        modelo: form.modelo,
+        versao: form.versao,
+        ano: form.ano,
+        matricula: form.matricula,
+        tipoSeguro: form.tipoSeguro,
+        coberturas: coveragesForSubmit,
+        outrosPedidos: form.outrosPedidos,
+        capturedAt: new Date().toISOString(),
+      };
+      localStorage.setItem('latestAutoSimulationPayload', JSON.stringify(bridgePayload));
+    } catch (error) {
+      console.warn('[SimulacaoAuto] Falha ao persistir payload local (ignorado):', error);
+    }
+
     try {
       // Firestore persistence if authenticated (will be after requireAuth)
       const uid = auth.currentUser?.uid;
       if (uid) {
+        // Generate a deterministic idempotency key for this combination and minute
+        const minuteBucket = new Date(); minuteBucket.setSeconds(0,0);
+        const key = [
+          'auto',
+          form.email || 'anon',
+          (form.matricula || '').replace(/[^A-Za-z0-9]/g,'').toUpperCase(),
+          minuteBucket.toISOString(),
+        ].join(':');
+
+        let sourceSimulationId: string | undefined;
         try {
-          // Generate a deterministic idempotency key for this combination and minute
-          const minuteBucket = new Date(); minuteBucket.setSeconds(0,0);
-          const key = [
-            'auto',
-            form.email || 'anon',
-            (form.matricula || '').replace(/[^A-Za-z0-9]/g,'').toUpperCase(),
-            minuteBucket.toISOString(),
-          ].join(':');
-          await saveSimulation(uid, {
+          sourceSimulationId = await saveSimulation(uid, {
             type: 'auto',
             title: `${form.marca || ''} ${form.modelo || ''}`.trim() || 'Auto',
             summary: resumo,
@@ -261,6 +289,36 @@ export default function SimulacaoAuto() {
           }, { idempotencyKey: key });
         } catch (e) {
           console.warn('[SimulacaoAuto] Falha a guardar simulação (ignorado):', e);
+        }
+
+        try {
+          await enqueueSimulationTransferJob({
+            uid,
+            simulationType: 'auto',
+            sourceSimulationId,
+            idempotencyKey: key,
+            targetUrl: transferTargetUrl,
+            payload: {
+              nome: form.nome,
+              email: form.email,
+              matricula: form.matricula,
+              plate: form.matricula,
+              codigoPostal: form.codigoPostal,
+              postalCode: form.codigoPostal,
+              dataNascimento: form.dataNascimento,
+              birthDate: form.dataNascimento,
+              contribuinte: form.contribuinte,
+              marca: form.marca,
+              modelo: form.modelo,
+              versao: form.versao,
+              ano: form.ano,
+              tipoSeguro: form.tipoSeguro,
+              coberturas: coveragesForSubmit,
+              outrosPedidos: form.outrosPedidos,
+            },
+          });
+        } catch (e) {
+          console.warn('[SimulacaoAuto] Falha ao enfileirar transferência Playwright (ignorado):', e);
         }
       }
   console.log('[EmailJS][Auto] Sending', { service: EMAILJS_SERVICE_ID, template: EMAILJS_TEMPLATE_ID });
