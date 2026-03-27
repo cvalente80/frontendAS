@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent, FormEvent, useRef } from "react";
+import React, { useState, ChangeEvent, FormEvent, useRef, useEffect } from "react";
 import Seo from "../components/Seo";
 import DatePicker, { registerLocale } from "react-datepicker";
 import { pt } from "date-fns/locale/pt";
@@ -10,7 +10,8 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useAuthUX } from '../context/AuthUXContext';
-import { auth } from '../firebase';
+import { auth, db } from '../firebase';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { saveSimulation } from '../utils/simulations';
 import { enqueueSimulationTransferJob } from '../utils/simulationTransferJobs';
 registerLocale("pt", pt);
@@ -69,7 +70,30 @@ export default function SimulacaoAuto() {
   const [mensagemTipo, setMensagemTipo] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const busyRef = useRef(false);
+  const [transferJobId, setTransferJobId] = useState<string | null>(null);
+  const [simulationResult, setSimulationResult] = useState<{
+    accordionValues?: { anual?: string | null; semestral?: string | null; trimestral?: string | null; mensal?: string | null } | null;
+    coberturasPremiumTotal?: string | null;
+    status?: string;
+  } | null>(null);
   const transferTargetUrl = 'https://myzurich.zurich.com.pt/';
+
+  // Listener em tempo real ao job de transferência — actualiza simulationResult quando o Playwright terminar
+  useEffect(() => {
+    if (!transferJobId) return;
+    const unsub = onSnapshot(doc(db, 'simulationTransferJobs', transferJobId), (snap) => {
+      if (!snap.exists()) return;
+      const data = snap.data();
+      if (data?.status === 'completed' && data?.result) {
+        setSimulationResult(data.result);
+        setStep(4);
+      } else if (data?.status === 'failed') {
+        setSimulationResult({ status: 'failed' });
+        setStep(4);
+      }
+    });
+    return () => unsub();
+  }, [transferJobId]);
 
   // Determina a "marca" do site actual (para assinatura dinâmica no email)
   const host = typeof window !== 'undefined' ? window.location.hostname.toLowerCase() : '';
@@ -292,7 +316,7 @@ export default function SimulacaoAuto() {
         }
 
         try {
-          await enqueueSimulationTransferJob({
+          const jobId = await enqueueSimulationTransferJob({
             uid,
             simulationType: 'auto',
             sourceSimulationId,
@@ -317,6 +341,7 @@ export default function SimulacaoAuto() {
               outrosPedidos: form.outrosPedidos,
             },
           });
+          if (jobId) setTransferJobId(jobId);
         } catch (e) {
           console.warn('[SimulacaoAuto] Falha ao enfileirar transferência Playwright (ignorado):', e);
         }
@@ -326,6 +351,8 @@ export default function SimulacaoAuto() {
   console.log('[EmailJS][Auto] Success', resp?.status, resp?.text);
       setMensagem(t('messages.submitSuccess'));
       setMensagemTipo('sucesso');
+      // Avança para o passo 4 (aguarda resultados via listener Firestore)
+      setStep(4);
     } catch (error: any) {
       console.error('[EmailJS][Auto] Error', error);
         setMensagem(t('messages.submitEmailError'));
@@ -392,7 +419,7 @@ export default function SimulacaoAuto() {
         <h2 className="text-3xl font-bold mb-6 text-blue-900 text-center">{t('title')}</h2>
         <div className="mb-6">
           <div className="flex items-center justify-center gap-2 mb-2">
-            {[1,2,3].map(n => (
+            {[1,2,3,4].map(n => (
               <div
                 key={n}
                 className={`w-8 h-8 flex items-center justify-center rounded-full font-bold text-white transition-all duration-300 ${step >= n ? 'bg-blue-700 scale-110' : 'bg-blue-300 scale-100'}`}
@@ -404,10 +431,10 @@ export default function SimulacaoAuto() {
           <div className="w-full h-2 bg-blue-100 rounded-full overflow-hidden">
             <div
               className="h-2 bg-blue-700 transition-all duration-500"
-              style={{ width: `${step * 33.33}%` }}
+              style={{ width: `${step * 25}%` }}
             />
           </div>
-          <div className="text-center text-blue-700 font-medium mt-2">{t('stepProgress', { step, defaultValue: base==='en' ? `Step ${step} of 3` : `Passo ${step} de 3` })}</div>
+          <div className="text-center text-blue-700 font-medium mt-2">{t('stepProgress', { step, defaultValue: base==='en' ? `Step ${step} of 4` : `Passo ${step} de 4` })}</div>
         </div>
         <form onSubmit={step === 3 ? handleSubmit : handleNext} className="space-y-5">
           {step === 1 && (
@@ -803,8 +830,88 @@ export default function SimulacaoAuto() {
                 </div>
             </>
           )}
+          {step === 4 && (
+            <>
+              <h3 className="text-xl font-semibold text-blue-700 mb-4 text-center">
+                {base === 'en' ? '🎉 Simulation Result' : '🎉 Resultado da Simulação'}
+              </h3>
+              {/* A aguardar resultados do Playwright */}
+              {!simulationResult && (
+                <div className="flex flex-col items-center gap-4 py-6">
+                  <svg className="animate-spin h-10 w-10 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                  </svg>
+                  <p className="text-blue-800 font-medium text-center">
+                    {base === 'en' ? 'Calculating your quote, please wait…' : 'A calcular a sua cotação, aguarde…'}
+                  </p>
+                  <p className="text-sm text-gray-500 text-center">
+                    {base === 'en' ? 'This may take a few minutes.' : 'Este processo pode demorar alguns minutos.'}
+                  </p>
+                </div>
+              )}
+              {/* Falhou */}
+              {simulationResult?.status === 'failed' && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+                  <p className="text-red-700 font-semibold">
+                    {base === 'en' ? 'We could not calculate an automatic quote.' : 'Não foi possível calcular uma cotação automática.'}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-2">
+                    {base === 'en' ? 'Our team will contact you with a personalised proposal.' : 'A nossa equipa irá contactá-lo com uma proposta personalizada.'}
+                  </p>
+                </div>
+              )}
+              {/* Resultados disponíveis */}
+              {simulationResult && simulationResult.status !== 'failed' && simulationResult.accordionValues && (
+                <div className="space-y-4">
+                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                    <p className="text-sm text-blue-600 font-semibold uppercase tracking-wide mb-1">
+                      {base === 'en' ? 'Vehicle' : 'Veículo'}
+                    </p>
+                    <p className="text-blue-900 font-bold text-lg">{form.marca} {form.modelo}{form.versao ? ` (${form.versao})` : ''} · {form.ano}</p>
+                    <p className="text-blue-700 text-sm">{form.tipoSeguro} · {form.matricula}</p>
+                  </div>
+                  {simulationResult.coberturasPremiumTotal && (
+                    <div className="bg-green-50 border border-green-300 rounded-xl p-3 text-center">
+                      <p className="text-xs text-green-700 uppercase tracking-wide font-semibold">
+                        {base === 'en' ? 'Total Premium' : 'Prémio Total'}
+                      </p>
+                      <p className="text-3xl font-extrabold text-green-700 mt-1">{simulationResult.coberturasPremiumTotal}</p>
+                    </div>
+                  )}
+                  <div className="grid grid-cols-2 gap-3">
+                    {([
+                      { key: 'anual',      label: base === 'en' ? 'Annual'      : 'Anual',      icon: '📅' },
+                      { key: 'semestral',  label: base === 'en' ? 'Semi-annual' : 'Semestral',  icon: '🗓️' },
+                      { key: 'trimestral', label: base === 'en' ? 'Quarterly'   : 'Trimestral', icon: '📆' },
+                      { key: 'mensal',     label: base === 'en' ? 'Monthly'     : 'Mensal',     icon: '💳' },
+                    ] as const).map(({ key, label, icon }) => {
+                      const val = simulationResult.accordionValues?.[key];
+                      return (
+                        <div key={key} className="bg-white border border-blue-200 rounded-xl p-3 flex flex-col items-center shadow-sm">
+                          <span className="text-2xl mb-1">{icon}</span>
+                          <span className="text-xs text-gray-500 font-semibold uppercase tracking-wide">{label}</span>
+                          <span className="text-xl font-bold text-blue-900 mt-1">{val ?? '—'}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <p className="text-xs text-gray-400 text-center pt-1">
+                    {base === 'en'
+                      ? 'Values are indicative. Final proposal subject to underwriting confirmation.'
+                      : 'Valores indicativos. Proposta final sujeita a confirmação da seguradora.'}
+                  </p>
+                  <div className="flex justify-center pt-2">
+                    <a href={`/${base}/simulacao-auto`} className="as-btn bg-blue-700 text-white hover:bg-blue-900 text-sm">
+                      {base === 'en' ? 'New Simulation' : 'Nova Simulação'}
+                    </a>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </form>
-        {resultado && <div className="mt-6 p-4 bg-blue-50 text-blue-900 rounded-lg text-center font-semibold shadow whitespace-pre-line">{resultado}</div>}
+        {resultado && step < 4 && <div className="mt-6 p-4 bg-blue-50 text-blue-900 rounded-lg text-center font-semibold shadow whitespace-pre-line">{resultado}</div>}
         {mensagem && (
           <div className={`as-alert fixed bottom-8 right-8 z-50 font-semibold shadow transition-opacity duration-500 ${mensagemTipo === 'sucesso' ? 'as-alert-success' : 'as-alert-error'}`}
             style={{ minWidth: '260px', maxWidth: '350px', textAlign: 'left' }}>

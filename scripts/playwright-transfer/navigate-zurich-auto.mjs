@@ -2,7 +2,7 @@ import { chromium } from 'playwright';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { collection, collectionGroup, getDocs, getFirestore, limit, query, where } from 'firebase/firestore';
+import { collection, collectionGroup, doc, getDocs, getFirestore, limit, query, serverTimestamp, updateDoc, where } from 'firebase/firestore';
 
 const stamp = new Date().toISOString().replace(/[:.]/g, '-');
 const dir = path.resolve(process.cwd(), 'artifacts', 'playwright-transfer', `zurich-auto-flow-${stamp}`);
@@ -234,13 +234,27 @@ async function loadLatestAutoSimulationPayload() {
   }
 
   try {
-    const jobsQuery = query(
-      collection(db, 'simulationTransferJobs'),
-      where('simulationType', '==', 'auto'),
-      limit(25)
-    );
-
-    const jobsSnapshot = await getDocs(jobsQuery);
+    // Preferir jobs com status 'queued'; fallback sem filtro de status para compatibilidade
+    let jobsSnapshot = null;
+    try {
+      const jobsQueuedQuery = query(
+        collection(db, 'simulationTransferJobs'),
+        where('simulationType', '==', 'auto'),
+        where('status', '==', 'queued'),
+        limit(25)
+      );
+      jobsSnapshot = await getDocs(jobsQueuedQuery);
+    } catch {
+      jobsSnapshot = null;
+    }
+    if (!jobsSnapshot || jobsSnapshot.empty) {
+      const jobsQuery = query(
+        collection(db, 'simulationTransferJobs'),
+        where('simulationType', '==', 'auto'),
+        limit(25)
+      );
+      jobsSnapshot = await getDocs(jobsQuery);
+    }
     jobsSnapshot.forEach((document) => {
       const data = document.data() || {};
       candidates.push({
@@ -3268,6 +3282,34 @@ try {
     tipoSeguro: simulationPayload.tipoSeguro || null,
   };
 
+  // Auto-detectar job ID a partir do simulationSource (path = 'simulationTransferJobs/{id}')
+  // Permite que o script escreva resultados de volta ao Firestore sem TRANSFER_JOB_ID manual
+  if (!process.env.TRANSFER_JOB_ID && simulationSource?.path?.startsWith('simulationTransferJobs/')) {
+    const autoJobId = simulationSource.id || simulationSource.path.split('/').pop();
+    if (autoJobId) {
+      process.env.TRANSFER_JOB_ID = autoJobId;
+      meta.steps.push(`transfer-job-id -> auto-detected (${autoJobId})`);
+    }
+  }
+
+  // Marcar job como 'running' no Firestore assim que começamos
+  const activeJobId = process.env.TRANSFER_JOB_ID;
+  if (activeJobId) {
+    try {
+      const _fbCfg = getFirebaseClientConfigFromEnv();
+      const _fbApp = getFirebaseClientApp(_fbCfg);
+      if (_fbApp) {
+        const _fbDb = getFirestore(_fbApp);
+        await updateDoc(doc(_fbDb, 'simulationTransferJobs', activeJobId), {
+          status: 'running',
+          startedAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        }).catch(() => null);
+        meta.steps.push(`firestore-job-update -> running (jobId=${activeJobId})`);
+      }
+    } catch { /* ignorar — não bloquear o flow */ }
+  }
+
   await page.goto('https://myzurich.zurich.com.pt/', { waitUntil: 'domcontentloaded', timeout: 45000 });
   await updateDebugOverlay(page, 'login-page-opened');
   await page.waitForSelector('#Input_LoginUsername', { timeout: 20000 });
@@ -3861,6 +3903,32 @@ try {
   meta.bodyTextSample = (await page.locator('body').innerText().catch(() => '')).slice(0, 700);
 
   await fs.writeFile(path.join(dir, 'meta.json'), JSON.stringify(meta, null, 2), 'utf8');
+
+  // Escreve resultados de volta ao job Firestore (para o frontend mostrar no passo 4)
+  const jobId = process.env.TRANSFER_JOB_ID;
+  if (jobId) {
+    try {
+      const { app: fbApp, db: fbDb } = (() => {
+        const config = getFirebaseClientConfigFromEnv();
+        const fbApp = getFirebaseClientApp(config);
+        return { app: fbApp, db: getFirestore(fbApp) };
+      })();
+      await updateDoc(doc(fbDb, 'simulationTransferJobs', jobId), {
+        status: 'completed',
+        completedAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        result: {
+          accordionValues: meta.accordionValues || null,
+          coberturasReceiptDetails: meta.coberturasReceiptDetails || null,
+          coberturasPremiumTotal: meta.coberturasPremiumTotal || null,
+          finalUrl: meta.finalUrl || null,
+        },
+      });
+      meta.steps.push(`firestore-job-update -> completed (jobId=${jobId})`);
+    } catch (fbErr) {
+      console.warn('[transfer] Falha ao actualizar job Firestore (ignorado):', fbErr?.message || fbErr);
+    }
+  }
 
   console.log(JSON.stringify({ ok: true, dir, finalScreenshot: meta.finalScreenshot, lastPageScreenshot: finalShot, finalUrl: meta.finalUrl, accordionValues: meta.accordionValues || null }, null, 2));
 } catch (error) {
