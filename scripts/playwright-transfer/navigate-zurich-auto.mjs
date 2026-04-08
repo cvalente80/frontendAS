@@ -3324,12 +3324,17 @@ try {
   await page.waitForTimeout(loginStepTransitionMs);
 
   const pass = page.locator('input[type="password"], input[name*="pass" i], input[id*="pass" i]').first();
-  if (await pass.count()) {
+  // Aguardar até 8s pelo campo de password (login em 2 passos do Zurich)
+  await pass.waitFor({ state: 'visible', timeout: 8000 }).catch(() => null);
+  if (await pass.count() && await pass.isVisible().catch(() => false)) {
     await pass.fill(process.env.TRANSFER_LOGIN_PASSWORD || '');
+    meta.steps.push('login-step2-password-filled');
     await clickFirstVisible([
       { name: 'entrar login step2', locator: page.locator('button[type="submit"], input[type="submit"], button:has-text("Entrar"), button:has-text("Login"), button:has-text("Seguinte")') },
     ], 'login-step2');
     await updateDebugOverlay(page, 'login-step2-submitted');
+  } else {
+    meta.steps.push('login-step2-password-not-found');
   }
 
   await page.waitForURL((u) => u.toString().includes('/MYZ_Home/Home'), { timeout: loginLandingWaitTimeoutMs }).catch(() => null);
@@ -3902,34 +3907,42 @@ try {
   meta.lastPageScreenshot = finalShot;
   meta.bodyTextSample = (await page.locator('body').innerText().catch(() => '')).slice(0, 700);
 
-  await fs.writeFile(path.join(dir, 'meta.json'), JSON.stringify(meta, null, 2), 'utf8');
-
   // Escreve resultados de volta ao job Firestore (para o frontend mostrar no passo 4)
   const jobId = process.env.TRANSFER_JOB_ID;
   if (jobId) {
     try {
-      const { app: fbApp, db: fbDb } = (() => {
-        const config = getFirebaseClientConfigFromEnv();
-        const fbApp = getFirebaseClientApp(config);
-        return { app: fbApp, db: getFirestore(fbApp) };
-      })();
-      await updateDoc(doc(fbDb, 'simulationTransferJobs', jobId), {
-        status: 'completed',
-        completedAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        result: {
-          accordionValues: meta.accordionValues || null,
-          coberturasReceiptDetails: meta.coberturasReceiptDetails || null,
-          coberturasPremiumTotal: meta.coberturasPremiumTotal || null,
-          finalUrl: meta.finalUrl || null,
-        },
-      });
-      meta.steps.push(`firestore-job-update -> completed (jobId=${jobId})`);
+      // Reutiliza a app Firebase já inicializada (evita erro se config for null neste ponto)
+      const fbDb = getFirestore(getApps().length ? getApp() : initializeApp(getFirebaseClientConfigFromEnv()));
+      const hasValues = meta.accordionValues && Object.values(meta.accordionValues).some(Boolean);
+      if (hasValues) {
+        await updateDoc(doc(fbDb, 'simulationTransferJobs', jobId), {
+          status: 'completed',
+          completedAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          result: {
+            accordionValues: meta.accordionValues || null,
+            coberturasReceiptDetails: meta.coberturasReceiptDetails || null,
+            coberturasPremiumTotal: meta.coberturasPremiumTotal || null,
+            finalUrl: meta.finalUrl || null,
+          },
+        });
+        meta.steps.push(`firestore-job-update -> completed (jobId=${jobId})`);
+      } else {
+        await updateDoc(doc(fbDb, 'simulationTransferJobs', jobId), {
+          status: 'failed',
+          failedAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          error: 'accordionValues not extracted — simulation did not reach Coberturas',
+        });
+        meta.steps.push(`firestore-job-update -> failed-no-values (jobId=${jobId})`);
+      }
     } catch (fbErr) {
-      console.warn('[transfer] Falha ao actualizar job Firestore (ignorado):', fbErr?.message || fbErr);
+      console.warn('[transfer] Falha ao actualizar job Firestore completed:', fbErr?.message || fbErr);
+      meta.steps.push(`firestore-job-update -> error: ${fbErr?.message || String(fbErr)}`);
     }
   }
 
+  await fs.writeFile(path.join(dir, 'meta.json'), JSON.stringify(meta, null, 2), 'utf8');
   console.log(JSON.stringify({ ok: true, dir, finalScreenshot: meta.finalScreenshot, lastPageScreenshot: finalShot, finalUrl: meta.finalUrl, accordionValues: meta.accordionValues || null }, null, 2));
 } catch (error) {
   if (error instanceof ControlledPauseStop) {
@@ -3944,6 +3957,19 @@ try {
     meta.error = error instanceof Error ? error.message : String(error);
     meta.finalUrl = page.url();
     meta.errorScreenshot = errShot;
+    // Marcar job como failed no Firestore
+    const failedJobId = process.env.TRANSFER_JOB_ID;
+    if (failedJobId) {
+      try {
+        const fbDb = getFirestore(getApps().length ? getApp() : initializeApp(getFirebaseClientConfigFromEnv()));
+        await updateDoc(doc(fbDb, 'simulationTransferJobs', failedJobId), {
+          status: 'failed',
+          failedAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          error: meta.error || 'unknown error',
+        });
+      } catch { /* ignorar */ }
+    }
     await fs.writeFile(path.join(dir, 'meta.json'), JSON.stringify(meta, null, 2), 'utf8');
     console.log(JSON.stringify({ ok: false, dir, error: meta.error, errorScreenshot: errShot, finalUrl: meta.finalUrl }, null, 2));
     process.exitCode = 1;
