@@ -89,7 +89,7 @@ async function claimAndLaunchJob(jobId) {
   const envVars = {
     ...process.env,
     TRANSFER_JOB_ID: jobId,
-    TRANSFER_SOURCE_PREFERENCE: 'localhost',
+    TRANSFER_SOURCE_PREFERENCE: process.env.TRANSFER_SOURCE_PREFERENCE ?? 'firestore',
     TRANSFER_VEHICLE_RESULT_INDEX: '1',
     TRANSFER_VEHICLE_PREFERRED_SELECTOR:
       'table#Zurich_PT_Theme_wtZurich_PT_Theme_Layout_SideBar_block_WebPatterns_wt24_block_wtColumn1_wtMainContent_wt20_wtItems_wt893_wtContent_wt350_wtMessage_wttr_Versoes > tbody > tr:nth-of-type(2) > td.TableRecords_EvenLine:nth-of-type(1) > div',

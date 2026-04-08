@@ -899,7 +899,7 @@ export default function SimulacaoAuto() {
                     <p className="text-blue-900 font-bold text-lg">{form.marca} {form.modelo}{form.versao ? ` (${form.versao})` : ''} · {form.ano}</p>
                     <p className="text-blue-700 text-sm">{form.tipoSeguro} · {form.matricula}</p>
                   </div>
-                  <p className="text-sm text-gray-600 text-center font-medium">
+                  <p className="text-base text-gray-800 text-center font-bold tracking-wide">
                     {base === 'en' ? 'Choose your preferred payment frequency:' : 'Escolha a periodicidade de pagamento:'}
                   </p>
                   <div className="grid grid-cols-2 gap-3">
@@ -940,12 +940,12 @@ export default function SimulacaoAuto() {
                       ? 'Values are indicative. Final proposal subject to underwriting confirmation.'
                       : 'Valores indicativos. Proposta final sujeita a confirmação da seguradora.'}
                   </p>
-                  {/* Botão Continuar — aparece após seleção */}
-                  {selectedPeriodicity && !choiceSaved && (
-                    <div className="flex justify-center pt-2">
+                  {/* Botões Continuar + Nova Simulação — sempre visíveis */}
+                  {!choiceSaved && (
+                    <div className="flex justify-center items-center gap-3 pt-2">
                       <button
                         type="button"
-                        disabled={isSavingChoice}
+                        disabled={!selectedPeriodicity || isSavingChoice}
                         onClick={async () => {
                           setIsSavingChoice(true);
                           try {
@@ -956,7 +956,7 @@ export default function SimulacaoAuto() {
                               trimestral: simulationResult.accordionValues?.['trimestral'],
                               mensal: simulationResult.accordionValues?.['mensal'],
                             };
-                            const chosenValue = periodicityValues[selectedPeriodicity];
+                            const chosenValue = periodicityValues[selectedPeriodicity!];
                             if (uid && transferJobId) {
                               await saveSimulation(uid, {
                                 type: 'auto',
@@ -989,40 +989,22 @@ export default function SimulacaoAuto() {
                             setChoiceSaved(true);
                           } catch (e) {
                             console.warn('[SimulacaoAuto] Falha a guardar escolha (ignorado):', e);
-                            setChoiceSaved(true); // avança na mesma
+                            setChoiceSaved(true);
                           } finally {
                             setIsSavingChoice(false);
                           }
                         }}
-                        className="as-btn bg-blue-700 text-white hover:bg-blue-900 text-sm min-w-[160px] flex items-center justify-center gap-2"
+                        className={`as-btn text-sm min-w-[140px] flex items-center justify-center gap-2 transition-all
+                          ${!selectedPeriodicity || isSavingChoice
+                            ? 'bg-blue-300 text-white cursor-not-allowed opacity-60'
+                            : 'bg-blue-700 text-white hover:bg-blue-900'
+                          }`}
                       >
                         {isSavingChoice
                           ? <><svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>{base === 'en' ? 'Saving…' : 'A guardar…'}</>
                           : base === 'en' ? 'Continue' : 'Continuar'
                         }
                       </button>
-                    </div>
-                  )}
-                  {/* Confirmação após guardar */}
-                  {choiceSaved && (
-                    <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center space-y-2">
-                      <p className="text-green-700 font-semibold text-lg">✅ {base === 'en' ? 'Choice saved!' : 'Escolha guardada!'}</p>
-                      <p className="text-sm text-gray-600">
-                        {base === 'en'
-                          ? 'Our team will prepare a personalised proposal based on your selection.'
-                          : 'A nossa equipa irá preparar uma proposta personalizada com base na sua escolha.'}
-                      </p>
-                      <div className="flex justify-center pt-2">
-                        <a href={`/${base}/simulacao-auto`} className="as-btn bg-blue-700 text-white hover:bg-blue-900 text-sm"
-                          onClick={() => { sessionStorage.removeItem('sim_auto_step'); sessionStorage.removeItem('sim_auto_job_id'); }}>
-                          {base === 'en' ? 'New Simulation' : 'Nova Simulação'}
-                        </a>
-                      </div>
-                    </div>
-                  )}
-                  {/* Botão Nova Simulação — sempre visível */}
-                  {!choiceSaved && (
-                    <div className="flex justify-center pt-2">
                       <a href={`/${base}/simulacao-auto`} className="as-btn bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300 text-sm"
                         onClick={() => { sessionStorage.removeItem('sim_auto_step'); sessionStorage.removeItem('sim_auto_job_id'); }}>
                         {base === 'en' ? 'New Simulation' : 'Nova Simulação'}
