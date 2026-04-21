@@ -207,7 +207,9 @@ export default function MinhasSimulacoes(): React.ReactElement {
           }
           return { id: d.id, ...data, ownerUid } as SimulationDoc;
         });
-        const filtered = filter === 'all' ? docs : docs.filter((d) => d.type === filter);
+        // Excluir registos de escolha de periodicidade ({jobId}:choice:{periodo})
+        const filtered = (filter === 'all' ? docs : docs.filter((d) => d.type === filter))
+          .filter((d) => !d.id.includes(':choice:'));
         setItems(filtered);
         setLoading(false);
       },
@@ -229,8 +231,9 @@ export default function MinhasSimulacoes(): React.ReactElement {
                 if (usersIdx >= 0 && segments[usersIdx + 1]) ownerUid = segments[usersIdx + 1];
               } catch {}
               return { id: d.id, ...data, ownerUid } as SimulationDoc;
-            });
-            const filtered = filter === 'all' ? docs : docs.filter((d) => d.type === filter);
+              });
+            const filtered = (filter === 'all' ? docs : docs.filter((d) => d.type === filter))
+              .filter((d) => !d.id.includes(':choice:'));
             setItems(filtered);
           } catch (fallbackErr: any) {
             console.error('[MinhasSimulacoes] Fallback getDocs failed:', fallbackErr);
