@@ -75,9 +75,9 @@ function App(): React.ReactElement {
       brandName = 'Porto Seguros';
       backgroundAsset = 'imagens/bg-porto.jpg';
     }
-    else if (host.includes('vlxinsurance') || host.includes('vlx')) {
+    else if (host.includes('vlxinsurance') || host.includes('vlx') || host.includes('vfx')) {
       brandName = 'VFX Seguros';
-      backgroundAsset = 'imagens/image.png';
+      backgroundAsset = 'imagens/bg-vfx.jpg';
     }
     // Force i18n language to follow URL param (robust on first load / GH Pages)
     useEffect(() => {
