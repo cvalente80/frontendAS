@@ -229,7 +229,9 @@ export default function Contato() {
           ? 'Pombal, distrito de Leiria.'
           : isSintra
             ? 'Sintra, distrito de Lisboa.'
-            : t('map.whereDesc');
+            : isVfx
+              ? 'Vila Franca de Xira, distrito de Lisboa.'
+              : t('map.whereDesc');
 
   const iframeTitle = isLisboa
     ? 'Mapa de Lisboa, Portugal'
@@ -241,7 +243,9 @@ export default function Contato() {
           ? 'Mapa de Pombal, distrito de Leiria'
           : isSintra
             ? 'Mapa de Sintra, distrito de Lisboa'
-            : t('map.iframeTitle');
+            : isVfx
+              ? 'Mapa de Vila Franca de Xira'
+              : t('map.iframeTitle');
 
   return (
     <div className="container mx-auto px-4 py-8">
