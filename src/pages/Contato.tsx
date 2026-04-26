@@ -39,6 +39,7 @@ export default function Contato() {
   const isPovoa = host.includes('povoaseg') || host.includes('povoa');
   const isLisboa = host.includes('lisboaseg') || host.includes('lisboa');
   const isPorto = host.includes('portoseg') || host.includes('porto');
+  const isVfx = host.includes('vlxinsurance') || host.includes('vlx') || host.includes('vfx');
 
   const brandName = isAurelio
     ? 'Aurélio Seguros'
@@ -50,8 +51,10 @@ export default function Contato() {
           ? 'Póvoa Seguros'
           : isLisboa
             ? 'Lisboa Seguros'
-            : isPorto
+              : isPorto
               ? 'Porto Seguros'
+              : isVfx
+              ? 'VFX Seguros'
               : 'Ansião Seguros';
   const siteDomain = typeof window !== 'undefined' ? window.location.hostname : '';
   const siteUrl = typeof window !== 'undefined' ? window.location.origin : '';
@@ -72,6 +75,8 @@ export default function Contato() {
           ? 'Pombal, Leiria, Portugal'
           : isSintra
             ? 'Sintra, Portugal'
+            : isVfx
+            ? 'Vila Franca de Xira, Portugal'
             : 'Ansião, Leiria, Portugal';
   const mapSrc = `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&hl=${base === 'en' ? 'en' : 'pt-PT'}&z=13&output=embed`;
   const mapLink = `https://maps.google.com/?q=${encodeURIComponent(mapQuery)}`;

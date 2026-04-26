@@ -98,6 +98,11 @@ export default function Seo({ title, description, image, canonicalPath, noIndex,
       cityDesc = 'Porto';
       addressLocality = 'Porto';
       addressRegion = 'Porto';
+    } else if (host.includes('vlxinsurance') || host.includes('vlx') || host.includes('vfx')) {
+      brandName = 'VFX Seguros';
+      cityDesc = 'Vila Franca de Xira';
+      addressLocality = 'Vila Franca de Xira';
+      addressRegion = 'Lisboa';
     }
 
     const base = siteBase();
