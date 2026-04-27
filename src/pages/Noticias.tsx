@@ -4,7 +4,7 @@ import { collection, getDocs, limit, orderBy, query, where } from "firebase/fire
 import Seo from "../components/Seo";
 import { db } from "../firebase";
 
-export type NewsRegion = "ansiao" | "povoa" | "lisboa" | "porto" | "pombal" | "sintra" | "nacional";
+export type NewsRegion = "ansiao" | "povoa" | "lisboa" | "porto" | "pombal" | "sintra" | "vfx" | "nacional";
 
 export type NewsItem = {
   id?: string;
@@ -24,6 +24,7 @@ function detectRegionFromHost(host: string): NewsRegion {
   if (h.includes("lisboaseg") || h.includes("lisboa")) return "lisboa";
   if (h.includes("povoaseg") || h.includes("povoa")) return "povoa";
   if (h.includes("portoseg") || h.includes("porto")) return "porto";
+  if (h.includes("vlxinsurance") || h.includes("vlx") || h.includes("vfx")) return "vfx";
   // aurélio e ansião caem aqui
   return "ansiao";
 }
@@ -82,6 +83,8 @@ export default function Noticias() {
         return "Póvoa de Santa Iria";
       case "porto":
         return "Porto";
+      case "vfx":
+        return "Vila Franca de Xira";
       case "ansiao":
       default:
         return "Ansião (Leiria)";
