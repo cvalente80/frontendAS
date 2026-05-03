@@ -24,6 +24,7 @@ export function DesktopNav() {
   else if (host.includes('povoaseg') || host.includes('povoa')) brandName = 'Póvoa Seguros';
   else if (host.includes('lisboaseg') || host.includes('lisboa')) brandName = 'Lisboa Seguros';
   else if (host.includes('portoseg') || host.includes('porto')) brandName = 'Porto Seguros';
+  else if (host.includes('vlxinsurance') || host.includes('vlx') || host.includes('vfx')) brandName = 'VFX Seguros';
 
   // Close menus on outside click or Escape
   useEffect(() => {

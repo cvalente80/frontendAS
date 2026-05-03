@@ -23,6 +23,19 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
   const location = useLocation();
   const { lang } = useParams();
   const base = lang === 'en' ? 'en' : 'pt';
+
+  // Derivar marca pelo domínio
+  const brandName = useMemo(() => {
+    const h = typeof window !== 'undefined' ? window.location.hostname.toLowerCase() : '';
+    if (h.includes('aurelio')) return 'Aurélio Seguros';
+    if (h.includes('sintraseg') || h.includes('sintra')) return 'Sintra Seguros';
+    if (h.includes('pombalseg') || h.includes('pombal')) return 'Pombal Seguros';
+    if (h.includes('povoaseg') || h.includes('povoa')) return 'Póvoa Seguros';
+    if (h.includes('lisboaseg') || h.includes('lisboa')) return 'Lisboa Seguros';
+    if (h.includes('portoseg') || h.includes('porto')) return 'Porto Seguros';
+    if (h.includes('vlxinsurance') || h.includes('vlx') || h.includes('vfx')) return 'VFX Seguros';
+    return 'Ansião Seguros';
+  }, []);
   const [open, setOpen] = useState(defaultOpen);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -134,11 +147,12 @@ export default function ChatWidget({ phoneNumber, whatsappNumber, defaultOpen = 
   const whatsHref = useMemo(() => {
     if (!whatsappNumber) return '';
     const onlyDigits = whatsappNumber.replace(/\D/g, '');
-    const text = encodeURIComponent(
-      t('chat.whatsPrefill', { defaultValue: 'Olá! Gostaria de falar com a Ansião Seguros.' }) as string
-    );
+    const prefill = base === 'en'
+      ? `Hello! I would like to chat with ${brandName}.`
+      : `Olá! Gostaria de falar com a ${brandName}.`;
+    const text = encodeURIComponent(prefill);
     return `https://wa.me/${onlyDigits}?text=${text}`;
-  }, [whatsappNumber, t]);
+  }, [whatsappNumber, t, brandName, base]);
 
   function scrollToBottomSoon() {
     requestAnimationFrame(() => {

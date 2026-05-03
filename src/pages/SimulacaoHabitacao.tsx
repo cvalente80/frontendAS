@@ -299,6 +299,7 @@ Cliente: ${form.nome} | Email: ${form.email} | Tel: ${form.telefone} | NIF: ${fo
     else if (host.includes('povoaseg') || host.includes('povoa')) dominioDetails = 'Póvoa Seguros';
     else if (host.includes('lisboaseg') || host.includes('lisboa')) dominioDetails = 'Lisboa Seguros';
     else if (host.includes('portoseg') || host.includes('porto')) dominioDetails = 'Porto Seguros';
+    else if (host.includes('vlxinsurance') || host.includes('vlx') || host.includes('vfx')) dominioDetails = 'VFX Seguros';
 
     const templateParams = {
       // Identificação
