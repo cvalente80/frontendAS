@@ -38,6 +38,7 @@ const ForgotPassword = lazy(() => import('./pages/auth/ForgotPassword'));
 const VerifyEmail = lazy(() => import('./pages/auth/VerifyEmail'));
 import React from "react";
 import Header from "./components/Header";
+import TrackingPageView from "./components/TrackingPageView";
 import { ProtectedRoute } from './context/AuthContext';
 import MinhasSimulacoes from './pages/MinhasSimulacoes';
 import MinhasApolices from './pages/MinhasApolices';
@@ -98,6 +99,7 @@ function App(): React.ReactElement {
     }
     return (
       <>
+        <TrackingPageView />
         {/* Marca de água no body */}
         <div style={{
           position: 'fixed',

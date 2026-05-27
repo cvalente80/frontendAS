@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import Seo from "../components/Seo";
 import { useIsMobile } from "../hooks/useIsMobile";
+import { trackQuoteStart, trackWhatsAppClick } from "../lib/tracking";
 
 type StatItem = { value: string; label: string };
 type InfoItem = { title: string; desc: string };
@@ -261,6 +262,23 @@ export default function LandingPovoaAuto() {
   const processSteps = isMobile ? copy.processSteps.slice(0, 3) : copy.processSteps;
   const faqs = isMobile ? copy.faqs.slice(0, 2) : copy.faqs;
 
+  function handleQuoteStart(placement: string) {
+    trackQuoteStart({
+      page: 'povoa-auto',
+      placement,
+      language: base,
+    });
+  }
+
+  function handleWhatsAppIntent(placement: string) {
+    trackWhatsAppClick({
+      page: 'povoa-auto',
+      placement,
+      language: base,
+      destination: 'contact-page',
+    });
+  }
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,#dbeafe_0%,#eff6ff_35%,#f8fafc_65%,#ffffff_100%)] px-2.5 py-3 pb-20 md:px-6 md:py-10 md:pb-10">
       <Seo
@@ -309,6 +327,7 @@ export default function LandingPovoaAuto() {
                 <div className="mt-4 flex flex-col gap-2.5 sm:flex-row md:mt-8 md:gap-3">
                   <Link
                     to={quoteHref}
+                    onClick={() => handleQuoteStart('hero-primary')}
                     className="group inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-emerald-400 to-teal-300 px-5 py-2.5 text-center text-sm font-bold text-slate-950 shadow-[0_16px_40px_rgba(16,185,129,0.28)] transition hover:scale-[1.01] hover:from-emerald-300 hover:to-teal-200 md:min-h-12 md:px-6 md:py-3 md:text-base"
                   >
                     <span>{copy.ctaPrimary}</span>
@@ -316,6 +335,7 @@ export default function LandingPovoaAuto() {
                   </Link>
                   <Link
                     to={contactHref}
+                    onClick={() => handleWhatsAppIntent('hero-secondary')}
                     className="inline-flex min-h-11 items-center justify-center rounded-full border border-green-300/40 bg-green-500/15 px-5 py-2.5 text-center text-white shadow-[0_12px_32px_rgba(37,211,102,0.12)] backdrop-blur transition hover:bg-green-500/25 md:min-h-12 md:px-6 md:py-3"
                   >
                     <span className="flex items-center gap-3">
@@ -402,6 +422,7 @@ export default function LandingPovoaAuto() {
                 {isMobile && (
                   <Link
                     to={quoteHref}
+                    onClick={() => handleQuoteStart('panel-mobile')}
                     className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-slate-950 px-5 py-2.5 text-center text-sm font-bold text-white transition hover:bg-slate-800"
                   >
                     {copy.finalPrimary}
@@ -506,6 +527,7 @@ export default function LandingPovoaAuto() {
             <div className="mt-5 flex flex-col justify-center gap-2.5 sm:flex-row md:mt-6 md:gap-3">
               <Link
                 to={quoteHref}
+                onClick={() => handleQuoteStart('final-primary')}
                 className="group inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-emerald-400 to-teal-300 px-6 py-2.5 text-sm font-bold text-slate-950 shadow-[0_16px_40px_rgba(16,185,129,0.28)] transition hover:scale-[1.01] hover:from-emerald-300 hover:to-teal-200 md:min-h-12 md:px-7 md:py-3 md:text-base"
               >
                 <span>{copy.finalPrimary}</span>
@@ -513,6 +535,7 @@ export default function LandingPovoaAuto() {
               </Link>
               <Link
                 to={contactHref}
+                onClick={() => handleWhatsAppIntent('final-secondary')}
                 className="inline-flex min-h-11 items-center justify-center rounded-full border border-green-300/40 bg-green-500/15 px-6 py-2.5 text-white transition hover:bg-green-500/25 md:min-h-12 md:px-7 md:py-3"
               >
                 <span className="flex items-center gap-3">
@@ -535,12 +558,14 @@ export default function LandingPovoaAuto() {
           <div className="mx-auto flex max-w-6xl gap-2.5">
             <Link
               to={quoteHref}
+              onClick={() => handleQuoteStart('sticky-primary')}
               className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full bg-gradient-to-r from-emerald-400 to-teal-300 px-4 py-2.5 text-center text-sm font-bold text-slate-950 shadow transition"
             >
               {copy.ctaPrimary}
             </Link>
             <Link
               to={contactHref}
+              onClick={() => handleWhatsAppIntent('sticky-secondary')}
               className="inline-flex min-h-11 items-center justify-center rounded-full border border-green-200 bg-green-50 px-4 py-2.5 text-center text-green-800 transition hover:bg-green-100"
             >
               <span className="flex items-center gap-2">
