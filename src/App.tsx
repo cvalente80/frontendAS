@@ -11,6 +11,7 @@ import SimulacaoSaude from "./pages/SimulacaoSaude";
 import SimulacaoHabitacao from "./pages/SimulacaoHabitacao";
 import LandingKristina from "./pages/LandingKristina";
 import LandingKristinaGuia from "./pages/LandingKristinaGuia";
+import LandingPovoaAuto from "./pages/LandingPovoaAuto";
 import Produtos from "./pages/Produtos";
 import Contato from "./pages/Contato";
 import ProdutoAuto from "./pages/ProdutoAuto";
@@ -49,6 +50,7 @@ function App(): React.ReactElement {
     const { lang } = useParams();
     const base = lang === 'en' ? 'en' : (lang === 'pt' ? 'pt' : 'pt');
     const host = typeof window !== 'undefined' ? window.location.hostname.toLowerCase() : '';
+    const pathname = typeof window !== 'undefined' ? window.location.pathname.toLowerCase() : '';
     let brandName = 'Ansião Seguros';
     let backgroundAsset = 'imagens/image.png';
     if (host.includes('aurelio')) {
@@ -78,6 +80,10 @@ function App(): React.ReactElement {
     else if (host.includes('vlxinsurance') || host.includes('vlx') || host.includes('vfx')) {
       brandName = 'VFX Seguros';
       backgroundAsset = 'imagens/bg-vfx.jpg';
+    }
+    else if (pathname.includes('/povoa-auto')) {
+      brandName = 'Póvoa Seguros';
+      backgroundAsset = 'imagens/bg-povoa1.jpg';
     }
     // Force i18n language to follow URL param (robust on first load / GH Pages)
     useEffect(() => {
@@ -122,6 +128,7 @@ function App(): React.ReactElement {
           {/* Campaign landing pages (shareable URLs) */}
           <Route path="kristin" element={<LandingKristina />} />
           <Route path="kristin-guia" element={<LandingKristinaGuia />} />
+          <Route path="povoa-auto" element={<LandingPovoaAuto />} />
           {/* Backwards-compatible redirects */}
           <Route path="kristina" element={<Navigate to={`/${base}/kristin`} replace />} />
           <Route path="kristina-guia" element={<Navigate to={`/${base}/kristin-guia`} replace />} />
