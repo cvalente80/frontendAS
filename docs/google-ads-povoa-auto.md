@@ -249,6 +249,91 @@ Criar 4 ações de conversão Web para casar com o tracking já implementado:
 - `Generate Lead - Auto Quote`
 - `Phone Click - Contact`
 
+## Lista exata para criar no Google Ads
+Criar estas 4 conversões com estes nomes e esta lógica.
+
+### 1. `Generate Lead - Auto Quote`
+- **Tipo**: Website
+- **Objetivo**: `Leads`
+- **Categoria**: `Enviar formulário de lead`
+- **Primária/Secundária**: `Primária`
+- **Valor**: `Não usar valor` ou `1`
+- **Contagem**: `Uma`
+- **Janela de conversão**: `30 dias`
+- **Evento do site**: `generate_lead`
+- **Quando dispara**: após envio com sucesso de `Simulação Auto`
+- **Uso**: conversão principal da campanha
+
+### 2. `WhatsApp Click - Povoa Auto`
+- **Tipo**: Website
+- **Objetivo**: `Leads`
+- **Categoria**: `Contacto`
+- **Primária/Secundária**: `Secundária` no arranque
+- **Valor**: `Não usar valor` ou `1`
+- **Contagem**: `Uma`
+- **Janela de conversão**: `30 dias`
+- **Evento do site**: `whatsapp_click`
+- **Quando dispara**: clique nos CTAs de contacto da landing e no botão real do `ChatWidget`
+- **Uso**: medir intenção forte, sem misturar logo com lead final
+
+### 3. `Quote Start - Povoa Auto`
+- **Tipo**: Website
+- **Objetivo**: `Leads`
+- **Categoria**: `Iniciar pedido`
+- **Primária/Secundária**: `Secundária`
+- **Valor**: `Não usar valor` ou `1`
+- **Contagem**: `Uma`
+- **Janela de conversão**: `30 dias`
+- **Evento do site**: `quote_start`
+- **Quando dispara**: clique em `Começar simulação` na landing
+- **Uso**: microconversão para perceber intenção antes do lead final
+
+### 4. `Phone Click - Contact`
+- **Tipo**: Website
+- **Objetivo**: `Leads`
+- **Categoria**: `Chamada telefónica`
+- **Primária/Secundária**: `Secundária`
+- **Valor**: `Não usar valor` ou `1`
+- **Contagem**: `Uma`
+- **Janela de conversão**: `30 dias`
+- **Evento do site**: `phone_click`
+- **Quando dispara**: clique no telefone ou CTA de chamada na página `Contacto`
+- **Uso**: medir leads que preferem telefonar
+
+## Prioridade recomendada para otimização
+### Fase 1 — arranque
+Usar como conversão principal apenas:
+
+- `Generate Lead - Auto Quote`
+
+Manter como observação/secundárias:
+
+- `WhatsApp Click - Povoa Auto`
+- `Quote Start - Povoa Auto`
+- `Phone Click - Contact`
+
+### Fase 2 — depois de validares a qualidade dos contactos
+Se os contactos por WhatsApp forem realmente bons, podes testar promover também:
+
+- `WhatsApp Click - Povoa Auto`
+
+para primária.
+
+## Mapeamento direto para as env vars
+- `VITE_GOOGLE_ADS_LABEL_GENERATE_LEAD` → `Generate Lead - Auto Quote`
+- `VITE_GOOGLE_ADS_LABEL_WHATSAPP_CLICK` → `WhatsApp Click - Povoa Auto`
+- `VITE_GOOGLE_ADS_LABEL_QUOTE_START` → `Quote Start - Povoa Auto`
+- `VITE_GOOGLE_ADS_LABEL_PHONE_CLICK` → `Phone Click - Contact`
+
+## Ordem recomendada de criação no Google Ads
+1. criar `Generate Lead - Auto Quote`
+2. criar `WhatsApp Click - Povoa Auto`
+3. criar `Quote Start - Povoa Auto`
+4. criar `Phone Click - Contact`
+5. copiar o `AW-...` e cada `label`
+6. preencher o `.env.local` ou as variáveis do ambiente de produção
+7. publicar e validar no `Tag Assistant`
+
 Sugestão de classificação:
 
 - `Quote Start - Povoa Auto` → secundária
