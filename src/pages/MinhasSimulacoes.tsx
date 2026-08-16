@@ -398,12 +398,16 @@ export default function MinhasSimulacoes(): React.ReactElement {
                   {it.type === 'auto' ? (
                     (() => {
                       const rawP = (it as any).payload || {};
-                      // Se cotacaoConfirmada mas sem dados de preço, enriquecer com o documento :choice: correspondente
-                      const p = (cotacaoConfirmada && !rawP.periodicidadeEscolhida && plate)
+                      // Associar a escolha à simulação de origem; a matrícula não é única entre simulações.
+                      const p = (cotacaoConfirmada && !rawP.periodicidadeEscolhida)
                         ? (() => {
-                            const choiceItem = choiceItems
-                              .filter(d => (d as any)?.payload?.matricula === plate)
-                              .sort((a, b) => ((b as any)?.createdAt?.seconds || 0) - ((a as any)?.createdAt?.seconds || 0))[0];
+                            const exactChoiceItem = choiceItems.find(
+                              d => (d as any)?.payload?.sourceSimulationId === it.id,
+                            );
+                            const plateChoices = plate
+                              ? choiceItems.filter(d => (d as any)?.payload?.matricula === plate)
+                              : [];
+                            const choiceItem = exactChoiceItem || (plateChoices.length === 1 ? plateChoices[0] : undefined);
                             return choiceItem ? { ...rawP, ...(choiceItem as any).payload } : rawP;
                           })()
                         : rawP;

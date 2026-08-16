@@ -77,6 +77,9 @@ export default function SimulacaoAuto() {
   const [transferJobId, setTransferJobId] = useState<string | null>(() =>
     sessionStorage.getItem('sim_auto_job_id')
   );
+  const [sourceSimulationId, setSourceSimulationId] = useState<string | null>(() =>
+    sessionStorage.getItem('sim_auto_source_simulation_id')
+  );
   const [simulationResult, setSimulationResult] = useState<{
     accordionValues?: { [key: string]: string | null | undefined; anual?: string | null; semestral?: string | null; semestral_primeiro?: string | null; trimestral?: string | null; trimestral_primeiro?: string | null; mensal?: string | null; mensal_primeiro?: string | null } | null;
     coberturasPremiumTotal?: string | null;
@@ -96,6 +99,10 @@ export default function SimulacaoAuto() {
     if (transferJobId) sessionStorage.setItem('sim_auto_job_id', transferJobId);
     else sessionStorage.removeItem('sim_auto_job_id');
   }, [transferJobId]);
+  useEffect(() => {
+    if (sourceSimulationId) sessionStorage.setItem('sim_auto_source_simulation_id', sourceSimulationId);
+    else sessionStorage.removeItem('sim_auto_source_simulation_id');
+  }, [sourceSimulationId]);
 
   // Listener em tempo real ao job de transferência — actualiza simulationResult quando o Playwright terminar
   useEffect(() => {
@@ -406,6 +413,7 @@ export default function SimulacaoAuto() {
               outrosPedidos: form.outrosPedidos,
             }
           }, { idempotencyKey: key });
+          setSourceSimulationId(sourceSimulationId);
         } catch (e) {
           console.warn('[SimulacaoAuto] Falha a guardar simulação (ignorado):', e);
         }
@@ -1140,6 +1148,7 @@ export default function SimulacaoAuto() {
                                       mensal: paymentValues.mensal_multibanco,
                                     },
                                   },
+                                  sourceSimulationId: sourceSimulationId || undefined,
                                   transferJobId,
                                 },
                               }, { idempotencyKey: `${transferJobId}:choice:${selectedPeriodicity}` });
@@ -1147,12 +1156,14 @@ export default function SimulacaoAuto() {
                             setChoiceSaved(true);
                             sessionStorage.removeItem('sim_auto_step');
                             sessionStorage.removeItem('sim_auto_job_id');
+                            sessionStorage.removeItem('sim_auto_source_simulation_id');
                             navigate(`/${base}/minhas-simulacoes`);
                           } catch (e) {
                             console.warn('[SimulacaoAuto] Falha a guardar escolha (ignorado):', e);
                             setChoiceSaved(true);
                             sessionStorage.removeItem('sim_auto_step');
                             sessionStorage.removeItem('sim_auto_job_id');
+                            sessionStorage.removeItem('sim_auto_source_simulation_id');
                             navigate(`/${base}/minhas-simulacoes`);
                           } finally {
                             setIsSavingChoice(false);
