@@ -1107,7 +1107,13 @@ export default function SimulacaoAuto() {
                               trimestral: paymentValues[selectedPaymentMethod === 'multibanco' ? 'trimestral_multibanco' : 'trimestral'],
                               mensal: paymentValues[selectedPaymentMethod === 'multibanco' ? 'mensal_multibanco' : 'mensal'],
                             };
-                            const chosenValue = periodicityValues[selectedPeriodicity!];
+                            const firstReceiptValues: Record<string, string | null | undefined> = {
+                              anual: paymentValues[selectedPaymentMethod === 'multibanco' ? 'anual_primeiro_multibanco' : 'anual_primeiro'] ?? periodicityValues.anual,
+                              semestral: paymentValues[selectedPaymentMethod === 'multibanco' ? 'semestral_primeiro_multibanco' : 'semestral_primeiro'],
+                              trimestral: paymentValues[selectedPaymentMethod === 'multibanco' ? 'trimestral_primeiro_multibanco' : 'trimestral_primeiro'],
+                              mensal: paymentValues[selectedPaymentMethod === 'multibanco' ? 'mensal_primeiro_multibanco' : 'mensal_primeiro'],
+                            };
+                            const chosenValue = firstReceiptValues[selectedPeriodicity!] ?? periodicityValues[selectedPeriodicity!];
                             if (uid && transferJobId) {
                               await saveSimulation(uid, {
                                 type: 'auto',
@@ -1133,10 +1139,25 @@ export default function SimulacaoAuto() {
                                   periodicidadeEscolhida: selectedPeriodicity,
                                   metodoPagamento: selectedPaymentMethod,
                                   premioEscolhido: chosenValue,
-                                  todosPrecos: periodicityValues,
+                                  todosPrecos: firstReceiptValues,
+                                  todosPrecosSeguintes: periodicityValues,
                                   todosPrecosPorMetodo: {
                                     debito_direto: {
-                                      anual: paymentValues.anual,
+                                      anual: paymentValues.anual_primeiro ?? paymentValues.anual ?? simulationResult.coberturasPremiumTotal,
+                                      semestral: paymentValues.semestral_primeiro,
+                                      trimestral: paymentValues.trimestral_primeiro,
+                                      mensal: paymentValues.mensal_primeiro,
+                                    },
+                                    multibanco: {
+                                      anual: paymentValues.anual_primeiro_multibanco ?? paymentValues.anual_multibanco,
+                                      semestral: paymentValues.semestral_primeiro_multibanco,
+                                      trimestral: paymentValues.trimestral_primeiro_multibanco,
+                                      mensal: paymentValues.mensal_primeiro_multibanco,
+                                    },
+                                  },
+                                  todosPrecosSeguintesPorMetodo: {
+                                    debito_direto: {
+                                      anual: paymentValues.anual ?? simulationResult.coberturasPremiumTotal,
                                       semestral: paymentValues.semestral,
                                       trimestral: paymentValues.trimestral,
                                       mensal: paymentValues.mensal,

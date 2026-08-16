@@ -422,10 +422,12 @@ export default function MinhasSimulacoes(): React.ReactElement {
                       const nif = p.contribuinte || p.nif || '-';
                       const paymentMethod = p.metodoPagamento === 'multibanco' ? 'multibanco' : 'debito_direto';
                       const methodPrices = p.todosPrecosPorMetodo?.[paymentMethod] as Record<string, string | null | undefined> | undefined;
+                      const methodFollowingPrices = p.todosPrecosSeguintesPorMetodo?.[paymentMethod] as Record<string, string | null | undefined> | undefined;
                       const displayedPrices = methodPrices && Object.keys(methodPrices).length > 0
                         ? methodPrices
                         : p.todosPrecos as Record<string, string | null | undefined> | undefined;
                       const selectedPrice = displayedPrices?.[p.periodicidadeEscolhida] ?? p.premioEscolhido;
+                      const selectedFollowingPrice = methodFollowingPrices?.[p.periodicidadeEscolhida] ?? p.todosPrecosSeguintes?.[p.periodicidadeEscolhida];
                       const paymentMethodLabel = paymentMethod === 'multibanco' ? 'Multibanco' : 'Débito direto';
                       return (
                         <div className="text-sm text-blue-800 space-y-1">
@@ -444,15 +446,11 @@ export default function MinhasSimulacoes(): React.ReactElement {
                           <div>{t('mysims:detail.others')}: {outros}</div>
                           {p.periodicidadeEscolhida && (
                             <div className="mt-3 pt-3 border-t border-blue-200">
-                              <div className="font-semibold text-blue-700 mb-1">💶 {t('mysims:detail.quotedPrice', 'Cotação obtida')}</div>
-                              <div className="text-sm text-blue-700">{paymentMethodLabel}</div>
-                              <div className="font-bold text-lg text-green-700">{selectedPrice ?? '-'} <span className="text-sm font-normal text-blue-700">/ {p.periodicidadeEscolhida}</span></div>
-                              {displayedPrices && (
-                                <div className="mt-1 grid grid-cols-2 gap-x-4 text-xs text-blue-600">
-                                  {Object.entries(displayedPrices).map(([k, v]) => v ? (
-                                    <span key={k} className={p.periodicidadeEscolhida === k ? 'font-bold text-green-700' : ''}>{k}: {v}</span>
-                                  ) : null)}
-                                </div>
+                              <div className="font-semibold text-base text-blue-700 mb-1">💶 {t('mysims:detail.quotedPrice', 'Cotação obtida')}</div>
+                              <div className="text-base text-blue-700">{paymentMethodLabel}</div>
+                              <div className="font-bold text-xl text-green-700">{selectedPrice ?? '-'} <span className="text-base font-normal text-blue-700">/ {p.periodicidadeEscolhida} (1º recibo)</span></div>
+                              {selectedFollowingPrice && selectedFollowingPrice !== selectedPrice && (
+                                <div className="text-sm text-blue-600">Recibos seguintes: {selectedFollowingPrice}</div>
                               )}
                             </div>
                           )}
