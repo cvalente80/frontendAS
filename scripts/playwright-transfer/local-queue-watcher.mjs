@@ -133,6 +133,7 @@ async function claimAndLaunchJob(jobId) {
     // Executar com browser visível para observar os tempos da simulação
     PW_HEADLESS: 'true',
     PW_SLOW_MO: '0',
+    TRANSFER_KEEP_BROWSER_OPEN_MS: '60000',
   };
 
   const scriptPath = path.join(__dirname, 'navigate-zurich-auto.mjs');
