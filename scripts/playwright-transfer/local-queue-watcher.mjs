@@ -130,9 +130,11 @@ async function claimAndLaunchJob(jobId) {
     TRANSFER_MATRICULA_LUPA_CLICKS: '2',
     TRANSFER_MATRICULA_FOCUS_CLICKS: '4',
     TRANSFER_MATRICULA_FOCUS_CLICK_GAP_MS: '50',
-    // Executar com browser visível para observar os tempos da simulação
-    PW_HEADLESS: 'true',
-    PW_SLOW_MO: '0',
+    // Permitir debug headed/Inspector através do ambiente do watcher
+    PW_HEADLESS: process.env.PW_HEADLESS || 'true',
+    PW_SLOW_MO: process.env.PW_SLOW_MO || '0',
+    PWDEBUG: process.env.PWDEBUG || '',
+    TRANSFER_PAUSE_BEFORE_CODIGO_POSTAL: process.env.TRANSFER_PAUSE_BEFORE_CODIGO_POSTAL || process.env.TRANSFER_PAUSE_BEFORE_CONTRIBUINTE || '',
     TRANSFER_KEEP_BROWSER_OPEN_MS: '60000',
   };
 

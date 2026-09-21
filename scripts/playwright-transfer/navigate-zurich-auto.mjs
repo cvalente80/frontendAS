@@ -20,6 +20,7 @@ meta.steps.push = (...entries) => {
   return originalStepsPush(...stampedEntries);
 };
 const debugOverlayEnabled = ['1', 'true', 'yes'].includes(String(process.env.TRANSFER_DEBUG_OVERLAY || 'false').trim().toLowerCase());
+const pauseBeforeCodigoPostal = ['1', 'true', 'yes'].includes(String(process.env.TRANSFER_PAUSE_BEFORE_CODIGO_POSTAL || process.env.TRANSFER_PAUSE_BEFORE_CONTRIBUINTE || '').trim().toLowerCase());
 const sourcePreferenceRaw = String(process.env.TRANSFER_SOURCE_PREFERENCE || '').trim().toLowerCase();
 const preferLocalhostFirst = sourcePreferenceRaw === 'localhost' || sourcePreferenceRaw === 'local' || sourcePreferenceRaw === 'localhost-first';
 const productionWatcher = String(process.env.WATCHER_ENV || '').trim().toLowerCase() === 'production';
@@ -114,6 +115,8 @@ const ownDamageCoberturasSettlingMs = Math.max(0, Number.parseInt(String(process
 const finalStepSettlingMs = Math.max(0, Number.parseInt(String(process.env.TRANSFER_FINAL_STEP_SETTLING_MS || '1200'), 10) || 1200);
 const finalStepBeforeSeguinteMs = Math.max(0, Number.parseInt(String(process.env.TRANSFER_FINAL_STEP_BEFORE_SEGUINTE_MS || '1800'), 10) || 1800);
 const finalStepNextPageWaitMs = Math.max(1500, Number.parseInt(String(process.env.TRANSFER_FINAL_STEP_NEXT_PAGE_WAIT_MS || '7000'), 10) || 7000);
+const zurichTomadorNameSelector = '#Zurich_PT_Theme_wtZurich_PT_Theme_Layout_SideBar_block_WebPatterns_wt24_block_wtColumn1_wtMainContent_wt20_wtItems_wt275_wtContent_Simuladores_WB_wt424_block_wt57_wtInput_wtinp_Tomador_Nome';
+const zurichClienteSeguinteSelector = '#Zurich_PT_Theme_wtZurich_PT_Theme_Layout_SideBar_block_WebPatterns_wt24_block_wtColumn1_wtMainContent_wt20_wtItems_wt275_wtActions_wtlnk_Seguinte_Cliente';
 const forcedMatriculaLupaSelector = String(process.env.TRANSFER_MATRICULA_LUPA_SELECTOR || '').trim();
 const defaultMatriculaLupaSelector = 'div.WSearch.T3:nth-of-type(1) > div.Text_Note.OSInline:nth-of-type(2) > span.fa.fa-fw';
 const effectiveMatriculaLupaSelector = forcedMatriculaLupaSelector || defaultMatriculaLupaSelector;
@@ -142,6 +145,7 @@ const contribuintePostFillWaitMs = Math.max(0, Number.parseInt(String(process.en
 const contribuintePostLookupWaitMs = Math.max(0, Number.parseInt(String(process.env.TRANSFER_CONTRIBUINTE_POST_LOOKUP_MS || '120'), 10) || 120);
 const contribuinteNameWaitTimeoutMs = Math.max(1200, Number.parseInt(String(process.env.TRANSFER_CONTRIBUINTE_NAME_WAIT_MS || '3500'), 10) || 3500);
 const contribuinteNamePollMs = Math.max(60, Number.parseInt(String(process.env.TRANSFER_CONTRIBUINTE_NAME_POLL_MS || '120'), 10) || 120);
+const codigoPostalTypeDelayMs = Math.max(80, Number.parseInt(String(process.env.TRANSFER_CODIGO_POSTAL_TYPE_DELAY_MS || '220'), 10) || 220);
 const simularPostClickReadyTimeoutMs = Math.max(1500, Number.parseInt(String(process.env.TRANSFER_SIMULAR_READY_TIMEOUT_MS || '10000'), 10) || 10000);
 const matriculaAutoDialogInitialWaitMs = Math.max(80, Number.parseInt(String(process.env.TRANSFER_MATRICULA_AUTO_DIALOG_WAIT_MS || '200'), 10) || 200);
 const loginStepTransitionMs = Math.max(0, Number.parseInt(String(process.env.TRANSFER_LOGIN_STEP_TRANSITION_MS || '500'), 10) || 500);
@@ -155,7 +159,7 @@ const vehiclePostSelectWaitMs = Math.max(0, Number.parseInt(String(process.env.T
 const vehicleLoadedWaitTimeoutMs = Math.max(1200, Number.parseInt(String(process.env.TRANSFER_VEHICLE_LOADED_WAIT_MS || '2500'), 10) || 2500);
 const vehicleLoadedSoftPauseMs = Math.max(0, Number.parseInt(String(process.env.TRANSFER_VEHICLE_LOADED_SOFT_PAUSE_MS || '350'), 10) || 350);
 const vehiclePostSelectLoadWaitMs = Math.max(200, Number.parseInt(String(process.env.TRANSFER_VEHICLE_POST_SELECT_LOAD_WAIT_MS || '900'), 10) || 900);
-const skipVehicleLoadedWait = ['1', 'true', 'yes'].includes(String(process.env.TRANSFER_SKIP_VEHICLE_LOADED_WAIT || 'true').trim().toLowerCase());
+const skipVehicleLoadedWait = ['1', 'true', 'yes'].includes(String(process.env.TRANSFER_SKIP_VEHICLE_LOADED_WAIT || 'false').trim().toLowerCase());
 const captureMatriculaIntermediateShot = ['1', 'true', 'yes'].includes(String(process.env.TRANSFER_CAPTURE_MATRICULA_SHOT || 'false').trim().toLowerCase());
 const loginLandingWaitTimeoutMs = Math.max(3000, Number.parseInt(String(process.env.TRANSFER_LOGIN_LANDING_WAIT_MS || '12000'), 10) || 12000);
 const menuSimuladoresReadyWaitMs = Math.max(600, Number.parseInt(String(process.env.TRANSFER_MENU_READY_WAIT_MS || '2500'), 10) || 2500);
@@ -857,6 +861,216 @@ async function fillFirstMatchingField(page, selectors, value, fieldLabel, metaSt
     }
   }
   return false;
+}
+
+async function fillPersonNameField(page, selectors, value, metaState) {
+  if (value === undefined || value === null || String(value).trim() === '') return false;
+  const expectedValue = String(value).trim();
+  metaState.steps.push('dados-pessoais-tomador -> iniciar preenchimento Nome');
+  console.log('[transfer] Dados do tomador: a iniciar preenchimento do Nome');
+  for (const selector of selectors) {
+    const locator = page.locator(selector).first();
+    if (!await locator.count().catch(() => 0)) continue;
+    if (!await locator.isVisible().catch(() => false)) continue;
+    try {
+      await locator.scrollIntoViewIfNeeded().catch(() => null);
+      await locator.click({ force: true, timeout: 5000 });
+      await locator.fill(expectedValue);
+      let actualValue = await locator.inputValue().catch(() => '');
+      if (!actualValue.trim()) {
+        await locator.selectText().catch(() => null);
+        await locator.pressSequentially(expectedValue, { delay: 40 });
+        await locator.blur().catch(() => null);
+        actualValue = await locator.inputValue().catch(() => '');
+      }
+      if (actualValue.trim() === expectedValue) {
+        metaState.steps.push(`prefill nome-tomador -> ${selector}`);
+        console.log(`[transfer] Dados do tomador: Nome preenchido (${selector})`);
+        return true;
+      }
+    } catch (error) {
+      metaState.steps.push(`prefill nome-tomador -> ${selector} error=${error?.message || String(error)}`);
+    }
+  }
+  metaState.steps.push('prefill nome-tomador -> not-found');
+  console.log('[transfer] Dados do tomador: não foi possível preencher o Nome');
+  return false;
+}
+
+async function fillPostalCodeDigitByDigit(page, selectors, value, fieldLabel, metaState) {
+  if (value === undefined || value === null || String(value).trim() === '') return false;
+  const rawValue = String(value).trim();
+  const digits = rawValue.replace(/\D/g, '');
+  if (!digits) return false;
+
+  for (const selector of selectors) {
+    const matched = page.locator(selector).first();
+    if (!await matched.count().catch(() => 0)) continue;
+    if (!await matched.isVisible().catch(() => false)) continue;
+    try {
+      const tagName = await matched.evaluate((element) => element.tagName.toLowerCase()).catch(() => '');
+      let locator = matched;
+      if (!['input', 'textarea'].includes(tagName)) {
+        locator = matched.locator('input, textarea').first();
+        if (!await locator.count().catch(() => 0)) locator = matched.locator('xpath=..').locator('input, textarea').first();
+      }
+      if (!await locator.count().catch(() => 0) || !await locator.isVisible().catch(() => false)) continue;
+      await locator.scrollIntoViewIfNeeded().catch(() => null);
+      await locator.click({ force: true });
+      await locator.selectText().catch(() => null);
+      await locator.press('Backspace').catch(() => null);
+      await locator.pressSequentially(rawValue, { delay: codigoPostalTypeDelayMs });
+      const actualValue = await locator.inputValue().catch(() => '');
+      if (actualValue.replace(/\D/g, '') !== digits) continue;
+      await page.locator('body').click({ position: { x: 12, y: 12 } }).catch(() => null);
+      await page.waitForTimeout(codigoPostalTypeDelayMs);
+      metaState.steps.push(`prefill ${fieldLabel} -> ${selector} (digits-only)`);
+      return true;
+    } catch {
+      continue;
+    }
+  }
+  metaState.steps.push(`prefill ${fieldLabel} -> not-found`);
+  return false;
+}
+
+async function fillFirstMatchingDateField(page, selectors, value, fieldLabel, metaState) {
+  if (value === undefined || value === null || String(value).trim() === '') {
+    metaState.steps.push(`prefill ${fieldLabel} -> missing-value`);
+    return false;
+  }
+  const rawValue = String(value).trim();
+  const dateValue = /^\d{4}-\d{2}-\d{2}$/.test(rawValue) ? rawValue : rawValue.replace(/^(\d{2})[-/]?(\d{2})[-/]?(\d{4})$/, '$3-$2-$1');
+  const displayValue = /^\d{4}-\d{2}-\d{2}$/.test(dateValue) ? `${dateValue.slice(8, 10)}-${dateValue.slice(5, 7)}-${dateValue.slice(0, 4)}` : rawValue;
+
+  for (const selector of selectors) {
+    const locator = page.locator(selector).first();
+    if (!await locator.count().catch(() => 0) || !await locator.isVisible().catch(() => false)) continue;
+    try {
+      const inputType = await locator.getAttribute('type').catch(() => null);
+      const inputMask = await locator.getAttribute('fv_type').catch(() => null);
+      await locator.fill(inputType === 'date' ? dateValue : displayValue);
+      const valueAfterFill = await locator.inputValue().catch(() => '');
+      const expectedDigits = displayValue.replace(/\D/g, '');
+      if (inputType === 'date' || valueAfterFill.replace(/\D/g, '') === expectedDigits || valueAfterFill === displayValue) {
+        metaState.steps.push(`prefill ${fieldLabel} -> ${selector}`);
+        return true;
+      }
+      await locator.click();
+      await locator.selectText().catch(() => null);
+      await locator.pressSequentially(displayValue, { delay: 50 });
+      await locator.blur().catch(() => null);
+      const valueAfterTyping = await locator.inputValue().catch(() => '');
+      if (valueAfterTyping.replace(/\D/g, '') === expectedDigits || valueAfterTyping === displayValue) {
+        metaState.steps.push(`prefill ${fieldLabel} -> ${selector} (${inputMask || 'date'} typing)`);
+        return true;
+      }
+    } catch {
+      continue;
+    }
+  }
+  metaState.steps.push(`prefill ${fieldLabel} -> not-found`);
+  return false;
+}
+
+async function selectFirstMatchingOption(page, selectors, value, fieldLabel, metaState) {
+  if (value === undefined || value === null || String(value).trim() === '') return false;
+  const wanted = String(value).trim().toLowerCase();
+  for (const selector of selectors) {
+    const locator = page.locator(selector).first();
+    if (!await locator.count().catch(() => 0) || !await locator.isVisible().catch(() => false)) continue;
+    const selected = await locator.evaluate((element, target) => {
+      const options = Array.from(element.options || []);
+      const option = options.find((candidate) => {
+        const text = (candidate.textContent || '').trim().toLowerCase();
+        const optionValue = String(candidate.value || '').trim().toLowerCase();
+        return optionValue === target || text === target || text.includes(target) || target.includes(text);
+      });
+      if (!option) return false;
+      element.value = option.value;
+      element.dispatchEvent(new Event('input', { bubbles: true }));
+      element.dispatchEvent(new Event('change', { bubbles: true }));
+      return true;
+    }, wanted).catch(() => false);
+    if (selected) {
+      metaState.steps.push(`prefill ${fieldLabel} -> ${selector}`);
+      return true;
+    }
+  }
+  metaState.steps.push(`prefill ${fieldLabel} -> not-found`);
+  return false;
+}
+
+async function selectCustomDropdownOption(page, selectors, value, fieldLabel, metaState) {
+  if (value === undefined || value === null || String(value).trim() === '') return false;
+  const wanted = String(value).trim().toLowerCase();
+  for (const selector of selectors) {
+    const trigger = page.locator(selector).first();
+    if (!await trigger.count().catch(() => 0) || !await trigger.isVisible().catch(() => false)) continue;
+    try {
+      await trigger.click();
+      const modal = page.locator('.form_select-modal.-show').last();
+      await modal.waitFor({ state: 'visible', timeout: 5000 });
+      const options = modal.locator('li.form_select-option');
+      const optionIndex = await options.evaluateAll((elements, target) => elements.findIndex((element) => {
+        const text = (element.querySelector('.txt')?.textContent || element.textContent || '').trim().toLowerCase();
+        return text === target || text.includes(target) || target.includes(text);
+      }), wanted);
+      if (optionIndex < 0) continue;
+      await options.nth(optionIndex).click();
+      const selectedText = await trigger.textContent().catch(() => '');
+      if (!String(selectedText || '').trim().toLowerCase().includes(wanted)) continue;
+      metaState.steps.push(`prefill ${fieldLabel} -> ${selector} -> ${wanted}`);
+      return true;
+    } catch {
+      continue;
+    }
+  }
+  metaState.steps.push(`prefill ${fieldLabel} -> not-found`);
+  return false;
+}
+
+async function fillMissingZurichPersonData(page, simulationPayload, metaState) {
+  const nameSelectors = [
+    zurichTomadorNameSelector,
+    'input[name*="nome" i]', 'input[id*="nome" i]', 'input[name*="name" i]', 'input[id*="name" i]',
+  ];
+  const birthDateSelectors = [
+    '#Zurich_PT_Theme_wtZurich_PT_Theme_Layout_SideBar_block_WebPatterns_wt24_block_wtColumn1_wtMainContent_wt20_wtItems_wt275_wtContent_wt301_wtInput_wtinp_TomadorSeguro_DataNascimento',
+    'input[name*="nascimento" i]', 'input[id*="nascimento" i]', 'input[name*="birth" i]', 'input[id*="birth" i]',
+  ];
+  const licenseDateSelectors = [
+    '#Zurich_PT_Theme_wtZurich_PT_Theme_Layout_SideBar_block_WebPatterns_wt24_block_wtColumn1_wtMainContent_wt20_wtItems_wt275_wtContent_wt206_wtInput_wtinp_TomadorSeguro_DataCartaConducao',
+    'input[name*="carta" i]', 'input[id*="carta" i]', 'input[name*="license" i]', 'input[id*="license" i]',
+  ];
+  const genderValue = simulationPayload.genero || simulationPayload.gender || simulationPayload.sexo;
+  const postalCodeValue = simulationPayload.codigoPostal || simulationPayload.postalCode;
+
+  if (!await fillPersonNameField(page, nameSelectors, simulationPayload.nome, metaState)) throw new Error('Não foi possível preencher o nome do tomador');
+  if (!await fillFirstMatchingDateField(page, birthDateSelectors, simulationPayload.dataNascimento || simulationPayload.birthDate, 'data-nascimento-tomador', metaState)) throw new Error('Não foi possível preencher a data de nascimento do tomador');
+  if (!await fillFirstMatchingDateField(page, licenseDateSelectors, simulationPayload.dataCartaConducao || simulationPayload.licenseDate, 'data-carta-tomador', metaState)) throw new Error('Não foi possível preencher a data da carta do tomador');
+  const genderFilled = await selectCustomDropdownOption(page, [
+    '#Zurich_PT_Theme_wtZurich_PT_Theme_Layout_SideBar_block_WebPatterns_wt24_block_wtColumn1_wtMainContent_wt20_wtItems_wt275_wtContent_wt661_wtInput > div.form_select-field.-myz_white.Mandatory',
+    '.form_select-field.-myz_white.Mandatory',
+  ], genderValue, 'genero-tomador', metaState) || await selectFirstMatchingOption(page, [
+    'select[name*="genero" i]', 'select[id*="genero" i]', 'select[name*="sexo" i]', 'select[id*="sexo" i]', 'select[name*="gender" i]', 'select[id*="gender" i]',
+  ], genderValue, 'genero-tomador', metaState);
+  if (!genderFilled) throw new Error('Não foi possível preencher o género do tomador');
+  await pauseBeforeCodigoPostalField(page, metaState);
+  if (!await fillPostalCodeDigitByDigit(page, [
+    '#Zurich_PT_Theme_wtZurich_PT_Theme_Layout_SideBar_block_WebPatterns_wt24_block_wtColumn1_wtMainContent_wt20_wtItems_wt275_wtContent_wt893_wtInput_wtinp_Cliente_CP',
+    'input[name*="postal" i]', 'input[id*="postal" i]', 'input[name*="codigo" i]', 'input[id*="codigo" i]', 'input[placeholder*="postal" i]',
+  ], postalCodeValue, 'codigo-postal-tomador', metaState)) throw new Error('Não foi possível preencher o código postal do tomador');
+
+  const seguinteCliente = page.locator(zurichClienteSeguinteSelector).first();
+  metaState.steps.push(`dados-pessoais-tomador -> clicar Seguinte após código postal (${zurichClienteSeguinteSelector})`);
+  try {
+    await seguinteCliente.click({ timeout: 3000 });
+    metaState.steps.push('dados-pessoais-tomador -> Seguinte após código postal clicado');
+  } catch (error) {
+    metaState.steps.push(`dados-pessoais-tomador -> Seguinte após código postal falhou: ${error?.message || String(error)}`);
+    throw new Error(`Não foi possível clicar em Seguinte após o código postal em 3 segundos: ${error?.message || String(error)}`);
+  }
 }
 
 async function forceFocusMatriculaField(page, selectors, metaState, stepLabel = 'matricula-focus', options = {}) {
@@ -4087,7 +4301,7 @@ async function clickByTextFallback(textRegex, stepLabel) {
   return false;
 }
 
-async function clickFinalSeguinteStep(page, metaState) {
+async function clickFinalSeguinteStep(page, metaState, options = {}) {
   const beforeClickUrl = page.url();
 
   if (finalStepBeforeSeguinteMs > 0) {
@@ -4117,6 +4331,16 @@ async function clickFinalSeguinteStep(page, metaState) {
   await page.waitForLoadState('networkidle', { timeout: Math.max(3000, finalStepNextPageWaitMs) }).catch(() => null);
   await page.waitForTimeout(500);
   metaState.steps.push(`final-step-click-seguinte -> waited-next-page ${finalStepNextPageWaitMs}ms`);
+  if (options.expectedVisibleSelector) {
+    const expectedField = page.locator(options.expectedVisibleSelector).first();
+    const reachedExpectedScreen = await expectedField.waitFor({ state: 'visible', timeout: finalStepNextPageWaitMs }).then(() => true).catch(() => false);
+    if (!reachedExpectedScreen) {
+      metaState.steps.push(`final-step-click-seguinte -> transition-not-confirmed (${options.expectedVisibleSelector})`);
+      console.log(`[transfer] Seguinte não confirmou o ecrã esperado: ${options.expectedVisibleSelector}`);
+      return false;
+    }
+    metaState.steps.push(`final-step-click-seguinte -> transition-confirmed (${options.expectedVisibleSelector})`);
+  }
   metaState.steps.push('final-step-click-seguinte -> success');
   return true;
 }
@@ -4744,6 +4968,20 @@ async function updateDebugOverlay(page, label) {
   }, text).catch(() => null);
 }
 
+async function pauseBeforeCodigoPostalField(page, metaState) {
+  if (!pauseBeforeCodigoPostal) return;
+
+  const pauseShot = path.join(dir, '05-codigo-postal-pause.png');
+  await page.screenshot({ path: pauseShot, fullPage: false }).catch(() => null);
+  metaState.pauseScreenshot = pauseShot;
+  metaState.steps.push('pause-before-codigo-postal -> Playwright Inspector');
+  await updateDebugOverlay(page, 'PAUSADO: antes do código postal — retoma no Inspector');
+  console.log(`[transfer] ⏸  Debug antes do código postal. Screenshot: ${pauseShot}`);
+  console.log('[transfer]    Retoma a execução no Playwright Inspector (Resume).');
+  await page.pause();
+  metaState.steps.push('pause-before-codigo-postal -> resumed');
+}
+
 async function waitForClienteContainerReady(page, timeoutMs, pollMs, metaState) {
   const selector = `#${clienteReadyElementId}`;
   const started = Date.now();
@@ -4796,6 +5034,10 @@ try {
       : (preferLocalhostFirst ? 'localhost-first' : 'firestore-first');
   meta.simulationSourcePath = simulationSource?.path || null;
   meta.simulationPayloadSample = {
+    nome: simulationPayload.nome || null,
+    dataNascimento: simulationPayload.dataNascimento || simulationPayload.birthDate || null,
+    dataCartaConducao: simulationPayload.dataCartaConducao || simulationPayload.licenseDate || null,
+    genero: simulationPayload.genero || simulationPayload.gender || simulationPayload.sexo || null,
     matricula: simulationPayload.matricula || null,
     codigoPostal: simulationPayload.codigoPostal || null,
     marca: simulationPayload.marca || null,
@@ -4966,50 +5208,14 @@ try {
   );
 
   await page.waitForTimeout(contribuintePostFillWaitMs);
-  const personNameWatchSelectors = [
-    'input[name*="nome" i]',
-    'input[id*="nome" i]',
-    'input[name*="tomador" i]',
-    'input[id*="tomador" i]',
-    'input[name*="cliente" i]',
-    'input[id*="cliente" i]',
-    'input[name*="segurado" i]',
-    'input[id*="segurado" i]',
-    'span[id*="nome" i]',
-    'div[id*="nome" i]',
-  ];
-  const nameBaseline = await snapshotValues(page, personNameWatchSelectors);
   const clickedContribLookup = await clickLookupNearField(page, contribuinteSelectors, 'contribuinte', meta);
   if (!clickedContribLookup) {
     throw new Error('Não foi possível clicar na lupa do contribuinte');
   }
   await updateDebugOverlay(page, 'nif-lookup-clicked');
-  const clienteReady = await waitForClienteContainerReady(
-    page,
-    clienteReadyWaitTimeoutMs,
-    clienteReadyPollMs,
-    meta
-  );
-  if (clienteReady) {
-    await updateDebugOverlay(page, 'cliente-ready -> avançar matrícula');
-  }
-
-  let nameResolved = clienteReady;
-  if (!nameResolved) {
-    await page.waitForTimeout(contribuintePostLookupWaitMs);
-    nameResolved = await waitForValueAppearance(
-      page,
-      personNameWatchSelectors,
-      nameBaseline,
-      contribuinteNameWaitTimeoutMs,
-      'contribuinte-name-loaded',
-      meta,
-      { allowExistingNonEmpty: true, pollIntervalMs: contribuinteNamePollMs }
-    );
-  }
-  if (!nameResolved) {
-    throw new Error('Nome da pessoa não apareceu após lookup do contribuinte');
-  }
+  await page.waitForTimeout(contribuintePostLookupWaitMs);
+  meta.steps.push('contribuinte-lookup -> continuar para matrícula; dados pessoais aguardam ecrã próprio');
+  await updateDebugOverlay(page, 'NIF validado -> continuar matrícula');
 
   const matriculaSelectors = [
     'input[name*="matric" i]',
@@ -5299,19 +5505,29 @@ try {
     }
   }
 
-  await fillFirstMatchingField(
+  const vehicleConfirmed = await waitForValueAppearance(
     page,
-    [
-      'input[name*="postal" i]',
-      'input[id*="postal" i]',
-      'input[name*="codigo" i]',
-      'input[id*="codigo" i]',
-      'input[placeholder*="postal" i]',
-    ],
-    simulationPayload.codigoPostal,
-    'codigoPostal',
-    meta
+    vehicleWatchSelectors,
+    vehicleBaseline,
+    vehicleLoadedWaitTimeoutMs,
+    'vehicle-selection-confirmed',
+    meta,
+    { allowExistingNonEmpty: true }
   );
+  if (!vehicleConfirmed) {
+    throw new Error('A viatura ainda não foi selecionada/carregada; não será clicado Seguinte');
+  }
+
+  meta.steps.push('dados-pessoais-tomador -> clicar Seguinte antes de fillPersonNameField');
+  const reachedTomadorScreen = await clickFinalSeguinteStep(page, meta, {
+    expectedVisibleSelector: zurichTomadorNameSelector,
+  });
+  if (!reachedTomadorScreen) {
+    throw new Error('O clique em Seguinte não avançou para o ecrã Tomador/Condutor');
+  }
+  meta.steps.push('dados-pessoais-tomador -> ecrã pós-matrícula disponível');
+  console.log(`[transfer] Payload dados pessoais: nome=${simulationPayload.nome || '-'} | nascimento=${simulationPayload.dataNascimento || simulationPayload.birthDate || '-'} | carta=${simulationPayload.dataCartaConducao || simulationPayload.licenseDate || '-'} | genero=${simulationPayload.genero || simulationPayload.gender || simulationPayload.sexo || '-'} | codigoPostal=${simulationPayload.codigoPostal || simulationPayload.postalCode || '-'}`);
+  await fillMissingZurichPersonData(page, simulationPayload, meta);
 
   await fillFirstMatchingField(
     page,
@@ -5322,19 +5538,6 @@ try {
     ],
     simulationPayload.email,
     'email',
-    meta
-  );
-
-  await fillFirstMatchingField(
-    page,
-    [
-      'input[name*="nome" i]',
-      'input[id*="nome" i]',
-      'input[name*="name" i]',
-      'input[id*="name" i]',
-    ],
-    simulationPayload.nome,
-    'nome',
     meta
   );
 
