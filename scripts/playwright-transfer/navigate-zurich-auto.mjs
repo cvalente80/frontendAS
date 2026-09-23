@@ -20,11 +20,10 @@ meta.steps.push = (...entries) => {
   return originalStepsPush(...stampedEntries);
 };
 const debugOverlayEnabled = ['1', 'true', 'yes'].includes(String(process.env.TRANSFER_DEBUG_OVERLAY || 'false').trim().toLowerCase());
-const pauseBeforeCodigoPostal = ['1', 'true', 'yes'].includes(String(process.env.TRANSFER_PAUSE_BEFORE_CODIGO_POSTAL || process.env.TRANSFER_PAUSE_BEFORE_CONTRIBUINTE || '').trim().toLowerCase());
 const sourcePreferenceRaw = String(process.env.TRANSFER_SOURCE_PREFERENCE || '').trim().toLowerCase();
 const preferLocalhostFirst = sourcePreferenceRaw === 'localhost' || sourcePreferenceRaw === 'local' || sourcePreferenceRaw === 'localhost-first';
 const productionWatcher = String(process.env.WATCHER_ENV || '').trim().toLowerCase() === 'production';
-const headless = productionWatcher ? false : String(process.env.PW_HEADLESS || 'true').toLowerCase() !== 'false';
+const headless = String(process.env.PW_HEADLESS || 'true').toLowerCase() !== 'false';
 const slowMo = Number(process.env.PW_SLOW_MO || 0);
 const keepBrowserOpenMs = productionWatcher
   ? Math.max(60000, Number.parseInt(String(process.env.TRANSFER_KEEP_BROWSER_OPEN_MS || '60000'), 10) || 60000)
@@ -1056,7 +1055,6 @@ async function fillMissingZurichPersonData(page, simulationPayload, metaState) {
     'select[name*="genero" i]', 'select[id*="genero" i]', 'select[name*="sexo" i]', 'select[id*="sexo" i]', 'select[name*="gender" i]', 'select[id*="gender" i]',
   ], genderValue, 'genero-tomador', metaState);
   if (!genderFilled) throw new Error('Não foi possível preencher o género do tomador');
-  await pauseBeforeCodigoPostalField(page, metaState);
   if (!await fillPostalCodeDigitByDigit(page, [
     '#Zurich_PT_Theme_wtZurich_PT_Theme_Layout_SideBar_block_WebPatterns_wt24_block_wtColumn1_wtMainContent_wt20_wtItems_wt275_wtContent_wt893_wtInput_wtinp_Cliente_CP',
     'input[name*="postal" i]', 'input[id*="postal" i]', 'input[name*="codigo" i]', 'input[id*="codigo" i]', 'input[placeholder*="postal" i]',
@@ -4966,20 +4964,6 @@ async function updateDebugOverlay(page, label) {
     }
     overlay.textContent = overlayText;
   }, text).catch(() => null);
-}
-
-async function pauseBeforeCodigoPostalField(page, metaState) {
-  if (!pauseBeforeCodigoPostal) return;
-
-  const pauseShot = path.join(dir, '05-codigo-postal-pause.png');
-  await page.screenshot({ path: pauseShot, fullPage: false }).catch(() => null);
-  metaState.pauseScreenshot = pauseShot;
-  metaState.steps.push('pause-before-codigo-postal -> Playwright Inspector');
-  await updateDebugOverlay(page, 'PAUSADO: antes do código postal — retoma no Inspector');
-  console.log(`[transfer] ⏸  Debug antes do código postal. Screenshot: ${pauseShot}`);
-  console.log('[transfer]    Retoma a execução no Playwright Inspector (Resume).');
-  await page.pause();
-  metaState.steps.push('pause-before-codigo-postal -> resumed');
 }
 
 async function waitForClienteContainerReady(page, timeoutMs, pollMs, metaState) {
