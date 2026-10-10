@@ -17,7 +17,7 @@ module.exports = {
       cwd: '/Users/carlosvalente/Desktop/frontendAS',
       env: {
         WATCHER_ENV: 'production',
-        PW_HEADLESS: 'false',
+        PW_HEADLESS: 'true',
         PWDEBUG: '0',
         PW_PAUSE_AFTER_ZURICH: 'false',
         PW_PAUSE_ON_WEBMAIL: 'false',

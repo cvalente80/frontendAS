@@ -28,6 +28,7 @@ const pauseAfterZurich = ['1', 'true', 'yes'].includes(String(process.env.PW_PAU
 const pauseOnWebmail = ['1', 'true', 'yes'].includes(String(process.env.PW_PAUSE_ON_WEBMAIL || 'false').trim().toLowerCase());
 const pauseAfterWebmail = ['1', 'true', 'yes'].includes(String(process.env.PW_PAUSE_AFTER_WEBMAIL || 'false').trim().toLowerCase());
 const slowMo = Number(process.env.PW_SLOW_MO || 0);
+const genericClickTimeoutMs = Math.max(800, Number.parseInt(String(process.env.TRANSFER_GENERIC_CLICK_TIMEOUT_MS || '3000'), 10) || 3000);
 const keepBrowserOpenMs = Math.max(0, Number.parseInt(String(process.env.TRANSFER_KEEP_BROWSER_OPEN_MS || '0'), 10) || 0);
 const manualMatriculaCapture = ['1', 'true', 'yes'].includes(String(process.env.TRANSFER_MANUAL_MATRICULA_LUPA_CAPTURE || '').trim().toLowerCase());
 const manualMatriculaAfterNif = ['1', 'true', 'yes'].includes(String(process.env.TRANSFER_MANUAL_MATRICULA_AFTER_NIF || '').trim().toLowerCase());
@@ -279,6 +280,9 @@ async function readLatestAmenVerificationCode(metaState) {
 
   try {
     await mailPage.goto(emailWebmailUrl, { waitUntil: 'domcontentloaded', timeout: emailInboxWaitMs });
+    if (pauseOnWebmail) {
+      await mailPage.pause();
+    }
 
     await acceptAmenWebmailCookies(mailPage, metaState);
 
@@ -687,6 +691,10 @@ async function completeEmailVerificationIfPresent(page, metaState) {
   await page.waitForURL((u) => /MYZ_Home\/Home|myzurich\.zurich\.com\.pt/i.test(u.toString()) || !/okta|sso/i.test(u.toString()), {
     timeout: Math.max(loginLandingWaitTimeoutMs, emailVerificationWaitMs),
   }).catch(() => null);
+
+  if (pauseAfterWebmail) {
+    await page.pause();
+  }
 
   metaState.steps.push('email-verification -> submitted');
   return true;
@@ -4051,10 +4059,10 @@ async function clickFirstVisible(locators, stepLabel) {
       const visible = await candidate.isVisible().catch(() => false);
       if (!visible) continue;
       try {
-        await candidate.click({ timeout: 15000 });
+        await candidate.click({ timeout: genericClickTimeoutMs, noWaitAfter: true });
       } catch {
         try {
-          await candidate.click({ force: true, timeout: 15000 });
+          await candidate.click({ force: true, timeout: genericClickTimeoutMs, noWaitAfter: true });
         } catch {
           continue;
         }
@@ -5122,6 +5130,9 @@ try {
   }
 
   await page.goto('https://myzurich.zurich.com.pt/', { waitUntil: 'domcontentloaded', timeout: 45000 });
+  if (pauseAfterZurich) {
+    await page.pause();
+  }
   await updateDebugOverlay(page, 'login-page-opened');
   await page.waitForSelector('#Input_LoginUsername', { timeout: 20000 });
   await page.fill('#Input_LoginUsername', process.env.TRANSFER_LOGIN_USERNAME || '');
