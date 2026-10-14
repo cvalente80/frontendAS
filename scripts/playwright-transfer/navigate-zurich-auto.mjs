@@ -876,13 +876,24 @@ async function fillFirstMatchingField(page, selectors, value, fieldLabel, metaSt
 async function fillPersonNameField(page, selectors, value, metaState) {
   if (value === undefined || value === null || String(value).trim() === '') return false;
   const expectedValue = String(value).trim();
+  const legacyNameSelector = selectors[0];
+  const legacyNameFieldVisible = legacyNameSelector
+    ? await page.locator(legacyNameSelector).first().isVisible().catch(() => false)
+    : false;
+  const selectorsToTry = legacyNameFieldVisible ? [legacyNameSelector] : selectors;
   metaState.steps.push('dados-pessoais-tomador -> iniciar preenchimento Nome');
   console.log('[transfer] Dados do tomador: a iniciar preenchimento do Nome');
-  for (const selector of selectors) {
+  for (const selector of selectorsToTry) {
     const locator = page.locator(selector).first();
     if (!await locator.count().catch(() => 0)) continue;
     if (!await locator.isVisible().catch(() => false)) continue;
     try {
+      const existingValue = await locator.inputValue().catch(() => '');
+      if (existingValue.trim() === expectedValue) {
+        metaState.steps.push(`prefill nome-tomador -> ${selector} (já preenchido pelo contribuinte)`);
+        console.log(`[transfer] Dados do tomador: Nome já preenchido (${selector})`);
+        return true;
+      }
       await locator.scrollIntoViewIfNeeded().catch(() => null);
       await locator.click({ force: true, timeout: 5000 });
       await locator.fill(expectedValue);
@@ -902,6 +913,66 @@ async function fillPersonNameField(page, selectors, value, metaState) {
       metaState.steps.push(`prefill nome-tomador -> ${selector} error=${error?.message || String(error)}`);
     }
   }
+
+  const nameAlreadyDisplayed = await page.evaluate((expected) => {
+    const normalize = (text) => String(text || '').replace(/\s+/g, ' ').trim().toLowerCase();
+    const wanted = normalize(expected);
+    const visible = (element) => {
+      if (!(element instanceof HTMLElement)) return false;
+      const style = window.getComputedStyle(element);
+      const rect = element.getBoundingClientRect();
+      return style.display !== 'none' && style.visibility !== 'hidden' && rect.width > 0 && rect.height > 0;
+    };
+
+    const valueFields = Array.from(document.querySelectorAll('input,textarea,[contenteditable="true"]'))
+      .filter(visible)
+      .map((element) => element.value || element.textContent || '')
+      .some((text) => normalize(text) === wanted);
+    if (valueFields) return true;
+
+    return Array.from(document.querySelectorAll('label,span,div,p,td,dd,strong'))
+      .filter(visible)
+      .some((element) => {
+        if (normalize(element.textContent) !== wanted) return false;
+        const container = element.closest('tr,td,div,section,article,li') || element.parentElement;
+        return /nome|tomador|segurado/i.test(normalize(container?.textContent));
+      });
+  }, expectedValue).catch(() => false);
+
+  if (nameAlreadyDisplayed) {
+    metaState.steps.push('prefill nome-tomador -> já apresentado pelo contribuinte');
+    console.log('[transfer] Dados do tomador: Nome já apresentado pelo contribuinte');
+    return true;
+  }
+
+  const visibleNameDiagnostics = await page.evaluate(() => {
+    const visible = (element) => {
+      if (!(element instanceof HTMLElement)) return false;
+      const style = window.getComputedStyle(element);
+      const rect = element.getBoundingClientRect();
+      return style.display !== 'none' && style.visibility !== 'hidden' && rect.width > 0 && rect.height > 0;
+    };
+    return Array.from(document.querySelectorAll('input,textarea,select,[contenteditable="true"]'))
+      .filter(visible)
+      .map((element) => ({
+        tag: element.tagName.toLowerCase(),
+        id: element.id || '',
+        name: element.getAttribute('name') || '',
+        type: element.getAttribute('type') || '',
+        value: element.value || element.textContent || '',
+        disabled: Boolean(element.disabled),
+        readOnly: Boolean(element.readOnly),
+        placeholder: element.getAttribute('placeholder') || '',
+        ariaLabel: element.getAttribute('aria-label') || '',
+      }));
+  }).catch(() => []);
+  metaState.steps.push(`prefill nome-tomador -> visible-controls=${visibleNameDiagnostics.length}`);
+  await fs.writeFile(
+    path.join(dir, 'tomador-name-debug.json'),
+    JSON.stringify({ expectedValue, legacyNameSelector, legacyNameFieldVisible, controls: visibleNameDiagnostics }, null, 2),
+    'utf8'
+  ).catch(() => null);
+
   metaState.steps.push('prefill nome-tomador -> not-found');
   console.log('[transfer] Dados do tomador: não foi possível preencher o Nome');
   return false;
@@ -1051,6 +1122,28 @@ async function selectCustomDropdownOption(page, selectors, value, fieldLabel, me
   return false;
 }
 
+async function isExistingZurichClient(page, metaState) {
+  const state = await page.evaluate(() => {
+    const birthDate = document.querySelector('input[id*="DataNascimento" i], input[name*="DataNascimento" i], input[name*="nascimento" i], input[id*="nascimento" i]');
+    const licenseDate = document.querySelector('input[id*="DataCartaConducao" i], input[name*="DataCartaConducao" i], input[name*="carta" i], input[id*="carta" i]');
+    const gender = document.querySelector('select[id*="Genero" i], select[name*="Genero" i], select[name*="sexo" i], select[id*="sexo" i], select[name*="gender" i], select[id*="gender" i]');
+    const postalCode = document.querySelector('input[id*="Cliente_CP" i], input[name*="Cliente_CP" i], input[name*="postal" i], input[id*="postal" i], input[name*="codigo" i], input[id*="codigo" i]');
+    const hasValue = (element) => Boolean(String(element?.value || '').trim());
+    const locked = (element) => Boolean(element?.readOnly || element?.disabled);
+    return {
+      birthDate: hasValue(birthDate) && locked(birthDate),
+      licenseDate: hasValue(licenseDate) && locked(licenseDate),
+      gender: hasValue(gender) && locked(gender),
+      postalCode: hasValue(postalCode) && locked(postalCode),
+    };
+  }).catch(() => ({ birthDate: false, licenseDate: false, gender: false, postalCode: false }));
+
+  const lockedFields = Object.values(state).filter(Boolean).length;
+  const existingClient = state.birthDate && state.postalCode && (state.gender || state.licenseDate);
+  metaState.steps.push(`cliente-existente -> ${existingClient ? 'dados-encontrados' : 'dados-para-preencher'} (${lockedFields}/4 campos bloqueados)`);
+  return existingClient;
+}
+
 async function fillMissingZurichPersonData(page, simulationPayload, metaState) {
   const nameSelectors = [
     zurichTomadorNameSelector,
@@ -1066,6 +1159,12 @@ async function fillMissingZurichPersonData(page, simulationPayload, metaState) {
   ];
   const genderValue = simulationPayload.genero || simulationPayload.gender || simulationPayload.sexo;
   const postalCodeValue = simulationPayload.codigoPostal || simulationPayload.postalCode;
+
+  if (await isExistingZurichClient(page, metaState)) {
+    metaState.steps.push('dados-pessoais-tomador -> cliente existente, ignorar nome/datas/género/código postal');
+    console.log('[transfer] Cliente existente: dados pessoais já encontrados, não preencher nome/datas/género/código postal');
+    return true;
+  }
 
   if (!await fillPersonNameField(page, nameSelectors, simulationPayload.nome, metaState)) throw new Error('Não foi possível preencher o nome do tomador');
   if (!await fillFirstMatchingDateField(page, birthDateSelectors, simulationPayload.dataNascimento || simulationPayload.birthDate, 'data-nascimento-tomador', metaState)) throw new Error('Não foi possível preencher a data de nascimento do tomador');
@@ -1095,6 +1194,7 @@ async function fillMissingZurichPersonData(page, simulationPayload, metaState) {
     metaState.steps.push(`dados-pessoais-tomador -> Seguinte após código postal falhou: ${error?.message || String(error)}`);
     throw new Error(`Não foi possível clicar em Seguinte após o código postal em 3 segundos: ${error?.message || String(error)}`);
   }
+  return false;
 }
 
 async function forceFocusMatriculaField(page, selectors, metaState, stepLabel = 'matricula-focus', options = {}) {
@@ -4384,15 +4484,38 @@ async function clickFinalSeguinteStep(page, metaState, options = {}) {
   await page.waitForLoadState('networkidle', { timeout: Math.max(3000, finalStepNextPageWaitMs) }).catch(() => null);
   await page.waitForTimeout(500);
   metaState.steps.push(`final-step-click-seguinte -> waited-next-page ${finalStepNextPageWaitMs}ms`);
-  if (options.expectedVisibleSelector) {
-    const expectedField = page.locator(options.expectedVisibleSelector).first();
-    const reachedExpectedScreen = await expectedField.waitFor({ state: 'visible', timeout: finalStepNextPageWaitMs }).then(() => true).catch(() => false);
+  const primaryExpectedSelector = options.expectedVisibleSelector;
+  const primarySelectorExists = primaryExpectedSelector
+    ? await page.locator(primaryExpectedSelector).count().catch(() => 0) > 0
+    : false;
+  const expectedVisibleSelectors = primarySelectorExists
+    ? [primaryExpectedSelector]
+    : [
+      primaryExpectedSelector,
+      ...(Array.isArray(options.expectedVisibleSelectors) ? options.expectedVisibleSelectors : []),
+    ].filter(Boolean);
+  if (expectedVisibleSelectors.length) {
+    const expectedStartedAt = Date.now();
+    let reachedExpectedScreen = false;
+    let reachedSelector = '';
+    while (Date.now() - expectedStartedAt < finalStepNextPageWaitMs) {
+      for (const selector of expectedVisibleSelectors) {
+        const expectedField = page.locator(selector).first();
+        if (await expectedField.isVisible().catch(() => false)) {
+          reachedExpectedScreen = true;
+          reachedSelector = selector;
+          break;
+        }
+      }
+      if (reachedExpectedScreen) break;
+      await page.waitForTimeout(150);
+    }
     if (!reachedExpectedScreen) {
-      metaState.steps.push(`final-step-click-seguinte -> transition-not-confirmed (${options.expectedVisibleSelector})`);
-      console.log(`[transfer] Seguinte não confirmou o ecrã esperado: ${options.expectedVisibleSelector}`);
+      metaState.steps.push(`final-step-click-seguinte -> transition-not-confirmed (${expectedVisibleSelectors.join(' | ')})`);
+      console.log(`[transfer] Seguinte não confirmou o ecrã esperado: ${expectedVisibleSelectors.join(' | ')}`);
       return false;
     }
-    metaState.steps.push(`final-step-click-seguinte -> transition-confirmed (${options.expectedVisibleSelector})`);
+    metaState.steps.push(`final-step-click-seguinte -> transition-confirmed (${reachedSelector})`);
   }
   metaState.steps.push('final-step-click-seguinte -> success');
   return true;
@@ -5574,6 +5697,14 @@ try {
   meta.steps.push('dados-pessoais-tomador -> clicar Seguinte antes de fillPersonNameField');
   const reachedTomadorScreen = await clickFinalSeguinteStep(page, meta, {
     expectedVisibleSelector: zurichTomadorNameSelector,
+    expectedVisibleSelectors: [
+      'input[name*="nome" i]',
+      'input[id*="nome" i]',
+      'input[name*="name" i]',
+      'input[id*="name" i]',
+      'input[name*="nascimento" i]',
+      'input[id*="nascimento" i]',
+    ],
   });
   if (!reachedTomadorScreen) {
     throw new Error('O clique em Seguinte não avançou para o ecrã Tomador/Condutor');
@@ -5592,10 +5723,15 @@ try {
     meta
   );
 
-  await fillMissingZurichPersonData(page, simulationPayload, meta);
+  const existingZurichClient = await fillMissingZurichPersonData(page, simulationPayload, meta);
 
   if (shouldAdvanceThirdPartyToCoberturas) {
-    await clickFinalSeguinteStep(page, meta);
+    if (existingZurichClient) {
+      meta.steps.push('cliente-existente -> já em seleção de pacote após primeiro Seguinte');
+      console.log('[transfer] Cliente existente: já em seleção de pacote, sem segundo Seguinte');
+    } else {
+      await clickFinalSeguinteStep(page, meta);
+    }
 
     if (pauseAfterSeguinteMs > 0) {
       meta.steps.push(`pause-after-seguinte -> ${pauseAfterSeguinteMs}ms (sem captura)`);
